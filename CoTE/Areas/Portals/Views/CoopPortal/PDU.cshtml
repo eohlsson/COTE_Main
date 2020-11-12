@@ -1,0 +1,50 @@
+﻿@model IEnumerable<CoTE.Areas.Portals.Models.CoopChecklistData>
+
+@{
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+    string left_menu = "/dotnet/areas/webpages/content/js/cc_left_menu.js";
+    string breadcrumb = "<nav class=\"site-breadcrumbs\"><ul>";
+    breadcrumb += " <li><a href=\"#\">Home</a> /</li>";
+    breadcrumb += " <li><a href=\"#\">Cooperating Personnel</a> /</li>";
+    breadcrumb += " <li><a href=\"#\">Cooperating Personnel Portal</a> /</li>";
+    breadcrumb += "</ul></nav>";
+}
+
+<!-- Hide menu since we are logged in -->
+<style>
+    .main-navigation {
+        display: none;
+    }
+</style>
+
+
+<html> 
+<title>Professional Development Hours (PDH)</title>
+<head>
+</head>
+<body>
+    <div class="row page-content portal-content">
+        <div class="small-12 column">
+
+            <a href="/dotnet/account.aspx/logout"><FONT COLOR="RED"><B>LOGOUT</B></FONT> <i class="fa fa-sign-out" aria-hidden="true"></i></a>
+
+            @MvcHtmlString.Create(@breadcrumb)
+            <left>
+                <blockquote>
+                    <h3>PDH Experience Forms</h3>
+                    PDH are awarded to cooperating professionals who complete the required minimum number of clock hours engaged in active supervision and submit an experience narrative. <br /><br />
+                    <b>For Fall placements, narrative forms are due between October 15th and February 15th.</b>
+                    <b>For Spring placements, narrative forms are due between February 16th and June 15th.</b>
+
+                    Click <a href="/dotnet/formprocessor/index.aspx/index?form_id=1420&index_id=1579" style="color: red;">here</a> for additional information and to begin the documentation process.  Once the required narrative form has been approved you will receive an email directing you to complete the PD evaluation form below.<br /><br />
+                    <h3>ISBE Required PD Evaluation Forms</h3>
+                    After receiving email notification, "[Council on Teacher Education] PDU Form Approved by Program Coordinator", from cote-techsupport@illinois.edu, click <a href="/dotnet/formprocessor/index.aspx/index?form_id=1422&index_id=1580" style="color: red;">here</a> to complete the ISBE required form that must be submitted before PDH are awarded.  Once this evaluation has been approved, you will receive an email directing you to download your Evidence of Completion form.<br /><br />
+                    <h3>PDH Evidence of Completion Forms</h3>
+                    Upon receipt of email, "[Council on Teacher Education] PDH form completed, EOC letter available", from cote-techsupport@illinois.edu, click <a href="/dotnet/formprocessor/index.aspx/index?form_id=1420&index_id=1583" style="color: red;">here</a> to print the Evidence of Completion form to upload to the ISBE ELIS system to document PDH.<br /><br />
+                </blockquote>
+            </left>
+        </div>
+    </div>
+</body>
+
+</html>

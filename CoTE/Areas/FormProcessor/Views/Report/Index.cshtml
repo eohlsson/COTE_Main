@@ -1,0 +1,21 @@
+﻿@using MvcReportViewer
+
+@{
+    ViewBag.Title = "Index";
+    string username = ViewBag.username;
+    string param1 = ViewBag.param1;
+}
+<!--
+Html.MvcReportViewer(string reportPath, string reportServerUrl = null, string username = null, string password = null, IEnumerable> reportParameters = null, ControlSettings controlSettings = null, object htmlAttributes = null, FormMethod method = FormMethod.Get)
+Html.MvcReportViewer("/reports/01_10_Day_Enrollment", "", "", "", null, null, null, FormMethod.Get)
+Html.MvcReportViewerFluent("/COTE/Data Operations Group/Debugging_Page").ReportServerUrl("http://chiedapp1.ad.uillinois.edu/ReportServer/").Attributes(new { Height = 1500, Width = 900 }).Username("").Password(""))
+-->
+
+<h2>Index</h2>
+
+@Html.MvcReportViewer("/COTE/Data Operations Group/IT Dashboard", "http://chiedapp1.ad.uillinois.edu/ReportServer/", @username, @param1, null, null, new { Height = 2000, Width = 2000, style = "border: none" }, FormMethod.Get)
+
+
+@{
+    ViewBag.ABC = "123";
+}

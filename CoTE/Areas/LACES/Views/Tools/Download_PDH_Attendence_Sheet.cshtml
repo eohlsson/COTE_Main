@@ -1,0 +1,97 @@
+﻿@{
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+    string left_menu = "/dotnet/areas/webpages/content/js/cc_left_menu.js";
+    string breadcrumb = "<nav class=\"site-breadcrumbs\"><ul>";
+    breadcrumb += " <li><a href=\"#\">Home</a> /</li>";
+    breadcrumb += " <li><a href=\"/dotnet/portals/programportal.aspx\">Program Staff Portal</a> /</li>";
+    breadcrumb += " <li><a href=\"/dotnet/laces/laces.aspx\">LACES</a> </li>";
+    breadcrumb += "</ul></nav>";
+
+    string event_list_field = "";
+    string message = (string)ViewBag.message ?? "";
+
+    event_list_field = "<select name='event_id' tabindex='1'><option value='' selected='selected'>-- Select an Event --</option>";
+
+    String ConnString = System.Configuration.ConfigurationManager.ConnectionStrings["UserDb"].ConnectionString;
+
+    using (System.Data.SqlClient.SqlConnection conn = new System.Data.SqlClient.SqlConnection(ConnString))
+    {
+        conn.Open();
+        using (System.Data.SqlClient.SqlCommand cmd = new System.Data.SqlClient.SqlCommand())
+        {
+            cmd.Connection = conn;
+            cmd.CommandType = System.Data.CommandType.Text;
+
+            cmd.CommandText = "Select pdh_event_id, event_title + ' (' + event_coordinator + ')' from pdh_event where event_status = 'Approved' order by created_date";
+
+            using (System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader())
+            {
+
+                while (reader.Read())
+                {
+
+                    event_list_field = event_list_field + "<option value=" + reader[0].ToString() + ">" + reader[1].ToString() + "</option>";
+
+                }
+            }
+
+            event_list_field += "</select>";
+        }
+    }                               
+
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Download PDH Attendence Sheet</title>
+</head>
+<body>
+
+ <div class="row page-content portal-content">
+    <div class="small-12 column">   
+
+<a href="/dotnet/account.aspx/logout"><FONT COLOR="RED"><B>LOGOUT</B></FONT> <i class="fa fa-sign-out" aria-hidden="true"></i></a>
+
+@MvcHtmlString.Create(@breadcrumb)
+ 
+   <h2>Download Attendence Sheet</h2>
+    @using(Html.BeginForm("Download_PDH_Attendence_Sheet", "Tools", FormMethod.Post, new {enctype = "multipart/form-data"}))
+    {
+@:       <div class="section-border">
+@:        <div class="row medium-unstack">
+@:            <div class="column cs-input-group">
+@:                  Event:
+@:                  @MvcHtmlString.Create(@event_list_field)
+@:            </div>
+@:        </div>
+@:        <div class="row medium-unstack">
+@:            <div class="column cs-input-group">
+@:                  File:
+@:                  <input type="file" name="UploadedFile" />
+@:            </div>
+@:        </div>
+@:        <div class="row medium-unstack">
+@:            <div class="column cs-input-group">
+@:                <input type="submit" name="Submit" value="Submit"/>
+@:            </div>
+@:        </div>
+@:        <div class="row medium-unstack">
+@:            <div class="column cs-input-group">
+                if (ViewBag.record_count > 0)
+                {
+                    @MvcHtmlString.Create(ViewBag.record_count + " records loaded.");
+                }
+@:            </div>
+@:        </div>
+    }
+
+
+            </div>
+          </div>
+        </div>
+	</body>
+
+</html>

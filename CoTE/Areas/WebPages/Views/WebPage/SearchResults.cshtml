@@ -1,0 +1,23 @@
+﻿@{
+    ViewBag.Title = "SearchResults";
+    string strSearchWord = ViewBag.searchword;
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+}
+<main class="site-main site-content" id="content">
+<!-- InstanceEndEditable -->
+    <!-- InstanceBeginEditable name="body-content" -->
+    <div class="row align-center page-content">
+<script>
+    (function () {
+        var cx = '014746577086438310150:bsthzxltoyi';
+        var gcse = document.createElement('script');
+        gcse.type = 'text/javascript';
+        gcse.async = true;
+        gcse.src = 'https://cse.google.com/cse.js?cx=' + cx;
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(gcse, s);
+    })();
+</script>
+<gcse:searchresults-only></gcse:searchresults-only>
+    </div>
+</main>

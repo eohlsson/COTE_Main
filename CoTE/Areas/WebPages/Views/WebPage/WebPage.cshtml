@@ -1,0 +1,136 @@
+@model IEnumerable<CoTE.Areas.WebPages.Models.WebPage_Data>
+
+@{
+
+    Int64 page_id = 0;
+    string page_level = "";
+    string title = "";
+    string section = "";
+    string html = "";
+    string left_menu = "";
+    string page_image = "";
+    bool draft = false;
+    bool checked_out = false;
+    string breadcrumb = "<li><a href=\"/dotnet/webpages/webpage.aspx\">Home</a> /</li>";
+
+    foreach (CoTE.Areas.WebPages.Models.WebPage_Data h in ViewData.Model)
+    {
+        foreach (var webpage in h.WebPageDataSet)
+        { 
+                page_id = webpage.page_id;
+                page_level = webpage.page_level;
+                title = webpage.title;
+                section = webpage.section;
+                html = webpage.html;
+                left_menu = webpage.left_menu;
+                draft = webpage.draft;
+                checked_out = webpage.checked_out; 
+        }
+    }
+
+    // Create breadcrumb
+    switch (section)
+    {
+        case "AC":
+            {
+                left_menu = "/dotnet/areas/webpages/content/js/ac_left_menu.js";
+                breadcrumb = breadcrumb + " <li> <a href=\"/dotnet/webpages/webpage.aspx/webpage?page_level=1.1\"> About CoTE</a> </li>";
+                page_image = "/dotnet/areas/webpages/content/images/inside.jpg";
+                break;
+            }
+        case "PE":
+            {
+                left_menu = "/dotnet/areas/webpages/content/js/pe_left_menu.js";
+                breadcrumb = breadcrumb + " <li> <a href=\"/dotnet/webpages/webpage.aspx/webpage?page_level=2\"> Professional Education Preparation at UIUC</a> </li>";
+                page_image = "/dotnet/areas/webpages/content/images/inside.jpg";
+                break;
+            }
+        case "PC":
+        {
+            left_menu = "/dotnet/areas/webpages/content/js/pc_left_menu.js";
+            breadcrumb = breadcrumb + " <li> <a href=\"/dotnet/webpages/webpage.aspx/webpage?page_level=4.2\"> Prospective Candidates</a> </li>";
+            page_image = "/dotnet/areas/webpages/content/images/pc.jpg";
+            break;
+        }
+        case "CC":
+        {
+            breadcrumb = breadcrumb + " <li> <a href=\"/dotnet/webpages/webpage.aspx/webpage?page_level=4.1\"> Current Candidates</a> </li>";
+            left_menu = "/dotnet/areas/webpages/content/js/cc_left_menu.js";
+            page_image = "/dotnet/areas/webpages/content/images/cc.jpg";
+            break;
+        }
+        case "CP":
+        {
+            breadcrumb = breadcrumb + " <li> <a href=\"/dotnet/webpages/webpage.aspx/webpage?page_level=4.3\"> Cooperating Personnel</a> </li>";
+            left_menu = "/dotnet/areas/webpages/content/js/cp_left_menu.js";
+            page_image = "/dotnet/areas/webpages/content/images/cp.jpg";
+            break;
+        }
+        case "US":
+        {
+            breadcrumb = breadcrumb + " <li> <a href=\"/dotnet/webpages/webpage.aspx/webpage?page_level=4.4\"> University Supervisors</a> </li>";
+            left_menu = "/dotnet/areas/webpages/content/js/us_left_menu.js";
+            page_image = "/dotnet/areas/webpages/content/images/us.jpg";
+            break;
+        }
+        case "PS":
+        {
+            breadcrumb = breadcrumb + " <li> <a href=\"/dotnet/webpages/webpage.aspx/webpage?page_level=4.5\"> Program Staff</a> </li>";
+            left_menu = "/dotnet/areas/webpages/content/js/ps_left_menu.js";
+            page_image = "/dotnet/areas/webpages/content/images/ps.jpg";
+            break;
+        }
+        case "PD":
+        {
+            breadcrumb = breadcrumb + " <li> <a href=\"/dotnet/webpages/webpage.aspx/webpage?page_level=7.0\"> ISBE Professional Development</a> </li>";
+            left_menu = "/dotnet/areas/webpages/content/js/pd_left_menu.js";
+            page_image = "/dotnet/areas/webpages/content/images/ps.jpg";
+            break;
+        }
+        case "SH":
+        {
+            breadcrumb = breadcrumb + " <li> <a href=\"/dotnet/webpages/webpage.aspx/webpage?page_level=4.1.8\"> Student Handbook</a> </li>";
+            left_menu = "/dotnet/areas/webpages/content/js/sh_left_menu.js";
+            page_image = "/dotnet/areas/webpages/content/images/ps.jpg";
+            break;
+        }            
+    }
+
+    if (!breadcrumb.Contains("page_level=" + page_level))
+    {
+        breadcrumb = breadcrumb + " <li> /<a href=\"/dotnet/webpages/webpage.aspx/webpage?page_level=" + page_level + "\"> " + title + "</a></li>"; 
+    }
+            
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+}
+
+<!-- InstanceEndEditable -->
+    <!-- InstanceBeginEditable name="body-content" -->
+    <div class="row align-center page-content">
+        <div class="img-container">
+            <img src="@page_image" class="img-header"/>
+        </div>
+        <div class="small-12 large-10 column site-top-border">
+            <nav class="site-breadcrumbs">
+                <ul>
+                    @MvcHtmlString.Create(@breadcrumb)
+                </ul>
+            </nav>
+            <section class="row align-center page-section">
+                <aside class="small-11 large-4 column page-aside">
+
+<script type="text/javascript" language="JavaScript1.2" src="@left_menu"></script>
+                </aside>
+                <div class="small-11 large-8 column page-text">
+                    <h1> @MvcHtmlString.Create(@title)</h1>
+<!--                    <p class="page-intro">This is the intro</p> -->
+
+ @MvcHtmlString.Create(@html)	
+
+                    <div class="arrow-down-white"></div>
+                </div>
+            </section>
+        </div>
+    </div>
+	
+<body>

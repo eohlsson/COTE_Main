@@ -1,0 +1,123 @@
+@* http://localhost:54017/SCE.aspx/index *@
+@model IEnumerable<CoTE.Areas.SCE.Models.SCE_Data>
+
+@{
+    bool authorized = false;
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+    string left_menu = "/dotnet/areas/webpages/content/js/cc_left_menu.js";
+    string breadcrumb = "<nav class=\"site-breadcrumbs\"><ul>";
+    breadcrumb += " <li><a href=\"#\">Home</a> /</li>";
+    breadcrumb += " <li><a href=\"/dotnet/portals/programportal.aspx\">Program Portal</a> /</li>";
+    breadcrumb += " <li><a href=\"/dotnet/sce/index.aspx\">SCE Portal</a> </li>";
+    breadcrumb += "</ul></nav>";
+}
+
+<div class="row page-content portal-content">
+    <div class="small-12 column">   
+
+<a href="/dotnet/account.aspx/logout"><FONT COLOR="RED"><B>LOGOUT</B></FONT> <i class="fa fa-sign-out" aria-hidden="true"></i></a>
+
+@MvcHtmlString.Create(@breadcrumb)
+
+<!--- Check if authorized --->
+
+@foreach (CoTE.Areas.SCE.Models.SCE_Data h in ViewData.Model)
+{
+    foreach (var authorization in h.AuthorizedDataSet)
+    {
+        if (authorization.user_name.Length > 0)
+        {
+            authorized = true;
+        }
+    }
+}
+
+@if (authorized == true)
+{
+
+                                <table width="100%" border="0" cellspacing="0" cellpadding="7">
+
+										<tr>
+
+											<td width="1">
+
+												<img src="https://cte-s.education.illinois.edu/images/clear.gif" width="1" height="1"/>
+
+											</td>
+
+											<td width="400" align="left" valign="top">
+
+<!-- Menu Links -->                                                
+@foreach (CoTE.Areas.SCE.Models.SCE_Data h in ViewData.Model)
+{
+    string old_link_group = "";
+    
+    foreach (var link in h.LinksDataSet)
+    {
+            if (@link.section_type == "L") 
+            {
+                
+                if (old_link_group != @link.link_group)
+                {
+                        <h3>@link.link_group</h3>
+                }
+                
+                switch (@link.link_level)
+                {
+                    case 1:
+                        if (link.link.IsEmpty())
+                        {
+                            <br /><text>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text> <b>@link.heading</b><br />
+                        }
+                        else
+                        {    
+                            <text>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text> <a href="@link.link" class="menuitems">@link.heading</a><br />
+                        }
+                        break;
+                    case 2:
+                        if (link.link.IsEmpty())
+                        {
+                                <h5><text>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text>@link.heading</h5>
+                        }
+                        else    
+                        {
+                                <text>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text> <a href="@link.link" class="menuitems">@link.heading</a><br />
+                        }       
+                        break;
+                    case 3:
+                        <text>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text> <a href="@link.link" class="menuitems">@link.heading</a><br />
+                        break;                    
+                    case 4:
+                        <text>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text> <a href="@link.link" class="menuitems">@link.heading</a><br />
+                        break;                    
+                    case 5:
+                        <text>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text> <a href="@link.link" class="menuitems">@link.heading</a><br />
+                        break;                    
+                    case 6:
+                        <text>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text> <a href="@link.link" class="menuitems">@link.heading</a><br />
+                        break;                    
+                 }
+                 
+                 old_link_group = @link.link_group;
+            
+             }
+    }
+}
+
+
+											</td>
+
+										</tr>
+
+									</table>
+
+}
+else
+{
+    		<center><br/><br/><br/><h2><font color="red" size="+2">You do not have access to view this page.  <br />For access to this page, please contact <a href="mailto:cote-techsupport@illinois.edu">cote-techsupport@illinois.edu</a></font></h2></center>
+}
+            </div>
+        </div>
+	</body>
+
+</html>

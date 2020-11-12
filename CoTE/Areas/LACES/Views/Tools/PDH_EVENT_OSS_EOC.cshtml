@@ -1,0 +1,173 @@
+﻿@model IEnumerable<CoTE.Areas.LACES.Models.PDH_EVENT_OOS_EOC_Data>
+
+@{
+    bool authorized = false;
+}
+
+<html>
+<title>Evidence of Completion Letter</title>
+<head>
+    <style type="text/css" media="print">
+        @@page {
+            margin: 2cm;
+            size: portrait;
+    </style>
+</head>
+<body>
+
+    <!--- Check if authorized --->
+    @foreach (CoTE.Areas.LACES.Models.PDH_EVENT_OOS_EOC_Data h in ViewData.Model)
+    {
+        <table width="750">
+            <tr>
+                <td align="center">
+                    <b>COUNCIL ON TEACHER EDUCATION</b>
+                    <br />College of Education
+                    <br />1310 South Sixth Street, Room 120
+                    <br />/Champaign, Illinois 61820
+                    <br /><br />
+                    <b>EVIDENCE OF COMPLETION FOR PROFESSIONAL DEVELOPMENT</b>
+                    <hr />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    This is to certify that the undersigned has completed the professional development activity described herein and that the provider is
+                    approved by the State Superintendent of Education at the time of completion.  This form serves as evidence to verify participation in
+                    this professional development activity. Professional development hours are awarded 1:1 for clock hours of participation. <br /><br />
+                </td>
+            </tr>
+             <tr>
+                <td>
+                    @foreach (CoTE.Areas.LACES.Models.PDH_EVENT_OOS_EOC_Data i in ViewData.Model)
+                    {
+                        foreach (var profile in i.OOSEOCDataSet)
+                        {
+                            <table width="100%" style="border-collapse: collapse">
+                                <tr>
+                                    <td width="300" colspan="1" div style="border: solid 0 #000000; border-top-width:1px; border-bottom-width:1px; border-right-width:1px;">
+                                        NAME OF PARTICIPANT <br />(Last, First, Middle Initial)
+                                        <br />@profile.full_name
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">
+                                        <div style="border: solid 0 #000000; border-bottom-width:1px">
+                                            TITLE OF PROFESSIONAL DEVELOPMENT
+                                            <br />@profile.event_title
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">
+                                        <div style="border: solid 0 #000000; border-bottom-width:1px">
+                                            DATE(S) OF ACTIVITY
+                                            <br />@profile.dates
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="1" style="padding-right:0px; border: solid 0 #000000; border-right-width:1px; border-top-width:1px; border-bottom-width:1px">
+                                        NAME OF APPROVED PROVIDER
+                                        <br /><br />University of Illinois at Urbana-Champaign
+                                    </td>
+                                    <td colspan="1" style="padding-left:2px; border: solid 0 #000000; border-top-width:1px; border-bottom-width:1px">
+                                        REGION, COUNTY, DISTRICT, TYPE (RCDT) CODE (form is invalid without an Illinois State-approved provider RCDT code)
+                                        <br />090105450510000
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">
+                                        NUMBER OF PROFESSIONAL DEVELOPMENT HOURS AWARDED
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">
+                                        <div style="border: solid 0 #000000; border-bottom-width:1px">
+                                            @profile.pdus
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                            <br /><br /><br /><br />
+                            <table width="100%" border="0">
+                                <tr>
+                                    <td width="5%">
+                                        &nbsp;
+                                    </td>
+                                    <td width="42%" align="center" style="border: solid 0 #000000; border-bottom-width:1px">
+                                        <img src="https://cte-s.education.illinois.edu/coopportal/eoc/exec%20director%20sig.jpg" width="120" height="50" />
+                                    </td>
+                                    <td width="6%">
+                                        &nbsp;
+                                    </td>
+                                    <td width="42%" align="center" style="border: solid 0 #000000; border-bottom-width:1px">
+                                        @profile.eoc_date
+                                    </td>
+                                    <td width="5%">
+                                        &nbsp;
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="5%">
+                                        &nbsp;
+                                    </td>
+                                    <td width="42%" style="text-align:center; vertical-align:text-top">
+                                        Signature of Approved Provider's Representative
+                                    </td>
+                                    <td width="6%">
+                                        &nbsp;
+                                    </td>
+                                    <td width="42%" style="text-align:center; vertical-align:text-top">
+                                        Date
+                                    </td>
+                                    <td width="5%">
+                                        &nbsp;
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="5%">
+                                        &nbsp;
+                                    </td>
+                                    <td width="42%" align="center" style="border: solid 0 #000000; border-bottom-width:1px">
+                                        <br /><br /><br />
+                                    </td>
+                                    <td width="6%">
+                                        &nbsp;
+                                    </td>
+                                    <td width="42%" align="center" style="border: solid 0 #000000; border-bottom-width:1px">
+                                        &nbsp;
+                                    </td>
+                                    <td width="5%">
+                                        &nbsp;
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="5%">
+                                        &nbsp;
+                                    </td>
+                                    <td width="42%" style="text-align:center; vertical-align:text-top">
+                                        Signature of Participant
+                                    </td>
+                                    <td width="6%">
+                                        &nbsp;
+                                    </td>
+                                    <td width="42%" style="text-align:center; vertical-align:text-top">
+                                        Date
+                                    </td>
+                                    <td width="5%">
+                                        &nbsp;
+                                    </td>
+                                </tr>
+                            </table>
+                        }
+                    }
+                    <br /><br /><br /><br /><br /><hr width="100%" />
+                </td>
+            </tr>
+        </table>
+    }
+
+</body>
+
+</html>

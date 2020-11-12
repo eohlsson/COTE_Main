@@ -1,0 +1,108 @@
+﻿@using System.Configuration
+@using System.Data.SqlClient
+@{
+    Layout = null;
+ }
+
+<html>
+
+<head>
+
+  <meta name="keywords" content="College of Education Intranet">
+
+  <meta name="description" content="College of Education Intranet Logon">
+
+  <meta name="reply-to" content="webmaster@education.illinois.edu">
+
+  <title>UIUC College of Education:  Intranet</title>
+
+ <link rel="stylesheet" href="https://www-s2.education.illinois.edu/intranet/library/intranet.css" rel="blah" type="text/css" ></link>
+
+<script src="/intranet/library/intranet.js"></script>
+
+
+
+</head>
+
+<body bgcolor="#ffffff" link="#3333cc" vlink="#cc3300"    OnLoad="initializeIntranetPage();document.logonform.username.focus();" >
+
+<div class="header" id="header">
+
+<div id="application"><a href="">COE Intranet</a></div>
+
+<div id="intranet"><a href="">Go to Intranet Home</a></div>
+
+<div id="logout"><a href="/dotnet/coelogin.aspx/logout">Log Off Intranet</a></div>
+
+</div>
+
+<div class="subheader"></div>
+
+<div class="content" id="main_content"><h1>College of Education Intranet</h1>
+
+
+ @{
+     
+        String ConnString = ConfigurationManager.ConnectionStrings["EdDb"].ConnectionString;
+        String sql = "";
+
+        sql = "SELECT	DISTINCT EDUS.service_id, EDUS.name,EDUS.menu_category, EDUS.service_status, EDUS.menu_url,EDUS.menu_link_name, EDUS.manager_groups, EDUS.manager_email, " +
+        " 	EDUS.manager_name, EDP.people_id, EDUSG.PeopleRecordOnAuthenticate,  " +
+        " 	EDPG.user_name, EDPG.date_effective, EDPG.date_ineffective, EDPG.charParam1, EDPG.intParam1, EDPG.charParam2, EDPG.intParam2," +
+        " 	EDPG.owner, EDPG.comments" +
+        " FROM	ED_USER_SERVICES EDUS INNER JOIN" +
+        " 	ED_USER_SERVICES_x_GROUPS EDUSG ON EDUS.service_id = EDUSG.service_id INNER JOIN" +
+        " 	ED_PEOPLE_x_GROUPS EDPG ON EDUSG.group_name = EDPG.group_name LEFT OUTER JOIN" +
+        " 	ED_PEOPLE EDP ON EDPG.user_name = EDP.username" +
+        " WHERE	EDUS.service_status = 'production' AND EDPG.USER_NAME = '" + ViewBag.username + "'" +
+        " ORDER BY EDUS.menu_category,EDUS.menu_link_name "; 
+        
+        string menu_category = "";
+            
+        using (SqlConnection conn = new SqlConnection(ConnString))
+        {
+            conn.Open();
+            using (SqlCommand cmd = new SqlCommand())
+            {
+                cmd.Connection = conn;
+                cmd.CommandType = System.Data.CommandType.Text;
+                cmd.CommandText = sql;
+                        
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+
+                    while (reader.Read())
+                    {
+
+                       if (menu_category == "" || menu_category != reader[2].ToString())
+                       {
+                           <h2 class="category">@reader[2].ToString()</h2>
+                       }  
+                       
+                       
+                                if(reader[4].ToString() != "")
+                                {
+                                    <ul class="subSection"><a href="@reader[4].ToString()">@reader[5].ToString()</a></ul>
+                                }
+                                else
+                                {
+                                    <ul class="subSection">@reader[4].ToString()</ul>
+                                }
+   
+                                                    
+                        menu_category = reader[2].ToString();
+                    }
+                }
+            }
+        }
+}
+
+
+</div>
+
+<div class="footer" id="footer">
+
+</div></body>
+
+</html>
+

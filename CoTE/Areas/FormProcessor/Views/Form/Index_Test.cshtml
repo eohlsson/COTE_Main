@@ -1,0 +1,1802 @@
+﻿@* http://localhost:54017/form.aspx/index *@
+@*      *@
+
+
+@using System.Data.Entity;
+@using System.Web.Helpers;
+@using FormProcessor.Models;
+@using System.Data;
+@using System.Data.SqlClient;
+@using System.Dynamic;
+@using System.Configuration;
+@using System.Collections;
+@using CoTE.Areas.FormProcessor.Helpers;
+@using Newtonsoft.Json;
+
+@model IEnumerable<Form_Data>
+
+
+<!DOCTYPE html>
+
+<html>
+
+@{ 
+    Byte[] bytes;
+    
+    string record_name = "";
+
+    string form_url = Request.Url.ToString();
+    string index_url = (string)Session["index_url"] ?? "";
+    string submit_button_text = "";
+        
+    Dictionary<String, String> form_errors = ViewBag.form_errors;
+    string field_error = "";
+
+    // Get submitted data if we are coming back with errors
+    IEnumerable<Form_Data> formdata = ViewData.Model;
+
+    Dictionary<string, string> insertparams = new Dictionary<string, string>();
+
+    if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "Start Form Load"); }
+
+    String form_action = ViewBag.action.ToString();
+
+    var form_data = (IDictionary<string, object>)new ExpandoObject();
+
+    var value_lists = new List<Form_Valuelists> { };
+
+    String ConnString = ConfigurationManager.ConnectionStrings["UserDb"].ConnectionString;
+
+
+
+    using (SqlConnection conn = new SqlConnection(ConnString))
+    {
+        conn.Open();
+        using (SqlCommand cmd = new SqlCommand())
+        {
+
+            // Load Form data
+            cmd.Connection = conn;
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.CommandText = "frm_proc.dbo.FRM_GetFormData_rs_v5";
+            cmd.Parameters.Add("form_id", ViewBag.form_id);
+            cmd.Parameters.Add("record_id", ViewBag.record_id);
+            cmd.Parameters.Add("user_name", Session["Username"].ToString());
+
+            if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "Get Form Data: Start:" + cmd.CommandText + " @form_id=" + ViewBag.form_id + ", @record_id=" + ViewBag.record_id); }
+
+            // fill the parameter collection
+            using (SqlDataReader reader = cmd.ExecuteReader())
+            {
+
+                string one_to_many = "0";
+
+                while (reader.IsClosed == false)
+                {
+
+
+                    DataTable dt = new DataTable();
+                    dt.Load(reader);
+
+                    int row_counter = 0;
+                    one_to_many = "0";
+
+                    foreach (DataRow row in dt.Rows)
+                    {
+
+                        row_counter++;
+
+                        foreach (DataColumn column in dt.Columns)
+                        {
+
+                            // Set one_to_many flag
+                            if (column.ColumnName == "one_to_many")
+                            {
+                                one_to_many = row[column.ColumnName].ToString();
+                            }
+
+                            if (column.ColumnName.ToString() != "one_to_many")
+                            {
+                                    if (one_to_many == "0")
+                                    {
+                                        form_data.Add(column.ColumnName, row[column.ColumnName]);
+                                    }
+                                    else
+                                    {
+                                        form_data.Add(column.ColumnName + "_" + row_counter, row[column.ColumnName]);
+                                    }
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+            if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "Get Form Data: End:" + cmd.CommandText + " @form_id=" + ViewBag.form_id + ", @record_id=" + ViewBag.record_id); }
+
+            cmd.Parameters.Clear();
+
+        }
+
+    }
+
+    foreach (Form_Data h in ViewData.Model)
+    {
+
+
+        value_lists = h.ValueListDataSet;
+
+        foreach (var form in h.FormDataSet) // Form
+        {
+  
+            string display_anchors = "";
+            List<string> anchor_list = new List<string>(new string[] {});
+                        
+            //Create the display anchors
+            if (form.display_anchors)
+            {
+            
+                foreach (var form_section in h.SectionsDataSet) // Section
+                {
+                    anchor_list.Add(form_section.section_title);
+                  
+                    //display_anchors = display_anchors + "&nbsp;&nbsp;<a href='#" + form_section.section_title.ToString().Replace(" ", "") + "'>" + form_section.section_title + "</a>&nbsp;&nbsp;";
+                }    
+    
+                anchor_list.Sort();
+                
+                foreach (string anchor in anchor_list)
+                {
+                    display_anchors = display_anchors + "&nbsp;&nbsp;<a href='#" + anchor.ToString().Replace(" ", "") + "'>" + anchor + "</a>&nbsp;&nbsp;";                       
+                }  
+                  
+            }
+            
+<head>
+    <script src="@Url.Content("~/Scripts/jquery-1.7.1.min.js")" type="text/javascript"></script>
+        <link href="/dotnet/areas/formprocessor/content/mb.balloon.css" rel="stylesheet">
+    <script type="text/javascript" src="/dotnet/Scripts/tinymce/tinymce.js"></script>
+    <script type="text/javascript">
+        tinyMCE.init({
+            selector: "textarea.mceEditable",
+            plugins: "image, advlist",
+            menubar: false,
+            toolbar: "image styleselect formatselect fontselect fontsizeselect cut copy paste bullist numlist outdent indent blockquote undo redo removeformat"
+        });
+    </script>
+    <script src="/dotnet/areas/formprocessor/content/jquery.mb.balloon.js"></script>
+    <script type="text/javascript">
+
+        var open_to_form_section = "";
+
+        jQuery.balloon.init();
+
+        $(document).ready(function () {
+
+            $('input[type="file"]').change(function () {
+                var file = this.files[0];
+                //window.alert('Filename : ' + file.name + '\nFilesize : ' + file.size + '\nFileType :' + file.type);
+
+                //var reader = new FileReader();
+                //reader.onload = readSuccess;
+                //function readSuccess(evt) {
+                //    document.getElementById("base64textarea").value = evt.target.result;
+                //};
+                //reader.readAsDataURL(file);
+
+                var data = new FormData();
+                data.append(file.name, file);
+
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("UploadFile", "Form", new { area = "FormProcessor" })',
+                    contentType: false,
+                    processData: false,
+                    data: data,
+                    success: function (result) {
+                        console.log(result);
+                    },
+                    error: function () {
+                        window.alert("AJAX Error");
+                    }
+                });
+
+
+            });
+
+            $(document).on('click', 'a', function () {
+                //alert("A link was clicked");
+                var addressValue = $(this).attr("href");
+                var section = $(this).attr("id");
+                if (addressValue.indexOf("subform=true") > 0) {
+                    //alert("Opening subform");
+                    open_to_form_section = section;
+                    if (addressValue.indexOf("#") < 1) {
+                        document.location.href = document.location.href + "#grid_" + open_to_form_section;
+                    }
+                    $.blockUI({ message: $('#open_to_form_popup'), css: { width: '275px' } });
+                }
+            });
+
+            $('#continue_after_open_to_form').click(function () {
+                // update the block message 
+                $.blockUI({ message: "<h1>Refreshing page, please wait...</h1>" });
+
+                // Refresh the Grid
+                $.ajaxSetup({ cache: false });
+
+                document.location.href = document.location.href.replace(/#/, "#grid_" + open_to_form_section);
+                var grid_refresh = document.location.href.replace(/#/, "#grid_" + open_to_form_section);
+
+                //$("#grid_" + open_to_form_section).load(location.href + "&randval=" + Math.random() + " #grid_" + open_to_form_section);
+                $("#grid_" + open_to_form_section).load(location.href + "&randval=" + Math.random() + " #grid_" + open_to_form_section, function () {
+                    //alert("Waiting");
+                    setTimeout($.unblockUI, 10);
+                });
+
+                //setTimeout($.unblockUI, 5000);
+
+                return false;
+            });
+
+            //Intercept cancel to see if we are on a subform
+            $("#cancel").click(function (e) {
+                if (window.location.href.indexOf("subform=true") > 0) {
+                    window.close();
+                }
+                else {
+                    window.location = $(this).attr("onclick");
+                }
+                return true;
+            });
+
+            $("#fp_form").on("submit", function (event) {
+                //alert("button disabled");
+                $('input[type="submit"]', this).attr('disabled', 'disabled');
+            });
+
+            // Chrome no likee the datepicker so don't use it
+            $.browser.chrome = /chrome/.test(navigator.userAgent.toLowerCase());
+            if (!$.browser.chrome) {
+                //window.alert("Not chrome");
+                $("input[type=date]").datepicker();
+                $.datepicker.setDefaults({
+                    dateFormat: 'yy-mm-dd'
+                });
+                $(".datepicker").datepicker({
+                    format: "yy-mm-dd",
+                    autoclose: true
+                });
+                $(".datepicker").datepicker('setValue', new Date());
+            }
+        });
+
+
+
+        function isDate(txtDate) {
+            //alert("Date = " + txtDate);
+            var currVal = txtDate;
+            if (currVal == '')
+                return false;
+
+            var rxDatePattern = /^(\d{4})(\/|-)(\d{1,2})(\/|-)(\d{1,2})$/; //Declare Regex
+            var dtArray = currVal.match(rxDatePattern); // is format OK?
+
+            if (dtArray == null)
+                return false;
+
+            // Based on browser, format may be different
+            $.browser.chrome = /chrome/.test(navigator.userAgent.toLowerCase());
+            if (!$.browser.chrome) {
+                //window.alert("Not chrome");
+                dtMonth = dtArray[3];
+                dtDay = dtArray[5];
+                dtYear = dtArray[1];
+
+            }
+            else {
+                //window.alert("Chrome");
+                dtMonth = dtArray[3];
+                dtDay = dtArray[5];
+                dtYear = dtArray[1];
+            }
+
+            //alert("Month:" + dtMonth + " Day:" + dtDay + " Year:" + dtYear);
+
+            if (dtMonth < 1 || dtMonth > 12)
+                return false;
+            else if (dtDay < 1 || dtDay > 31)
+                return false;
+            else if ((dtMonth == 4 || dtMonth == 6 || dtMonth == 9 || dtMonth == 11) && dtDay == 31)
+                return false;
+            else if (dtMonth == 2) {
+                var isleap = (dtYear % 4 == 0 && (dtYear % 100 != 0 || dtYear % 400 == 0));
+                if (dtDay > 29 || (dtDay == 29 && !isleap))
+                    return false;
+            }
+            return true;
+        }
+
+        function OnChange(question_name, question_id, question_list) {
+
+            //alert("Question: " + question_id + " which limits " + question_list + " has been changed");
+            //alert(question_name);
+            question_name = question_name.replace(/[.]/g, '_');
+            //alert(document.getElementById(question_name).value);
+            //alert(document.getElementById(question_name).innerHTML);
+
+            var questions = question_list.toString().split(";");
+
+            for (var i = 0; i < questions.length; i++) {
+                $.ajax({
+                    type: "GET",
+                    contentType: "application/json; charset=utf-8",
+                    url: '@Url.Action("FilterQuestion", "Form")',
+                    data: { "question_id": question_id, "question_value": document.getElementById(question_name).value, "question_list": questions[i], "completeData": question_list },
+                    dataType: "json",
+                    beforeSend: function () { },
+                    success: function (new_values) {
+
+                        var values = "";
+                        var changed_field = "";
+                        var changed_field_name = "";
+                        var old_value = "";
+
+                        $.each(new_values, function (i, new_values) {
+                            if (i != 0) {
+                                //alert(i);
+                                if (new_values.Value == old_value) {
+                                    values += '<option value="' + new_values.Value + '" selected="selected">' +
+                                     new_values.Text + '</option>';
+                                }
+                                else {
+                                    values += '<option value="' + new_values.Value + '">' +
+                                         new_values.Text + '</option>';
+                                }
+
+                                //alert('<option value="' + new_values.Value + '">' + new_values.Text + '</option>')
+                            }
+                            else {
+                                changed_field = new_values.Text;
+
+                                // Store the old value so we don't lose it
+                                changed_field_name = "#" + changed_field.replace(/[.]/g, '_');
+                                old_value = $(changed_field_name).val();
+                                //alert(changed_field_name + ":" + $(changed_field_name).val());
+                            }
+                        })
+
+                        //document.getElementById(changed_field).innerHTML = values;
+                        //alert(changed_field);
+                        //alert("CI 420 request: " + $("#CTE_DBO_CTE_STU_ST_APPL_CI_420_REQUEST").val());
+                        changed_field = "#" + changed_field.replace(/[.]/g, '_');
+
+                        $(changed_field).empty().append(values);
+
+                        // Check if there are any one-to-many questions that need to be updated
+                        if ($(changed_field + "_1").length > 0) {
+                            var counter = 1;
+                            while ($(changed_field + "_" + counter).length > 0) {
+                                $(changed_field + "_" + counter).empty().append(values);
+                                counter++;
+                            }
+                        }
+                        else {
+                            $(changed_field).empty().append(values);
+                        }
+
+                    }
+                })
+
+            }
+        }
+
+        function question_filter(question_id, question_name) {
+
+            //alert("IN");
+            var search_question = "search_" + question_name;
+            //alert(search_question);
+            //alert(document.getElementById(search_question).value);
+            var search_value = document.getElementById(search_question).value;
+
+            //alert("question: " + question_name + ", question_id: " + question_id + ", search value:" + search_value);
+
+            $.ajax({
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                url: '@Url.Action("FilterSearchQuestion", "Index")',
+                data: { "question_id": question_id, "search_value": search_value },
+                dataType: "json",
+                beforeSend: function () { },
+                success: function (new_values) {
+
+                    var values = "";
+
+                    $.each(new_values, function (i, new_values) {
+                        //alert(i);
+                        values += '<option value="' + new_values.Value + '">' +
+                                new_values.Text + '</option>';
+                        //alert('<option value="' + new_values.Value + '">' + new_values.Text + '</option>')
+                    })
+
+                    question_name = "#" + question_name.replace(/[.]/g, '_');
+                    //This is really slow
+                    //$(question_name).empty().append(values);
+                    $(question_name).html("");
+                    $(question_name).append(values);
+                }
+            })
+
+        }
+
+        // add
+        $(".add").live("click", function (e) {
+
+            //alert($(this).attr("id"));
+            var str = $(this).attr("id").split("_");
+            var fieldcount = str[1];
+            var section = str[2];
+            var id = str[3];
+            var orientation = str[4];
+
+            var spanAdd;
+            var spanAddAction;
+
+            var grid_action = document.getElementById('grid_action').value || "";
+
+            //alert("Grid Action=*" + grid_action + "*");
+
+            if (grid_action == "") {
+
+                $('#grid_action').val("add");
+
+                //alert("fieldcount=" + fieldcount + ", section=" + section + ", id=" + id);
+
+                for (var i = 1; i <= fieldcount; i++) {
+                    spanAdd = "#AddRowField_" + i + "_" + section + "_" + id + "_" + orientation;
+                    $(spanAdd).show();
+                }
+
+                spanAddAction = "#AddRowAction_" + fieldcount + "_" + section + "_" + id + "_" + orientation;
+                //alert("spanAddAction:" + spanAddAction);
+                $(spanAddAction).show();
+
+                //var cellname = ($("#grid_" + section + " tr:eq(" + id + ") td:nth-child(1)  select ").attr('id') || $("#grid_" + section + " tr:eq(" + id + ") td:nth-child(1)  input ").attr('id') || $("#grid_" + section + " tr:eq(" + id + ") td:nth-child(1)  textarea ").attr('id'));
+                //$(spanAdd).focus();
+                e.preventDefault();
+                //var focusfield = "#AddRowField_1_" + section + "_" + id;
+                var focusfield = "#grid_" + section + "_" + id + "_" + orientation;
+                $(focusfield).find('input:first').focus();
+                //alert(focusfield);
+
+            }
+            else if (grid_action == "add") {
+                alert('First Save the record you are adding.');
+            }
+            else {
+                alert('First Save the record you are editing.');
+            }
+
+        });
+
+        // icancel
+        $(".icancel").live("click", function () {
+            var str = $(this).attr("id").split("_");
+            fieldcount = str[1];
+            section = str[2];
+            id = str[3];
+            orientation = str[4];
+
+            var spanAdd;
+            var spanAddAction;
+
+            var flag = confirm('Are you sure to cancel');
+            if (flag) {
+
+                for (var i = 1; i <= fieldcount; i++) {
+                    spanAdd = "#AddRowField_" + i + "_" + section + "_" + id + "_" + orientation;
+                    $(spanAdd).hide();
+                }
+
+                spanAddAction = "#AddRowAction_" + fieldcount + "_" + section + "_" + id + orientation;
+                $(spanAddAction).hide();
+
+                $('#grid_action').val("");
+
+            }
+
+        });
+
+        // save
+        $(".save").live("click", function () {
+            var error = "false";
+            var str = $(this).attr("id").split("_");
+            var fieldcount = str[1];
+            var section = str[2];
+            var id = str[3];
+            var record_id = str[4];
+            var orientation = str[5];
+            var insertparams = $(this).data('insertparams');
+
+            //alert("Insertparams:" + insertparams);
+            //alert("Adding record: ID: " + id);
+
+            var tablename = "#grid_" + section + "_" + id;
+            var fieldnames = "";
+            var fieldvalues = "";
+
+            var cellname;
+            var cellid;
+            var cellvalue;
+            var inputtype;
+            var cell;
+            var row = 0;
+            var col = 0;
+            var nullable;
+            var datatype;
+            var savefield;
+
+            //alert("Ready to loop");
+            //alert("Fieldcount:" + fieldcount);
+
+            for (var i = 1; i < fieldcount; i++) {
+
+                //alert("In Loop" + i);
+
+                if (orientation == "H") {
+                    tablename = "#grid_" + section;
+
+                    row = (id * 2) - 1;
+                    col++;
+
+                    //alert("ID:" + id + ", Row: " + row + ", Column:" + col);
+
+                    cellid = ($(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ")  select ").prop('id') || $(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ")  input ").prop('id') || $(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ")  textarea ").prop('id'));
+                    cellname = ($(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ")  textarea ").prop('name') || $(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ")  select ").prop('name') || $(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ")  input ").prop('name'));
+                    inputtype = $(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ") select ").prop("type") || $(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ") input ").prop("type") || $(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ") textarea ").prop("type");
+
+                }
+
+                if (orientation == "T") {
+
+                    tablename = "#grid_" + section + "_" + id;
+
+                    //alert("Column count:" + $(tablename + ' tr:eq(' + row + ') td').length);
+
+                    if (col >= $(tablename + ' tr:eq(' + row + ') td').length) {
+                        row++;
+                        col = 1;
+                    }
+                    else {
+                        col++;
+                    }
+
+                    //alert("ID:" + id + ", Row: " + row + ", Column:" + col);
+
+                    cellid = ($(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ")  select ").prop('id') || $(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ")  input ").prop('id') || $(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ")  textarea ").prop('id'));
+                    cellname = ($(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ")  textarea ").prop('name') || $(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ")  select ").prop('name') || $(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ")  input ").prop('name'));
+                    inputtype = $(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ") select ").prop("type") || $(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ") input ").prop("type") || $(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ") textarea ").prop("type");
+                    //cellvalue = document.getElementById(cellid).value;
+                    //alert("CellID:" + cellid);
+                }
+
+                cell = document.getElementById(cellid);
+                nullable = cell.getAttribute('nullable');
+                datatype = cell.getAttribute('datatype');
+
+                if (inputtype == "radio") {
+                    var rads = document.getElementsByName(cellid);
+
+                    for (var rad in rads) {
+                        if (rads[rad].checked) {
+                            cellvalue = rads[rad].value;
+                        }
+                    }
+                }
+                else if (datatype == "full_html_editor") {
+                    //alert("full_html_editor");
+                    cellvalue = tinymce.get(cellname).getContent();
+                }
+                else if (datatype != "textarea") {
+                    cellvalue = document.getElementById(cellid).value;
+                }
+                else {
+                    cellvalue = $(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ")  textarea ").prop('value');
+                }
+
+                // replace single quote with double quotes
+                cellvalue = cellvalue.replace("'", "''");
+
+                //alert("Name:" + cellname + "\nCellID:" + cellid + "\nInputType:" + inputtype + "\nValue:" + cellvalue + "\nDatatype:" + datatype + "\nNullable: " + nullable);
+
+                // Validation
+                if (nullable == "False" && cellvalue == "") {
+                    error = "true";
+                    alert("Field '" + cell.getAttribute('questionname') + "' cannot be left blank ");
+                    break;
+                }
+
+                if (nullable == "False" && datatype == "date" && cellvalue == "0001-01-01") {
+                    error = "true";
+                    alert("Field '" + cell.getAttribute('questionname') + "' cannot be left blank ");
+                    break;
+                }
+
+                if (nullable == "False" && datatype == "date" && isDate(cellvalue) == false) {
+                    error = "true";
+                    alert("Field '" + cell.getAttribute('questionname') + "' contains an invalid date ");
+                    break;
+                }
+
+                //alert("Entering validation");
+
+
+                // Don't save these fields
+                savefield = "true";
+                // Don't save if date is blank
+                if (datatype == "date" && cellvalue == "0001-01-01") {
+                    savefield = "false";
+                }
+                // Don't save if field is disabled
+                if (cell.getAttribute('disabled') != null && cell.getAttribute('disabled') != false) {
+                    savefield = "false";
+                }
+                // Don't save if field is display
+                if (datatype == "display") {
+                    savefield = "false";
+                }
+
+                //alert(inputtype + ":" + datatype + ":" + cellvalue + ":" + cellname);
+                //alert("Savefield:" + savefield);
+
+                // Only save if savefield
+                if (savefield == "true") {
+                    //alert(inputtype + ":" + datatype + ":" + cellvalue + ":" + cellname);
+
+                    if (inputtype == "file" && datatype == "file_db") {
+                        var file = cell.files[0];
+
+                        if (cell.files.length != 0) {
+                            fieldname = cellid.split("").reverse().join("");
+                            fieldname = fieldname.substring(fieldname.indexOf("_") + 1);
+                            fieldname = fieldname.split("").reverse().join("");
+
+                            fieldnames = fieldnames + ", " + fieldname;
+                            fieldnames = fieldnames + ", " + fieldname + "_filename";
+                            fieldnames = fieldnames + ", " + fieldname + "_mime";
+
+                            fieldvalues = fieldvalues + ", '[attachment][" + file.name + "]'";
+                            fieldvalues = fieldvalues + ", '" + file.name + "'";
+                            fieldvalues = fieldvalues + ", '" + file.type + "'";
+                            //window.alert('Name :' + cellid + '/nFilename : ' + file.name + '/nFilesize : ' + file.size + '/nMime' + file.type);
+                            //window.alert('Field values:' + fieldvalues);
+
+                        }
+                    }
+
+                    // Build fields and value strings for insert if fields have values
+                    if ((inputtype == "text" && cellvalue != "") || (inputtype == "select-one" && cellvalue != "") || (datatype == "date" && (cellvalue != "0001-01-01" && cellvalue != "")) || (inputtype == "textarea" && cellvalue != "")) {
+
+                        //alert("Start saving field " + cellname + " with value: " + cellvalue);
+
+                        cellname = cellname.substring(0, cellname.lastIndexOf("_" + id));
+
+                        fieldnames = fieldnames + ", " + cellname;
+
+                        if ((cellvalue.match(/[a-zA-Z]+/)) || (datatype == "date")) {
+                            fieldvalues = fieldvalues + ", '" + cellvalue + "'";
+                        }
+                        else {
+                            fieldvalues = fieldvalues + ", " + cellvalue;
+                        }
+
+                        //alert("End saving field " + cellname + " with value: " + cellvalue);
+
+                    }
+                }
+            }
+
+            // This stops the code for testing purposes
+            //alert(abc);
+            //alert("field names: " + fieldnames);
+            //alert("field values: " + fieldvalues);
+
+            // Trim off the extra comma from the front
+            fieldnames = fieldnames.substring(2);
+            fieldvalues = fieldvalues.substring(2);
+
+            //alert("field names: " + fieldnames);
+            //alert("field values: " + fieldvalues);
+
+            //Pass to AddGridRecord using ajax GET from MVCGrid example
+            // Send the following:  section, fieldnames, fieldvalues
+
+            if (id != "" && error == "false") {
+                //alert("calling ajax");
+
+                $.ajax({
+                    type: "GET",
+                    contentType: "application/json; charset=utf-8",
+                    url: '@Url.Action("AddGridRow", "Form", new { area = "FormProcessor" })',
+                    data: { "section": section, "fieldnames": fieldnames, "fieldvalues": fieldvalues, "insertparams": insertparams },
+                    dataType: "json",
+                    beforeSend: function () { },
+                    success: function (data) {
+                        //window.alert("JSON Success");
+                        if (data.result == true) {
+                            for (var i = 1; i <= fieldcount; i++) {
+                                spanAdd = "#AddRowField_" + i + "_" + section + "_" + id;
+                                $(spanAdd).hide();
+                            }
+
+                            spanAddAction = "#AddRowAction_" + fieldcount + "_" + section + "_" + id;
+                            $(spanAddAction).hide();
+
+                            $('#grid_action').val("");
+
+                            //Update the id on the Add link
+                            var add_link = document.getElementById("AddRow_" + fieldcount + "_" + section + "_" + id + "_" + orientation);
+                            var new_id = Number(id);
+                            new_id++;
+                            var add_id = "AddRow_" + fieldcount + "_" + section + "_" + new_id.toString() + "_" + orientation;
+                            $(add_link).attr("id", add_id);
+
+                            $.blockUI({ message: "<h1>Refreshing page, please wait...</h1>" });
+                            // Refresh the Grid
+                            //$.ajaxSetup({cache: false});
+
+                            document.location.href = document.location.href.replace(/#/, "#grid_" + section);
+                            var grid_refresh = document.location.href.replace(/#/, "#grid_" + section);
+                            //$("#grid_" + section).load(grid_refresh);
+                            $("#grid_" + section).load(location.href + "&randval=" + Math.random() + " #grid_" + section, function () {
+                                setTimeout($.unblockUI, 10);
+                            });
+                            //alert(grid_refresh);
+                            //alert("Record added");
+
+                        }
+                        else {
+                            $('#grid_action').val("");
+                            window.location = "/dotnet/formprocessor/error.aspx/httperror";
+                        }
+
+                    },
+                    error: function (request, status, error) {
+                        alert(request.responseText);
+                        $('#grid_action').val("");
+                        window.alert("JSON error");
+                        window.location = "/dotnet/formprocessor/error.aspx/httperror";
+                    }
+
+                });
+
+                $('#grid_action').val("");
+                //$.unblockUI();
+            }
+        });
+
+        // edit
+        $(".edit").live("click", function (e) {
+            var str = $(this).attr("id").split("_");
+            var fieldcount = str[1];
+            var section = str[2];
+            var id = str[3];
+            var record_id = str[4];
+            var orientation = str[5];
+
+            var spanEdit;
+            var spanView;
+
+            //alert("Editing record: ID: " + record_id);
+
+            var grid_action = document.getElementById('grid_action').value || "";
+
+            if (grid_action == "") {
+                for (var i = 1; i < fieldcount; i++) {
+                    spanEdit = "#Editable_" + i + "_" + section + "_" + id + "_" + record_id + "_" + orientation;
+                    spanView = "#View_" + i + "_" + section + "_" + id + "_" + record_id + "_" + orientation;
+                    $(spanEdit).show();
+                    $(spanView).hide();
+                }
+
+                $(this).hide();
+                $("#Update_" + fieldcount + "_" + section + "_" + id + "_" + record_id + "_" + orientation).show();
+                $("#Cancel_" + fieldcount + "_" + section + "_" + id + "_" + record_id + "_" + orientation).show();
+
+                $('#grid_action').val("edit");
+
+            }
+            else if (grid_action == "add") {
+                alert('First Save the record you are adding.');
+            }
+            else {
+                alert('First Save the record you are editing.');
+            }
+
+            e.preventDefault();
+            var focusfield = "#grid_" + section + "_" + id + "_" + orientation;
+            $(focusfield).find('input:first').focus();
+            //alert(focusfield);
+
+
+        });
+
+        // cancel
+        $(".cancel").live("click", function () {
+            var str = $(this).attr("id").split("_");
+            fieldcount = str[1];
+            section = str[2];
+            id = str[3];
+            record_id = str[4];
+            orientation = str[5];
+
+            var spanEdit;
+            var spanView;
+
+            for (var i = 1; i < fieldcount; i++) {
+                spanEdit = "#Editable_" + i + "_" + section + "_" + id + "_" + record_id + "_" + orientation;
+                spanView = "#View_" + i + "_" + section + "_" + id + "_" + record_id + "_" + orientation;
+                $(spanEdit).hide();
+                $(spanView).show();
+            }
+
+            $('#grid_action').val("");
+            $(this).hide();
+            $("#Edit_" + fieldcount + "_" + section + "_" + id + "_" + record_id + "_" + orientation).show();
+            $("#Cancel_" + fieldcount + "_" + section + "_" + id + "_" + record_id + "_" + orientation).hide();
+            $("#Update_" + fieldcount + "_" + section + "_" + id + "_" + record_id + "_" + orientation).hide();
+
+        });
+
+        // update
+        $(".update").live("click", function () {
+            var str = $(this).attr("id").split("_");
+            var fieldcount = str[1];
+            var section = str[2];
+            var id = str[3];
+            var record_id = str[4];
+            var orientation = str[5];
+
+            //alert("Editing record: ID: " + record_id);
+            //alert("fieldcount = " + fieldcount + ", section = " + section + ", id = " + id + ", record_id = " + record_id + ", orientation = " + orientation);
+
+            var tablename;
+            var update_sql = "";
+
+            var cellname;
+            var cellid;
+            var cellvalue;
+            var inputtype;
+            var cell;
+            var row = 0;
+            var col = 0;
+            var nullable;
+            var datatype;
+            var savefield;
+
+            //alert("Ready to loop");
+            //alert("Fieldcount:" + fieldcount);
+
+            for (var i = 1; i < fieldcount; i++) {
+
+                if (orientation == "H") {
+
+                    tablename = "#grid_" + section;
+                    row = (id * 2) - 1;
+                    col++;
+
+                    cellid = ($(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ")  select ").prop('id') || $(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ")  input ").prop('id') || $(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ")  textarea ").prop('id'));
+                    cellname = ($(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ")  textarea ").prop('name') || $(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ")  select ").prop('name') || $(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ")  input ").prop('name'));
+                    inputtype = $(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ") select ").prop("type") || $(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ") input ").prop("type") || $(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ") textarea ").prop("type");
+
+                }
+
+                if (orientation == "T") {
+
+                    tablename = "#grid_" + section + "_" + id;
+
+                    if (col >= $(tablename + ' tr:eq(' + row + ') td').length) {
+                        row++;
+                        col = 1;
+                    }
+                    else {
+                        col++;
+                    }
+
+                    cellid = ($(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ")  select ").prop('id') || $(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ")  input ").prop('id') || $(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ")  textarea ").prop('id'));
+                    cellname = ($(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ")  textarea ").prop('name') || $(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ")  select ").prop('name') || $(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ")  input ").prop('name'));
+                    inputtype = $(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ") select ").prop("type") || $(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ") input ").prop("type") || $(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ") textarea ").prop("type");
+                    //cellvalue = document.getElementById(cellid).value;
+                    //alert("CellID:" + cellid);
+                }
+
+                cell = document.getElementById(cellid);
+                nullable = cell.getAttribute('nullable');
+                datatype = cell.getAttribute('datatype');
+
+                if (inputtype == "radio") {
+                    var rads = document.getElementsByName(cellid);
+
+                    for (var rad in rads) {
+                        if (rads[rad].checked) {
+                            cellvalue = rads[rad].value;
+                        }
+                    }
+                }
+                else if (datatype == "full_html_editor") {
+                    //alert("full_html_editor");
+                    cellvalue = tinymce.get(cellname).getContent();
+                }
+                else if (datatype != "textarea") {
+                    cellvalue = document.getElementById(cellid).value;
+                }
+                else {
+                    cellvalue = $(tablename + " tr:eq(" + row + ") td:nth-child(" + col + ")  textarea ").prop('value');
+                }
+
+
+                // replace single quote with double quotes
+                cellvalue = cellvalue.replace("'", "''");
+
+                //alert("Name:" + cellname + "\nInputType:" + inputtype + "\nValue:" + cellvalue);
+
+                // Don't save these fields
+                savefield = "true";
+                // Don't save if date is blank
+                if (datatype == "date" && cellvalue == "0001-01-01") {
+                    savefield = "false";
+                }
+
+                if (datatype == "date" && isDate(cellvalue) == false) {
+                    savefield = "false";
+                    alert("Field '" + cell.getAttribute('questionname') + "' contains an invalid date ");
+                    return false;
+                }
+
+                // Don't save if field is disabled
+                if (cell.getAttribute('disabled') != null && cell.getAttribute('disabled') != false) {
+                    savefield = "false";
+                }
+
+                //alert("Savefield:" + savefield);
+
+                // Only save if savefield
+                if (savefield == "true") {
+
+                    //alert(inputtype + ":" + datatype + ":" + cellvalue + ":" + cellname);
+                    if (inputtype == "file" && datatype == "file_db") {
+                        var file = cell.files[0];
+
+                        if (cell.files.length != 0) {
+                            cellname = cellid.split("").reverse().join("");
+                            cellname = cellname.substring(cellname.indexOf("_") + 1);
+                            cellname = cellname.split("").reverse().join("");
+
+                            update_sql = update_sql + ", " + cellname + " = '[attachment][" + file.name + "]'";
+                            update_sql = update_sql + ", " + cellname + "_filename" + " = '" + file.name + "'";
+                            update_sql = update_sql + ", " + cellname + "_mime" + " = '" + file.type + "'";
+                        }
+
+                        //window.alert('Name :' + cellid + '/nFilename : ' + file.name + '/nFilesize : ' + file.size + '/nMime' + file.type);
+                        //window.alert('Update_SQL:' + update_sql);
+                    }
+
+                    // Only update if there are data in the fields
+                    if ((datatype != "display") && ((inputtype == "radio" && cellvalue != "") || (inputtype == "text" && cellvalue != "") || (inputtype == "select-one") || (datatype == "date" && (cellvalue != "0001-01-01" && cellvalue != "")) || (inputtype == "textarea" && cellvalue != ""))) {
+
+                        cellname = cellname.substring(0, cellname.lastIndexOf("_" + id));
+
+                        if (cellvalue.match(/[a-zA-Z]+/) || datatype == "date") {
+                            update_sql = update_sql + ", " + cellname + " = '" + cellvalue + "'";
+                        }
+                        else if (inputtype == "select-one" && cellvalue.length == 0) {
+                            update_sql = update_sql + ", " + cellname + " = null";
+                        }
+                        else {
+                            update_sql = update_sql + ", " + cellname + " = " + cellvalue;
+                        }
+
+                        //alert("update_sql " + update_sql);
+
+                    }
+                }
+            }
+
+            //alert("update_sql: " + update_sql);
+
+            // Trim off the extra comma from the front
+            update_sql = update_sql.substring(2);
+
+            alert("update_sql: " + update_sql);
+
+            //Pass to AddGridRecord using ajax GET from MVCGrid example
+            // Send the following:  section, fieldnames, fieldvalues
+            if (id != "") {
+                //alert("calling ajax");
+
+                $.ajax({
+                    type: "GET",
+                    contentType: "application/json; charset=utf-8",
+                    cache: false,
+                    url: '@Url.Action("UpdateGridRow", "Form", new { area = "FormProcessor" })',
+                    data: { "section": section, "update_sql": update_sql, "record_id": record_id },
+                    dataType: "json",
+                    beforeSend: function () { },
+                    success: function (data) {
+                        if (data.result == true) {
+                            for (var i = 1; i < fieldcount; i++) {
+                                spanEdit = "#Editable_" + i + "_" + section + "_" + id + "_" + record_id + "_" + orientation;;
+                                spanView = "#View_" + i + "_" + section + "_" + id + "_" + record_id + "_" + orientation;;
+                                $(spanEdit).hide();
+                                $(spanView).show();
+                            }
+
+                            $('#grid_action').val("");
+                            $(this).hide();
+                            $("#Edit_" + fieldcount + "_" + section + "_" + id + "_" + record_id + "_" + orientation).show();
+                            $("#Cancel_" + fieldcount + "_" + section + "_" + id + "_" + record_id + "_" + orientation).hide();
+                            $("#Update_" + fieldcount + "_" + section + "_" + id + "_" + record_id + "_" + orientation).hide();
+
+                            $('#grid_action').val("");
+
+                            //window.location.href =  window.location.href.replace(/#/, "#grid_" + section);
+                            //document.location.href = document.location.href.replace(/#/, "#grid_" + section);
+                            //var grid_refresh = document.location;
+                            //$(tablename).load(grid_refresh + " " + tablename);
+
+                            $.blockUI({ message: "<h1>Refreshing page, please wait...</h1>" });
+
+                            // Refresh the Grid
+                            $.ajaxSetup({ cache: false });
+
+                            document.location.href = document.location.href.replace(/#/, "#grid_" + section);
+                            var grid_refresh = document.location.href.replace(/#/, "#grid_" + section);
+                            //$("#grid_" + section).load(location.href + "&random=" + Math.random()*99999 + " #grid_" + section,{noncache: new Date().getTime()},function(){});
+                            $("#grid_" + section).load(location.href + "&randval=" + Math.random() * 99999 + " #grid_" + section, function () {
+                                setTimeout($.unblockUI, 10);
+                            });
+
+                            //$("#grid_" + section).load(location.href + " #grid_888",{noncache: new Date().getTime()},function(){});
+                            //alert("Record updated.");
+
+                        }
+                        else {
+                            $('#grid_action').val("");
+                            window.location = "/dotnet/formprocessor/error.aspx/httperror";
+
+                        }
+
+                    },
+                    error: function (e) {
+                        $('#grid_action').val("");
+                        alert(e.responseText);
+                        window.location = "/dotnet/formprocessor/error.aspx/httperror";
+                    }
+
+                });
+
+                $('#grid_action').val("");
+
+            }
+        });
+
+        // delete
+        $(".delete").live("click", function () {
+            var str = $(this).attr("id").split("_");
+            var fieldcount = str[1];
+            var section = str[2];
+            var id = str[3];
+            var record_id = str[4];
+            var orientation = str[5];
+
+            var tablename = "#grid_" + section;
+
+            //Update the add_row link
+            var add_link = $('a[href$=#grid_' + section + ']:first');
+            var add_link_str = $('a[href$=#grid_' + section + ']:first').attr('id').split("_");
+            var new_id = Number(add_link_str[3]);
+            new_id--;
+            var add_id = "AddRow_" + fieldcount + "_" + section + "_" + new_id + "_" + orientation;
+            $(add_link).attr("id", add_id);
+
+            //alert("Delete record: ID: " + record_id);
+
+            //Pass to DeleteGridRecord using ajax GET from MVCGrid example
+            // Send the following:  section, fieldnames, fieldvalues
+            if (record_id != "") {
+                //alert("calling ajax");
+
+                $.ajax({
+                    type: "GET",
+                    contentType: "application/json; charset=utf-8",
+                    url: '@Url.Action("DeleteGridRow", "Form", new { area = "FormProcessor" })',
+                    data: { "section": section, "record_id": record_id },
+                    dataType: "json",
+                    beforeSend: function () { },
+                    success: function (data) {
+                        if (data.result == true) {
+                            alert("Record deleted");
+
+
+                            document.location.href = document.location.href.replace(/#/, "#grid_" + section);
+                            var grid_refresh = document.location;
+                            $(tablename).load(grid_refresh + " " + tablename);
+
+                        }
+                        else {
+                            window.location = "/dotnet/formprocessor/error.aspx/httperror";
+                        }
+
+                    },
+                    error: function () {
+                        window.location = "/dotnet/formprocessor/error.aspx/httperror";
+                    }
+
+                });
+
+            }
+        });
+</script>
+
+ 
+     <meta name="viewport" content="width=device-width" />
+     <link type="text/css" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+     <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+     <title>@form.form_title</title>
+    @MvcHtmlString.Create(form.header_xslt)
+    
+</head>
+
+        <body id="@form.form_id">
+            <h2 id="form_title" class="form_title">@form.form_title</h2>
+
+
+    @if (form.display_anchors)
+    {
+        @MvcHtmlString.Create(display_anchors)
+    }
+
+        @if (form.asterisks_in_required_questions)
+        {
+             <p id="required_symbol"><span class="required_symbol">* </span> indicates a required field.</p>
+        }
+  
+        @foreach (var wrapper in h.WrapperDataSet.Where(wrapper => wrapper.page_action.ToString().ToUpper() == ViewBag.action.ToString().ToUpper())) // Wrapper
+        {
+            <div class="directions" id="directions" name="directions">	
+                @MvcHtmlString.Create(wrapper.directions_xslt)
+            </div>
+        }
+          
+            <form method="post" class="fp_form" id="fp_form" name="fp_form"  enctype="multipart/form-data" id="@ViewBag.action.ToString()" action="@form_url">
+            
+            @foreach (var form_section in h.SectionsDataSet) // Section
+            {
+
+                if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "Section: " + form_section.section_id + " Start"); }
+
+
+//***** One-to-One Sections
+                if (form_section.one_to_many_relation_id.ToString() == "") // One to One Sections
+                {
+
+                    int? section_row = 0;
+                    int rowcount = 1;
+                                               
+                    <div class="sections">
+                    <table class="one_to_one_section">
+
+
+                    @if (form_section.section_header_xslt != null)
+                    {
+                        @MvcHtmlString.Create(form_section.section_header_xslt.Replace("[record_id]", ViewBag.record_id));
+                    }
+                    else if (form_section.section_title != null)
+                    {
+                        @MvcHtmlString.Create("<a name=" + form_section.section_title.ToString().Replace(" ", "") + "></a><h2 class='section_title'>" + form_section.section_title + "</h2>");
+                    }
+
+                    @foreach (var question in h.QuestionsDataSet.Where(question => question.section_id.ToString() == form_section.section_id.ToString())) // Question
+                    {
+
+                        if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "Question: " + question.question_id + " Start"); }
+
+                        string field_value = "";
+                        string required = "";
+
+                        if (ViewData[question.data_location] != null)
+                        {
+                            field_value = ViewData[question.data_location].ToString();
+                        }
+                        else if (form_action != "add")
+                        {
+                            // Get field value if it exists
+                            if (form_data.ContainsKey(question.data_location))
+                            {
+                                field_value = form_data[question.data_location].ToString();
+                            }
+                        }
+
+                        if (ViewBag.form_errors != null && form_errors.ContainsKey(question.data_location))
+                        {
+                            field_error = "<br/><font color='red'><b>Error: " + question.question_name + " " + form_errors[question.data_location] + "</b></font>";
+                        }
+                        else
+                        {
+                            field_error = "";
+                        }
+
+                        if (!question.nullable)
+                        {
+                            required = "<span class='required_symbol'>* </span>";
+                        }
+
+                        if ((question.question_row == null) || (question.question_row > 0 && section_row != question.question_row))
+                        {
+                            @MvcHtmlString.Create("<tr class=\"question_and_input\"><td class=\"question\">");
+                            section_row = question.question_row;
+                        }
+                        else
+                        {
+                            @MvcHtmlString.Create("<td class=\"question\">");
+                        }                           
+
+                              string question_help = "";
+                              if (question.help != "" && question.help != null)
+                              {
+                                  //question_help = "<span id='demo' class='opener' data-addoverlay='true' data-balloon = '" + question.help + "'><img src='/dotnet/areas/formprocessor/content/help.png' height='15' width='15'></span>";
+                                  question_help = "<div id=\"help_" + question.data_location.Replace(".", "_") + "\" style=\"display: none; padding: 10px;\"> " + question.help + " </div><div style=\"display: inline; padding=:5px;\" id=\"balloon_help2\" class=\"opener\" data-forceposition=\"up\" data-balloon=\"" + question.help + "\"  onmouseover=\"$(this).showBalloon(event,{balloon:$('#help_" + question.data_location.Replace(".", "_") + "')})\" onmouseout=\"$(this).hideBalloon()\" style=\"position:relative; margin: auto ; clear: both\"><img src='/dotnet/areas/formprocessor/content/help.png' height='15' width='15'></div>";
+                              }
+                              
+                              if (question.question != "" && question.question != null)
+                              {
+                                @MvcHtmlString.Create(@required)<span class="question_question">@MvcHtmlString.Create(@question.question)</span>@MvcHtmlString.Create(@question_help)
+                              }
+                              else
+                              {
+                                @MvcHtmlString.Create(@required)<span class="question_name">@MvcHtmlString.Create(@question.question_name)</span>@MvcHtmlString.Create(@question_help)  
+                              }
+
+                              // Is question vertical or horizontal??
+                              if ((question.question_orientation == "H"))
+                              {
+                            @MvcHtmlString.Create("</td><td>");
+                              }
+                              else
+                              {
+                            @MvcHtmlString.Create("<br/>");
+                              }
+
+                              switch (form_action)
+                              {
+                                  case "add":
+                                      {
+                                          // field_value should be input_default on add
+                                          if (question.input_default != "" && question.input_default != null)
+                                          {
+                                              field_value = question.input_default;
+                                          }
+                                          
+                                         @Functions.GenerateFPField(this, field_value, question.data_location, question, question.input_type, value_lists, ViewBag.record_id, ViewBag.form_id)<span class="question_trailer">@MvcHtmlString.Create(@question.question_trailer)</span><span class="field_error">@MvcHtmlString.Create(@field_error)</span>@MvcHtmlString.Create("</td>")
+                                          break;
+                                      }
+                                  case "edit":
+                                      {
+                                          @Functions.GenerateFPField(this, field_value, question.data_location, question, question.input_type, value_lists, ViewBag.record_id, ViewBag.form_id)<span class="question_trailer">@MvcHtmlString.Create(@question.question_trailer)</span><span class="field_error">@MvcHtmlString.Create(@field_error)</span>@MvcHtmlString.Create("</td>")
+                                          break;
+                                      }
+                                  case "view":
+                                      {
+                                      @Functions.GenerateFPField(this, field_value, question.data_location, question, "display", value_lists, ViewBag.record_id, ViewBag.form_id)<span class="question_trailer">@MvcHtmlString.Create(@question.question_trailer)</span><span class="field_error">@MvcHtmlString.Create(@field_error)</span>@MvcHtmlString.Create("</td>")
+                                          break;
+                                      }
+                              }
+
+                              if ((question.question_row == null) || (question.question_row > 0 && section_row != question.question_row))
+                              {
+                                    @MvcHtmlString.Create("</tr>");
+                                                                  section_row = question.question_row;
+                              }
+
+                              if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "Question: " + question.question_id + " End "); }
+
+                              rowcount++;
+
+                    }
+                    </table>
+                    </div>
+
+                    if (form_section.section_footer_xslt != null)
+                    {
+                            @MvcHtmlString.Create(form_section.section_footer_xslt);
+                    }
+
+                }
+// One-to-Many sections
+                else // One to Many Sections
+                {
+
+                    string section_HTML = "";
+                    int? section_row = 1;
+
+                    // Set default section orientation to "H"
+                    string section_orientation = (string)form_section.section_xslt_2nd_pass ?? "H";
+                    section_orientation = section_orientation.ToUpper();
+
+                    if (form_section.section_header_xslt != null)
+                    {
+                            @MvcHtmlString.Create(form_section.section_header_xslt);
+                    }
+                    else
+                    {
+                            @MvcHtmlString.Create("<a name=" + form_section.section_title.ToString().Replace(" ", "") + "></a><h2 class='section_title'>" + form_section.section_title + "</h2>");
+                    }
+
+                    var result = new List<dynamic>();
+                    int rowcount = 1;
+                    int fieldcount;
+
+                    // Get record_id value and insertparams
+                    string record_id_field = "";
+                    string primary_key_insert_values = "";
+                    string permissions_mask = "";
+                    string section_entity_name = "";
+
+                    // Get Permissions mask
+                    foreach (var relation in h.RelationsDataSet.Where(relation => relation.relation_id.ToString() == form_section.one_to_many_relation_id.ToString())) // Question
+                    {
+                        permissions_mask = relation.permissions_mask;
+                        section_entity_name = relation.entity_name;
+                    }
+
+                    // Only get record_id if it isn't an add
+                    foreach (var relation in h.RelationsDataSet.Where(relation => relation.relation_id.ToString() == form_section.one_to_many_relation_id.ToString())) // Question
+                    {
+
+                        if (form_action != "add")
+                        {
+                            // Make sure there are records
+                            if (form_data.ContainsKey(relation.table_name + "." + relation.record_id_field + "_1"))
+                            {
+
+                                record_id_field = relation.table_name + "." + relation.record_id_field;
+                                if (!relation.primary_key_insert_values.IsEmpty())
+                                {
+                                    primary_key_insert_values = relation.primary_key_insert_values.ToString();
+                                }
+
+                            }
+                            else if (relation.primary_key_insert_values != null && relation.primary_key_insert_values.ToString().Contains("["))
+                            {
+                                record_id_field = relation.table_name + "." + relation.record_id_field;
+                                primary_key_insert_values = relation.primary_key_insert_values.ToString();
+                                //primary_key_insert_values = ViewBag.record_id;
+                                primary_key_insert_values = primary_key_insert_values.Replace("'[record_id]'", ViewBag.record_id);
+                                primary_key_insert_values = primary_key_insert_values.Replace("'[calling_id]'", Session["calling_id"].ToString());
+                                primary_key_insert_values = primary_key_insert_values.Replace("'[calling_form]'", Session["calling_form"].ToString());
+                                primary_key_insert_values = primary_key_insert_values.Replace("[username]", Session["Username"].ToString());
+                            }
+
+
+                        }
+                        else if (relation.primary_key_insert_values != null && relation.primary_key_insert_values.ToString().Contains("[record_id]"))
+                        {
+                            record_id_field = relation.table_name + "." + relation.record_id_field;
+                            primary_key_insert_values = relation.primary_key_insert_values.Replace("'[record_id]'", ViewBag.record_id);
+                        }
+
+                    }
+
+                    insertparams.Add(form_section.section_id.ToString(), primary_key_insert_values);
+
+                    int editable_field_count = 0;
+                    var first_record = h.QuestionsDataSet.First(question => question.section_id.ToString() == form_section.section_id.ToString());
+                    string required = "";
+                    string record_id_value = "";
+
+                    while (form_data.ContainsKey(first_record.data_location + "_" + rowcount))
+                    {
+
+                        var obj = (IDictionary<string, object>)new ExpandoObject();
+                        fieldcount = 1;
+                        section_row = 1;
+
+                        if (record_id_field != "")
+                        {
+                            record_id_value = form_data[record_id_field + "_" + rowcount].ToString();
+                        }
+
+                        string row_label = form_section.section_id.ToString() + "_" + rowcount.ToString() + "_" + record_id_value.ToString() + "_" + section_orientation;
+
+                        section_HTML = "<table id = 'grid_" + form_section.section_id.ToString() + "_" + rowcount.ToString() + "' border='0' cellpadding='5'><tr>";
+
+                        foreach (var question in h.QuestionsDataSet.Where(question => question.section_id.ToString() == form_section.section_id.ToString())) // Question
+                        {
+
+                            // Get colspan if it exists
+                            string colspan = "1";
+                            if (question.question_colspan != null)
+                            {
+                                colspan = question.question_colspan.ToString();
+                            }
+
+                            //if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "Question: " + question.question_id + " Start"); }
+
+                            if (question.input_type != "display")
+                            {
+                                editable_field_count++;
+                            }
+
+                            string field_value = "";
+
+                            if (ViewData[question.data_location + "_" + rowcount.ToString()] != null)
+                            {
+                                field_value = ViewData[question.data_location + "_" + rowcount.ToString()].ToString();
+                            }
+                            else if (form_action != "add")
+                            {
+                                field_value = @form_data[@question.data_location + "_" + rowcount.ToString()].ToString();
+                            }
+
+                            if (ViewBag.form_errors != null && form_errors.ContainsKey(question.data_location))
+                            {
+                                field_error = "<br/><font color='red'><b>Error: " + question.question_name + " " + form_errors[question.data_location] + "</b></font>";
+                            }
+                            else
+                            {
+                                field_error = "";
+                            }
+
+                            if (!question.nullable)
+                            {
+                                required = "* ";
+                            }
+                            else
+                            {
+                                required = "";
+                            }
+
+
+                            // If section_orientation is Horizontal then show headers in first row and don't put it in a table
+                            if (section_orientation != "T")
+                            {
+                                obj.Add(@Html.Raw(required) + @question.question_name, @MvcHtmlString.Create("<span id='Editable_" + fieldcount + "_" + row_label + "' style='display:none'>" + @Functions.GenerateFPField(this, field_value, question.data_location + "_" + rowcount.ToString(), question, question.input_type, value_lists, record_id_value.ToString(), ViewBag.form_id) + "</span>" + "<span id='View_" + fieldcount + "_" + row_label + "'>" + @Functions.GenerateFPField(this, @form_data[@question.data_location + "_" + rowcount.ToString()].ToString(), question.question_name + "_" + rowcount.ToString(), question, "display", value_lists, record_id_value.ToString(), ViewBag.form_id) + "</span>"));
+                                //section_HTML = "<td>" + @Html.Raw(required) + @question.question_name + "<span id='Editable_" + fieldcount + "_" + row_label + "' style='display:none'>" + @Functions.GenerateFPField(this, field_value, question.data_location + "_" + rowcount.ToString(), question, question.input_type, value_lists) + "</span>" + "<span id='View_" + fieldcount + "_" + row_label + "'>" + @Functions.GenerateFPField(this, @form_data[@question.data_location + "_" + rowcount.ToString()].ToString(), question.question_name + "_" + rowcount.ToString(), question, "display", value_lists) + "</span></td></table>";
+                            }
+
+                            if (section_orientation == "T")
+                            {
+                                if (question.question_row > 0 && section_row != question.question_row)
+                                {
+                                    section_HTML = section_HTML + "</tr><tr>";
+                                    section_row = question.question_row;
+                                }
+
+                                section_HTML = section_HTML + "<td colspan='" + colspan + "'><b>" + Html.Raw(required) + question.question_name + "</b>:<br/> <span id='Editable_" + fieldcount + "_" + row_label + "' style='display:none'>" + Functions.GenerateFPField(this, field_value, question.data_location + "_" + rowcount.ToString(), question, question.input_type, value_lists, record_id_value, ViewBag.form_id) + "<span class='question_trailer'>" + MvcHtmlString.Create(@question.question_trailer) + "</span></span>" + "<span id='View_" + fieldcount + "_" + row_label + "'>" + Functions.GenerateFPField(this, form_data[question.data_location + "_" + rowcount.ToString()].ToString(), question.question_name + "_" + rowcount.ToString(), question, "display", value_lists, ViewBag.record_id, ViewBag.form_id) + "<span class='question_trailer'>" + MvcHtmlString.Create(@question.question_trailer) + "</span></span></td>";
+                            }
+
+                            fieldcount++;
+
+                            //if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "Question: " + question.question_id + " End "); }
+
+                        }
+
+                        // If section_orientation is NOT Horizontal finish table and then add to collection as a table
+                        if (section_orientation == "T")
+                        {
+                            section_HTML = section_HTML + "</tr></table>";
+
+                            obj.Add("Data", MvcHtmlString.Create(section_HTML));
+                        }
+
+                        // Don't show Action column if in view mode or there are no editable fields
+                        if (form_action != "view" && (editable_field_count > 0 || form_section.open_to_form != null))
+                        {
+                            string strActionColumn = "";
+
+                            // Build action column
+                            // Open to form instead of inline editing if open_to_form is not null
+                            if (form_section.open_to_form == null)
+                            {
+                                if (permissions_mask.ToString().Contains("update"))
+                                {
+                                    strActionColumn = strActionColumn + "<a href='#grid_" + form_section.section_id.ToString() + "' id='Edit_" + fieldcount + "_" + row_label + "' class='edit'>Edit</a><a href='#grid_" + form_section.section_id.ToString() + "' id='Update_" + fieldcount + "_" + row_label + "' style='display:none' class='update'>Update</a>&nbsp;&nbsp;&nbsp;<a href='#grid_" + form_section.section_id.ToString() + "' id='Cancel_" + fieldcount + "_" + row_label + "' style='display:none' class='cancel'>Cancel</a>";
+                                }
+                                if (permissions_mask.Contains("delete"))
+                                {
+                                    strActionColumn = strActionColumn + "&nbsp;&nbsp;&nbsp;<a href='#grid_" + form_section.section_id.ToString() + "' id='Delete_" + fieldcount + "_" + row_label + "' class='delete'>Delete</a>";
+                                }
+                            }
+                            else
+                            {
+
+                                string custom_URL = (string)form_section.open_to_form_url ?? "";
+
+                                // If there is a open_to_form_url then open using that
+                                if (custom_URL != "")
+                                {
+                                    custom_URL = custom_URL.Replace("[record_id]", record_id_value.ToString());
+                                    if (permissions_mask.Contains("view"))
+                                    {
+                                        strActionColumn = strActionColumn + "<a href='" + custom_URL + "&amp;" + ViewBag.Username + "&subform=true&callingform=" + ViewBag.form_id + "&callingid=" + ViewBag.record_id + "' id=" + form_section.section_id + " target='_New'>View</a>";
+                                    }
+                                    if (permissions_mask.Contains("update"))
+                                    {
+                                        strActionColumn = strActionColumn + "&nbsp;&nbsp;&nbsp;<a href='" + custom_URL + "&amp;" + ViewBag.Username + "&subform=true&callingform=" + ViewBag.form_id + "&callingid=" + ViewBag.record_id + "' id=" + form_section.section_id + " target='_New'>Edit</a>";
+                                    }
+                                }
+                                else
+                                {
+                                    if (permissions_mask.Contains("view"))
+                                    {
+                                        strActionColumn = strActionColumn + "<a href='../form.aspx/index?form_id=" + form_section.open_to_form + "&action=view&amp;record_id=" + record_id_value.ToString() + "&amp;" + ViewBag.Username + "&subform=true&callingform=" + ViewBag.form_id + "&callingid=" + ViewBag.record_id + "' id=" + form_section.section_id + " target='_New'>View</a>";
+                                    }
+                                    if (permissions_mask.Contains("update"))
+                                    {
+                                        strActionColumn = strActionColumn + "&nbsp;&nbsp;&nbsp;<a href='../form.aspx/index?form_id=" + form_section.open_to_form + "&action=edit&amp;record_id=" + record_id_value.ToString() + "&amp;" + ViewBag.Username + "&subform=true&callingform=" + ViewBag.form_id + "&callingid=" + ViewBag.record_id + "' id=" + form_section.section_id + " target='_New'>Edit</a>";
+                                    }
+                                }
+                            }
+
+                            // Don't add to collection if there are no actions
+                            if (strActionColumn != "")
+                            {
+                                obj.Add("  Action  ", @MvcHtmlString.Create("<table class='action_table' border='0' height='100%' ><tr><td class='action_table'>" + strActionColumn + "</td></tr></table>"));
+                            }
+
+                        }
+                        result.Add(obj);
+
+                        rowcount++;
+
+                    }
+
+                    // Pass in fieldcount to functions
+                    // Loop on fieldcount to set hide fields
+
+                    //Add an extra row for ADDING
+                    fieldcount = 1;
+                    section_HTML = "<span id='AddRowField_" + fieldcount + "_" + form_section.section_id.ToString() + "_" + rowcount.ToString() + "_" + section_orientation + "' style='display:none'><table id = 'grid_" + form_section.section_id.ToString() + "_" + rowcount.ToString() + "' border='0' cellpadding='5'><tr>";
+
+                    section_row = 1;
+
+                    var add_row = (IDictionary<string, object>)new ExpandoObject();
+
+                    foreach (var question in h.QuestionsDataSet.Where(question => question.section_id.ToString() == form_section.section_id.ToString())) // Question
+                    {
+                        string field_value = "";
+                        // field_value should be input_default on add
+                        if (question.input_default != "" && question.input_default != null)
+                        {
+                            field_value = question.input_default;
+                        }
+
+                        //if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "AddRow: Question: " + question.question_id + " Start "); }
+
+                        if (!question.nullable)
+                        {
+                            required = "* ";
+                        }
+                        else
+                        {
+                            required = "";
+                        }
+
+
+                        // If section_orientation is Horizontal then show headers in first row and don't put it in a table
+                        if (section_orientation == "H")
+                        {
+                            add_row.Add(@Html.Raw(required) + @question.question_name, @MvcHtmlString.Create("<span id='AddRowField_" + fieldcount + "_" + form_section.section_id.ToString() + "_" + rowcount.ToString() + "_" + section_orientation + "' style='display:none'>" + @Functions.GenerateFPField(this, field_value, question.data_location + "_" + rowcount, question, question.input_type, value_lists, ViewBag.record_id, ViewBag.form_id) + "</span>"));
+                        }
+                        else
+                        {
+                            if (question.question_row > 0 && section_row != question.question_row)
+                            {
+                                section_HTML = section_HTML + "</tr><tr>";
+                                section_row = question.question_row;
+                            }
+
+                            section_HTML = section_HTML + "<td>" + Html.Raw(required) + question.question_name + ": " + Functions.GenerateFPField(this, field_value, question.data_location + "_" + rowcount, question, question.input_type, value_lists, ViewBag.record_id, ViewBag.form_id) + "</td>";
+                        }
+
+                        fieldcount++;
+
+                        //if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "AddRow: Question: " + question.question_id + " End "); }
+
+                    }
+
+                    // If section_orientation is NOT Horizontal then finish the table and add it to the grid as a table
+                    if (section_orientation != "H")
+                    {
+                        section_HTML = section_HTML + "</tr></table></span>";
+                        add_row.Add("Data", MvcHtmlString.Create(section_HTML));
+                    }
+
+                    add_row.Add("  Action  ", @MvcHtmlString.Create("<table class='action_table' border='0' height='100%' ><tr><td class='action_table'><span id='AddRowAction_" + fieldcount + "_" + form_section.section_id.ToString() + "_" + rowcount.ToString() + "_" + section_orientation + "' style='display:none'><a href='#grid_" + form_section.section_id.ToString() + "' id='Save_" + fieldcount + "_" + form_section.section_id.ToString() + "_" + rowcount.ToString() + "_-1_" + section_orientation + "' class='save'  data-insertparams=\"" + insertparams[form_section.section_id.ToString()] + "\">Save</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href='#grid_" + form_section.section_id.ToString() + "' id='iCancel_" + fieldcount + "_" + form_section.section_id.ToString() + "_" + rowcount.ToString() + "_" + section_orientation + "'  class='icancel'>Cancel</a></span></td></tr></table>"));
+                    result.Add(add_row);
+
+
+                    // Don't show Add if in view mode or if there are no editable fields
+                    if (form_action != "view" && permissions_mask.Contains("add"))
+                    {
+
+                        string add_text = "";
+                        if (section_entity_name.Substring(0).IndexOfAny(new char[] { 'a', 'A', 'e', 'E', 'i', 'I', 'o', 'O', 'u', 'U' }) == 0)
+                        {
+                            add_text = "Click here to add a " + section_entity_name.ToString();
+                        }
+                        else
+                        {
+                            add_text = "Click here to add an " + section_entity_name.ToString();
+                        }
+
+                        // Open to subform instead of inline editing if open_to_form is not null
+                        if (form_section.open_to_form == null)
+                        {                        
+                            @MvcHtmlString.Create("<a name=grid_" + form_section.section_id.ToString() + "></a><a href='#grid_" + form_section.section_id.ToString() + "' class='add' id='AddRow_" + fieldcount + "_" + form_section.section_id.ToString() + "_" + rowcount.ToString() + "_" + section_orientation + "'><b>" + add_text + "</b></a>");
+                        }
+                        else
+                        {
+                            @MvcHtmlString.Create("<a name=grid_" + form_section.section_id.ToString() + "></a><a href='../form.aspx/index?form_id=" + form_section.open_to_form + "&action=add&amp;record_id=" + ViewBag.session_id.ToString() + "&amp;" + ViewBag.Username + "&subform=true&callingform=" + ViewBag.form_id + "&callingid=" + ViewBag.record_id + "' id=" + form_section.section_id.ToString() + " target='_New'><b>" + add_text + "</b></a>");
+                        }
+
+                    }
+
+                    if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "Grid: " + form_section.section_id.ToString() + " Start"); }
+
+/*
+                    var grid = new WebGrid(result, rowsPerPage: 250, canPage: false, canSort: false, ajaxUpdateContainerId: "grid_" + form_section.section_id.ToString());
+
+                    int firstRecord = (grid.PageIndex * grid.RowsPerPage) + 1;
+                    int lastRecord = (grid.PageIndex * grid.RowsPerPage) + grid.Rows.Count();
+
+                    //@MvcHtmlString.Create(@grid.GetHtml(
+                    //@(new HtmlString(@grid.GetHtml(
+                    @Html.Raw(@grid.GetHtml(
+                        htmlAttributes: new { id = "grid_" + form_section.section_id.ToString() },
+                        mode: WebGridPagerModes.All,
+                        tableStyle: "grid",
+                        headerStyle: "grid-header",
+                        footerStyle: "grid-footer",
+                        alternatingRowStyle: "grid-alternating-row",
+                        selectedRowStyle: "grid-selected-row",
+                        rowStyle: "grid-row-style",
+                        firstText: "First", lastText: "Last"
+                    ).ToString().Replace("<tfoot>\r\n        <tr  class=\"grid-footer\">\r\n            <td col", "<tfoot><tr class='grid-footer'><td align='right' col").ToString().Replace("<tfoot><tr class='grid-footer'>", "<tfoot><tr class='grid-footer'><td align='left' class='footstuff'>Records " + firstRecord + " to " + lastRecord + " of " + grid.TotalRowCount + "          "))
+                    
+*/
+
+                    @MvcHtmlString.Create("<table class='grid' id='grid_" + form_section.section_id.ToString() + "'>");
+
+                    int rowcounter = 0;
+                    
+                    foreach (IDictionary<string, object> row in result)
+                    {
+                        // Create table headers
+                        if (rowcounter == 0)
+                        {
+                            @MvcHtmlString.Create("<thead><tr class='grid-header'>");
+
+                            foreach (var kv in row)
+                            {
+                                    @MvcHtmlString.Create("<th>");
+                                    @MvcHtmlString.Create(kv.Key.ToString());
+                                    @MvcHtmlString.Create("</th>");                           
+                            }   
+
+                            @MvcHtmlString.Create("</tr></thead>");
+                        }
+                                                                         
+
+                        if (rowcounter % 2 == 0)
+                        {
+                            @MvcHtmlString.Create("<tr class='grid-row-style'>");
+                        }
+                        else
+                        {
+                            @MvcHtmlString.Create("<tr class='grid-alternating-row'>");
+                        }
+
+                        foreach (var kv in row)
+                        {
+                            
+                            Console.WriteLine("{0}: {1}", kv.Key, kv.Value);
+                            if (kv.Key.ToString().Length > 0)
+                            {
+                                @MvcHtmlString.Create("<td>");
+                                @MvcHtmlString.Create(kv.Value.ToString());
+                                @MvcHtmlString.Create("</td>");
+                            }
+                        }
+
+                        rowcounter++;
+
+                        @MvcHtmlString.Create("</tr>");
+                    }
+ 
+                    @MvcHtmlString.Create("</table>");
+
+                    
+
+                   
+                if (form_section.section_footer_xslt != null)
+                    {
+                        @MvcHtmlString.Create(form_section.section_footer_xslt);
+                    }
+
+                    if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "Grid: " + form_section.section_id.ToString() + " End "); }
+
+                }
+
+                if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "Section: " + form_section.section_id + " End "); }
+
+                <br /><br />
+
+                if (form.submit_button_text == null)
+                {
+                    submit_button_text = "Submit";
+                }
+                else
+                {
+                    submit_button_text = form.submit_button_text.ToString();
+                }
+
+
+                // After everything is done fire off the onchange() events
+                // Loop on questions with value_drilldown_question_id not null
+                foreach (var question in h.QuestionsDataSet.Where(question => question.value_drilldown_question_id != null)) // Question
+                {
+                    // call onchange (data_location, question_id, value_drilldown_question_id
+                    string question_list = question.value_drilldown_question_id.ToString().Replace(",", ";");
+
+                        <text>
+                            <script type="text/javascript">OnChange("@question.data_location.ToString()", "@question.question_id.ToString()", "@question_list");</script>
+                        </text>
+
+                }
+
+
+            }
+                <input type="hidden" id="session_id" name="session_id" value="@ViewBag.session_id"/>
+                <input type="hidden" id="Action" name="Action" value="@ViewBag.action"/>
+                <input type="hidden" id="Username" name="Username" value="@ViewBag.Username"/>   
+                <input type="hidden" id="Form_id" name="Form_id" value="@ViewBag.form_id"/>   
+                <input type="hidden" id="Record_id" name="Record_id" value="@ViewBag.record_id"/>   
+                <input type="hidden" id="grid_action" name="grid_action" value=""/>
+                <input type="hidden" id="subform" name="subform" value="@ViewBag.subform"/>
+                <input type="hidden" id="calling_form" name="calling_form" value="@ViewBag.callingform"/>
+                <input type="hidden" id="calling_id" name="calling_id" value="@ViewBag.callingid"/>
+                <input type="hidden" id="param1" name="param1" value="@ViewBag.param1"/>
+                <input type="hidden" id="param2" name="param2" value="@ViewBag.param2"/>
+
+                <input name="submit" accesskey="s" type="submit" value="@submit_button_text.ToString()"></input>
+
+                <input type="button" id="cancel" name="cancel" value="Cancel (Alt-C)" onClick="@Url.Content(index_url)"></input>
+
+                @MvcHtmlString.Create(form.footer_xslt)
+
+<div id="open_to_form_popup" style="display:none; cursor: default"> 
+        <br /><input type="button" id="continue_after_open_to_form" value="Click here to continue" /><br /><br />
+</div> 
+                  
+<script src="@Url.Content("~/Scripts/jquery.blockUI.js")" type="text/javascript"></script> 
+
+            </form>
+
+
+        </body>
+    
+        }
+
+        if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "End Form Load"); }
+
+    }
+
+    
+}
+
+                               
+</html>

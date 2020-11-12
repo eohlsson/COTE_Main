@@ -1,0 +1,21 @@
+﻿@{
+    ViewBag.Title = "Confirm Your Account";
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+}
+<div class="row page-content portal-content">
+    <div class="small-12 column">   
+        <br /><br /><br /><br />
+                        <b><font color="red" size=-1 face=arial,helvetica>
+                                    @if (@ViewBag.ErrorMessage != null)
+                                    {
+                                        @ViewBag.ErrorMessage
+                                    }
+                                    else
+                                    {
+                                        <h2>Your information has been sent to your email.<br /><br />  
+                                        If you do not receive your email within 2 hours please contact <a href="mailto:cote-techsupport@illinois.edu">cote-techsupport@illinois.edu</a></h2>
+                                    }
+                        </font></b>
+        <br /><br /><br /><br />
+    </div>
+</div>

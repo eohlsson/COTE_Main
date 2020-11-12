@@ -1,0 +1,167 @@
+@model IEnumerable<CoTE.Areas.Portals.Models.CoopChecklistData>
+
+@{
+    bool authorized = false;
+    bool beta = false;
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+    string left_menu = "/dotnet/areas/webpages/content/js/cc_left_menu.js";
+    string breadcrumb = "<nav class=\"site-breadcrumbs\"><ul>";
+    breadcrumb += " <li><a href=\"#\">Home</a> /</li>";
+    breadcrumb += " <li><a href=\"#\">Cooperating Personnel</a> /</li>";
+    breadcrumb += " <li><a href=\"#\">Cooperating Personnel Portal</a> /</li>";
+    breadcrumb += "</ul></nav>";
+}
+
+<!-- Hide menu since we are logged in -->
+<style>
+    .main-navigation {
+        display: none;
+    }
+</style>
+
+<div class="row page-content portal-content">
+    <div class="small-12 column">   
+
+<a href="/dotnet/account.aspx/logout"><FONT COLOR="RED"><B>LOGOUT</B></FONT> <i class="fa fa-sign-out" aria-hidden="true"></i></a>
+
+@MvcHtmlString.Create(@breadcrumb)
+
+
+<!--- Check if authorized --->
+@foreach (CoTE.Areas.Portals.Models.CoopChecklistData h in ViewData.Model)
+{
+    foreach (var authorization in h.AuthorizedDataSet)
+    {
+        if (authorization.user_name.Length > 0)
+        {
+            authorized = true;
+        }
+        beta = authorization.beta;
+    }
+}
+
+@if (authorized == true)
+{
+
+<!--
+@if (beta == false)
+{
+        <font color="red"><b>Click <a href="/dotnet/portals/coopportal.aspx">here</a> to return to the old Cooperating Personnel Portal start page.</b></font><br /><br />
+
+        <font color="red"><b>Click <a href="/dotnet/portals/coopportal.aspx/beta_set">here</a> to make this your new Cooperating Personnel Portal starting page.</b></font><br /><br />
+}
+else
+{
+          <font color="red"><b>Click <a href="/dotnet/portals/cooptportal.aspx/beta_set">here</a> to make reset your start page to the old Cooperating Personnel Portal starting page.</b></font><br /><br />    
+}
+
+<font color="red"><b>Click <a href="/dotnet/account.aspx/logout">here</a> to LOGOUT.</b></font><br /><br />
+-->
+
+foreach (CoTE.Areas.Portals.Models.CoopChecklistData h in ViewData.Model)
+{
+    foreach (var header in h.ChecklistHeaderDataSet)
+    {
+        @MvcHtmlString.Create(@header.header)<br /><br />                  
+    }
+}
+
+<!-- End Header -->
+
+<!-- Profile -->
+
+foreach (CoTE.Areas.Portals.Models.CoopChecklistData h in ViewData.Model)
+{
+    foreach (var profile in h.ChecklistProfileDataSet)
+    {
+ 
+@:       <div class="section-border">
+@:        <div class="row medium-unstack">
+@:            <div class="column cs-input-group">
+@:                    Name:<br />
+@:                    @profile.full_name
+@:            </div>                    
+@:            <div class="column cs-input-group">
+@:                    Email:<br />
+@:                   @profile.email
+@:            </div>
+@:            <div class="column cs-input-group">
+@:                    UIN:<br />
+@:                    @profile.uin
+@:            </div>
+@:        </div>
+@:    </div>
+@:    <br />
+    }
+}
+
+<!-- End Profile -->
+
+
+<!-- Checklist section -->
+
+foreach (CoTE.Areas.Portals.Models.CoopChecklistData h in ViewData.Model)
+{
+
+    foreach (var item in h.ChecklistSectionDataSet)
+    {
+        if (@item.dataset == "section")
+        {
+            <h4>@MvcHtmlString.Create(@item.section_name)</h4>
+        }
+
+        if (@item.dataset == "link")
+        {
+                      <blockquote style="margin:0px;padding-left:58px;padding-bottom:10px;">@MvcHtmlString.Create(@item.section_name)</blockquote>
+        }
+        
+        if (@item.dataset == "requirement")
+        {
+
+            string checkbox;
+            string text_color;
+            string message_text;
+            
+            if (@item.met_unmet == "1") 
+            {
+                text_color = "green";
+                checkbox = "/dotnet/areas/portals/content/checkbox_checked.png";
+                message_text = item.met_text;
+            }
+            else
+            {
+                text_color = "red";
+                checkbox = "/dotnet/areas/portals/content/checkbox_unchecked.png";
+                message_text = item.unmet_text;
+            }
+    
+            if (@item.required == "0")
+            {
+                text_color = "orange";
+            }
+
+            for (int x = 0; x < Convert.ToInt32(@item.level); x++)
+            {
+                <text>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</text>
+            }
+            
+            <img src='@checkbox' height='12' width='12'><text>&nbsp;&nbsp;</text>@MvcHtmlString.Create(@item.section_name)<text>&nbsp;(</text><font color="@text_color">@MvcHtmlString.Create(@message_text)</font><text>)</text><br /><br />
+           
+        }
+    }
+}
+
+<!-- End Checklist -->
+
+}
+else
+{
+    @Html.Partial("AccessDenied")
+}
+            </div>
+        </div>
+	</body>
+
+</html>
+
+

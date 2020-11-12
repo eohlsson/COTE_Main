@@ -1,0 +1,361 @@
+﻿@* http://localhost:25903/dotnet/webpages/webpage.aspx/dragndrop *@
+@*      *@
+
+
+@using System.Data.Entity;
+@using System.Web.Helpers;
+@using System.Data;
+@using System.Data.SqlClient;
+@using System.Dynamic;
+@using System.Configuration;
+@using System.Collections;
+@using Newtonsoft.Json;
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title>CoTE Year 1 Survey</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="googlebot" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+  <script src="/dotnet/Scripts/jquery-ui-1.11.4.js"></script>
+    <script src="/dotnet/Scripts/jquery-1.7.1.min.js" type="text/javascript"></script>
+
+    <link rel="stylesheet" type="text/css" href="/css/normalize.css">
+    <script type="text/javascript" src="/dotnet/scripts/jquery-ui-1.8.9.js"></script>
+    
+   <script type="text/javascript">
+
+       $(document).ready(function () {
+
+           $("#save").on("click", function () {
+               //alert("In");
+               var field_count;
+               var fieldnames;
+               var fieldvalues;
+               var insertparams;
+
+               fieldnames = "";
+               fieldvalues = "";
+               insertparams = "";
+
+               field_count = 1;
+
+               if ($("#program option:selected").val() != "") {
+                   fieldnames = fieldnames + ",licensure_program";
+                   fieldvalues = fieldvalues + ",'" + $("#program option:selected").val() + "'";
+               }
+
+               if ($('input[name=subject_area]:checked').val() != "") {
+                   fieldnames = fieldnames + ",subject_area";
+                   fieldvalues = fieldvalues + ",'" + $('input[name=subject_area]:checked').val() + "'";
+               }
+
+               if ($("#subject_area_comments").val() != "") {
+                   fieldnames = fieldnames + ",subject_area_comments";
+                   fieldvalues = fieldvalues + ",'" + $("#subject_area_comments").val() + "'";
+               }
+
+               if ($("#remain_teaching option:selected").val() != "") {
+                   fieldnames = fieldnames + ",remain_teaching";
+                   fieldvalues = fieldvalues + ",'" + $("#remain_teaching option:selected").val() + "'";
+               }
+
+               ko.utils.arrayForEach(viewModel.IncreaseItems(), function (single_item) {
+                   var standard = single_item;
+                   //alert("Increase:" + standard.item);
+                   //alert(field_count);
+                   if (field_count < 3) {
+                       fieldnames = fieldnames + ",expand_" + field_count.toString();
+                       fieldvalues += ",'" + standard.item + "'";
+                   }
+                   field_count++;
+               });
+
+               if (field_count > 3) {
+                   alert("More than 3 items were chosen for 'Expand'.  Only the first 3 items will be saved")
+               }
+
+               field_count = 1;
+
+               ko.utils.arrayForEach(viewModel.LeaveItems(), function (single_item) {
+                   var standard = single_item;
+                   //alert("Leave As Is:" + standard.item);
+                   if (field_count < 12) {
+                       fieldnames += ",maintain_" + field_count;
+                       fieldvalues += ",'" + standard.item + "'";
+                   }
+                   field_count++;
+               });
+
+
+               //if (field_count > 5) {
+               //    alert("More than 5 items were chosen for 'Leave as Is'.  Only the first 5 items will be saved")
+               //}
+
+               field_count = 1;
+
+               ko.utils.arrayForEach(viewModel.ReduceItems(), function (single_item) {
+                   var standard = single_item;
+                   //alert("Reduce:" + standard.item);
+                   if (field_count < 12) {
+                       fieldnames += ",reduce_" + field_count;
+                       fieldvalues += ",'" + standard.item + "'";
+                   }
+                   field_count++;
+               });
+
+               //if (field_count > 5) {
+               //    alert("More than 5 items were chosen for 'Reduce'.  Only the first 5 items will be saved")
+               //}
+
+               if ($("#additional_comments").val() != "") {
+                   fieldnames = fieldnames + ",additional_comments";
+                   fieldvalues = fieldvalues + ",'" + $("#additional_comments").val() + "'";
+               }
+
+               fieldnames = fieldnames + ",cte_stu_id";
+               fieldvalues = fieldvalues + ",'" + $("#survey_id").val() + "'";
+
+               fieldnames = fieldnames.substring(1);
+               fieldvalues = fieldvalues.substring(1);
+
+               //window.alert("Field Names:" + fieldnames);
+               //window.alert("Field Values:" + fieldvalues);
+
+               //window.alert("Pre ajax");
+
+               jQuery.ajax({
+                   type: "GET",
+                   contentType: "application/json; charset=utf-8",
+                   url: '@Url.Action("DragNDropSave", "WebPage")',
+                   data: { "fieldnames": fieldnames, "fieldvalues": fieldvalues, "insertparams": insertparams },
+                   dataType: "json",
+                   beforeSend: function () { },
+                   success: function (data) {
+                       //window.alert("Success");
+                       window.location.href = "http://www.cote.illinois.edu/year1/thanks.html";
+                       },
+                   error: function (request, status, error) {
+                       alert(request.responseText);
+                       window.alert("JSON error");
+                       window.location = "/dotnet/formprocessor/error.aspx/httperror";
+                   }
+               });
+
+               //window.alert("JSON Success");
+
+               //alert("Out");
+
+           });
+       });
+   </script>
+    <link rel="stylesheet" type="text/css" href="/css/result-light.css">
+
+      <script type="text/javascript" src="/dotnet/scripts/jquery.tmpl.js"></script>
+      <script type="text/javascript" src="/dotnet/scripts/knockout-2.2.1.debug.js"></script>
+
+  <style type="text/css">
+    body { font-family: arial; font-size: 14px;}
+h2 { font-weight: bold; font-size: 16px;}
+div {  padding: 2px; margin: 1px; border: black 1px solid; display:flexbox;}
+.topper {  width: 700px; min-height: 30px;}
+.question { border: hidden; }
+.save { border: hidden; position: static; float: left; }
+input[type=button] { font-size: 24px; border-radius: 8px; background-color: #AAA; }
+p, a { font-size: .2em; }
+ul { padding-bottom: 10px; }
+.container {  width: 325px; min-height: 30px; background-color: #AAA;}
+.high { background-color: #357CA8; }
+.item { background-color: #DDD; cursor: move; height: 30px;}
+.item div { width: 290px; border: hidden; height: 20px; font-size: 10px;}
+.main { float: left; display: inline-block; cursor: move; }
+#results { margin-left: 175px; width: 300px; }
+#left { width: 335px; float:left;}
+#right { width: 335px; float:right;}
+
+
+
+  </style>
+  
+</head>
+<body>
+<h1>Council on Teacher Education</h1>
+<h4>Year 1 Follow-up Survey</h4>
+<form action="dragndrop" method="post">
+<div class="topper">
+    <div class='question'>1.	Select the licensure program you completed:<br/>
+        <select name='program' id='program' tabindex='1'>
+	        <option value='' selected='selected'>-- Select a program --</option>
+	        <option value="Agricultural Education">Agricultural Education</option>
+	        <option value="Art Education">Art Education</option>
+	        <option value="Early Childhood Education">Early Childhood Education</option>
+	        <option value="Elementary Education">Elementary Education</option>
+	        <option value="Foreign Language">Foreign Language</option>
+	        <option value="Learning & Behavior Specialist I">Learning & Behavior Specialist I</option>
+            <option value="Learning & Behavior Specialist II">Learning & Behavior Specialist II</option>
+	        <option value="Middle Grades">Middle Grades</option>
+	        <option value="Music Education">Music Education</option>
+	        <option value="Physical Education">Physical Education</option>
+	        <option value="School Librarian">School Librarian</option>
+	        <option value="Secondary – English">Secondary – English</option>
+	        <option value="Secondary – Math">Secondary – Math</option>
+	        <option value="Secondary - Social Studies">Secondary - Social Studies</option>
+	        <option value="Secondary – Science">Secondary – Science</option>
+            <option value="Speech/Language Pathologist">Speech/Language Pathologist</option>
+       </select>
+    </div>
+
+   <div class="question">2.	Are you currently employed as a teacher in the subject area of the program you completed?
+         <input type="radio" name="subject_area" value="yes">Yes
+         &nbsp;&nbsp;<input type="radio" name="subject_area" id="subject_area" value="no">No
+       <br />
+       If no, please describe your current employment situation.<br />
+         <textarea rows = "5" cols = "50" id="subject_area_comments" name = "subject_area_comments">
+         </textarea><br /><br />
+   </div>
+   <div class="question">3.	How long do you plan to remain in teaching/education?</div>
+     <select id="remain_teaching" name="remain_teaching">
+    <option value="">--Select an answer--</option>
+    <option value="As long as I am able">As long as I am able</option>
+    <option value="Until I am eligible for retirement benefits">Until I am eligible for retirement benefits</option>
+    <option value="Until a specific life event occurs (e.g., parenthood, marriage)">Until a specific life event occurs (e.g., parenthood, marriage)</option>
+    <option value="Until a more desirable non-teaching job opportunity comes along">Until a more desirable non-teaching job opportunity comes along</option>
+    <option value="Definitely plan to leave as soon as possible">Definitely plan to leave as soon as possible</option>
+    <option value="Undecided at this time">Undecided at this time</option>
+  </select>
+   <br /><br />
+   <div class="question">4.	If you could redesign your teacher preparation program, how much would you want to change the amount of time and emphasis given to:</div>
+
+<div class="main">
+   <div id="left">
+   <h2>Items</h2>
+      <div class="container high" data-bind="template: { name: 'taskTmpl', foreach: Items, templateOptions: { parentList: Items } }, sortableList: Items"></div>
+   </div>
+    
+   <div id="left">
+      <h2>Expand (Limit 3)</h2>
+      <div class="container " data-bind="template: { name: 'taskTmpl', foreach: IncreaseItems, templateOptions: { parentList: IncreaseItems } }, sortableList: IncreaseItems"></div>
+
+      <h2>Leave As Is</h2>
+      <div class="container" data-bind="template: { name: 'taskTmpl', foreach: LeaveItems, templateOptions: { parentList: LeaveItems } }, sortableList: LeaveItems"></div>
+
+      <h2>Reduce</h2>
+      <div class="container" data-bind="template: { name: 'taskTmpl', foreach: ReduceItems, templateOptions: { parentList: ReduceItems } }, sortableList: ReduceItems"></div>
+      <br /><br />
+    </div>
+
+</div>
+
+<div class="question"><br /><br />Additional Comments<br />
+    <textarea rows = "5" cols = "50" id="additional_comments" name = "additional_comments">
+    </textarea><br /><br />
+</div>
+<input type="button" id="save" value="Save and Submit" />
+</div>
+<script id="resultTmpl" type="text/html">
+    <b data-bind="text: item"></b>
+</script>
+    
+<script id="taskTmpl" type="text/html">
+    <div class="item" data-bind="sortableItem: { item: $data, parentList: $item.parentList }" >
+        <div class="inner-item" data-bind="text: item, visible: $data !== viewModel.selectedTask()"></div>
+        <input data-bind="value: item, visibleAndSelect: $data === viewModel.selectedTask(), event: { blur: function () { viewModel.selectTask(''); } }" />
+    </div>
+</script>
+
+  <script type="text/javascript">
+
+      var viewModel = {
+          Items: ko.observableArray([
+            { item: "Content knowledge as needed for lesson planning" },
+            { item: "Planning standards-aligned lessons with clear purpose"},
+            { item: "Planning instruction appropriate for students with varied skill and ability levels" },
+            { item: "Creating a classroom environment that is both challenging and supportive" },
+            { item: "Developing efficient classroom routines for non-instructional tasks e.g., distributing materials, managing transitions"},
+            { item: "Establishing and enforcing standards of conduct in small and large group situations"},
+            { item: "Creating intellectually engaging learning tasks"},
+            { item: "Creating and using summative assessments"},
+            { item: "Using formative assessment data to make day-to-day decisions about instruction"},
+            { item: "Collaborating with colleagues in making team and department decisions"},
+            { item: "Identifying and addressing my professional development needs"}
+            ]),
+          IncreaseItems: ko.observableArray(),
+          LeaveItems: ko.observableArray(),
+          ReduceItems: ko.observableArray(),
+          selectedTask: ko.observable(),
+      };
+
+      //connect items with observableArrays
+      ko.bindingHandlers.sortableList = {
+          init: function (element, valueAccessor, allBindingsAccessor, context) {
+              $(element).data("sortList", valueAccessor()); //attach meta-data
+              $(element).sortable({
+                  update: function (event, ui) {
+                      var item = ui.item.data("sortItem");
+                      if (item) {
+                          //identify parents
+                          var originalParent = ui.item.data("parentList");
+                          var newParent = ui.item.parent().data("sortList");
+                          //figure out its new position
+                          var position = ko.utils.arrayIndexOf(ui.item.parent().children(), ui.item[0]);
+                          if (position >= 0) {
+                              originalParent.remove(item);
+                              newParent.splice(position, 0, item);
+                          }
+
+                          ui.item.remove();
+                      }
+                  },
+                  connectWith: '.container'
+              });
+          }
+      };
+
+      //attach meta-data
+      ko.bindingHandlers.sortableItem = {
+          init: function (element, valueAccessor) {
+              var options = valueAccessor();
+              $(element).data("sortItem", options.item);
+              $(element).data("parentList", options.parentList);
+          }
+      };
+
+      //control visibility, give element focus, and select the contents (in order)
+      ko.bindingHandlers.visibleAndSelect = {
+          update: function (element, valueAccessor) {
+              ko.bindingHandlers.visible.update(element, valueAccessor);
+              if (valueAccessor()) {
+                  setTimeout(function () {
+                      $(element).focus().select();
+                  }, 0); //new tasks are not in DOM yet
+              }
+          }
+
+      }
+
+      ko.applyBindings(viewModel);
+
+
+</script>
+
+  <script>
+      // tell the embed parent frame the height of the content
+      if (window.parent && window.parent.parent) {
+          window.parent.parent.postMessage(["resultsFrame", {
+              height: document.body.getBoundingClientRect().height,
+              slug: "f1yxr8u4"
+          }], "*")
+      }
+  </script>
+
+  <input type="hidden" id="survey_id" name="survey_id" value="@ViewBag.survey_id" />
+
+</form>
+</body>
+</html>

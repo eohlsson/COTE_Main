@@ -1,0 +1,32 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+<BODY TEXT="#666666" LINK="#31326B" VLINK="#FF6600" LEFTMARGIN="0" TOPMARGIN="0" MARGINWIDTH=0 MARGINHEIGHT=0">
+
+</head>
+<body>
+    <center>
+		        @if (ViewBag.Answer != "No")
+                {
+                    <form method="post" action="certification_application" id="certification_application" style="margin-bottom: 0">
+                            <br/><br/><h3>Are you currently registered for or have you previously done your student teaching or internship?</h3>
+		                    <input type="radio" name="answer" value="Yes"> Yes
+		                    <br/><br/><input type="radio" name="answer" value="No"> No
+		                    <br/><br/>
+		                    <input type="submit" name="btnG" value="Submit" src="../images/go.gif" ><br/><br/>
+                      </form>        
+                }
+                else
+                {
+                    <h3>Sorry, you must be registered for student teaching or previously done your student teaching in order to apply for certification. <br/><br/>Please click <a href="https://cte-s.education.illinois.edu/studentportal">here</a> to return to the Student Portal.</h3>
+                }
+              
+    </center>
+</body>
+</html>

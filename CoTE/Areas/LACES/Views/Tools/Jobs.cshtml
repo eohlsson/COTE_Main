@@ -1,0 +1,43 @@
+﻿@{
+    Layout = "~/Areas/LACES/Views/Tools/_Layout.cshtml";
+   
+    string message = "";
+    message = ViewBag.message.ToString();
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+    string left_menu = "/dotnet/areas/webpages/content/js/cc_left_menu.js";
+    string breadcrumb = "<nav class=\"site-breadcrumbs\"><ul>";
+    breadcrumb += " <li><a href=\"#\">Home</a> /</li>";
+    breadcrumb += " <li><a href=\"/dotnet/portals/programportal.aspx\">Program Staff Portal</a> /</li>";
+    breadcrumb += " <li><a href=\"/dotnet/laces/laces.aspx\">LACES</a> /</li>";
+    breadcrumb += "</ul></nav>";
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>jobs</title>
+</head>
+<body>
+ <div class="row page-content portal-content">
+    <div class="small-12 column">   
+
+<a href="/dotnet/account.aspx/logout"><FONT COLOR="RED"><B>LOGOUT</B></FONT> <i class="fa fa-sign-out" aria-hidden="true"></i></a>
+
+@MvcHtmlString.Create(@breadcrumb)
+    <div>
+        <br /><br />
+        Job has been completed.<br /><br />
+
+        @MvcHtmlString.Create(@message)<br /><br />
+
+        Click <a href="/dotnet/formprocessor/index.aspx/index?form_id=360&index_id=503">here</a> to return to the Jobs menu
+
+            </div>
+          </div>
+        </div>
+    
+    </div>
+</body>
+</html>

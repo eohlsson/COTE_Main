@@ -1,0 +1,15 @@
+body { font-family: arial; }
+h2 { font-weight: bold; }
+div {  padding: 5px; margin: 5px; border: black 1px solid; }
+p, a { font-size: .8em; }
+ul { padding-bottom: 10px; }
+.container {  width: 325px; min-height: 50px; background-color: #AAA;}
+.high { background-color: green; }
+.trash { background-color: #000;  }
+.item { background-color: #DDD; cursor: move; }
+.item input { width: 100px; }
+#main { float: left; display: inline-flex;}
+#results { margin-left: 175px; width: 150px; }
+.inline-block-child {
+  
+}

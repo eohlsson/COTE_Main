@@ -1,0 +1,239 @@
+﻿@using System.Configuration
+@using System.Data.SqlClient
+@using System.Data;
+@{
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+    string breadcrumb = "<nav class=\"site-breadcrumbs\"><ul>";
+    breadcrumb += " <li><a href=\"#\">Home</a> /</li>";
+    breadcrumb += " <li><a href=\"/dotnet/portals/programportal.aspx\">Program Staff Portal</a> /</li>";
+    breadcrumb += "</ul></nav>";
+
+    string testlistHTML = "";
+    string message = (string)ViewBag.message ?? "";
+    string action = (string)ViewBag.action ?? "";
+    object admin_date_start = (object)ViewBag.admin_date_start ?? DBNull.Value;
+    object admin_date_end = (object)ViewBag.admin_date_end ?? DBNull.Value;
+    object test = (object)ViewBag.test ?? DBNull.Value;
+    object last_name = (object)ViewBag.last_name ?? DBNull.Value;
+    object dob = (object)ViewBag.dob ?? DBNull.Value;
+    string student_field = "";
+
+    if (test == "")
+    {
+        test = DBNull.Value;
+    }
+
+
+    String ConnString = ConfigurationManager.ConnectionStrings["UserDb"].ConnectionString;
+
+    if (action == "filter")
+    {
+        testlistHTML = "<table border='1'>";
+
+        using (SqlConnection conn = new SqlConnection(ConnString))
+        {
+            conn.Open();
+
+
+
+            student_field = "<font class='smtxt'><select name='student' tabindex='1'><option value='' selected='selected'>-- Select a student --</option></font>";
+
+            using (SqlCommand cmd = new SqlCommand())
+            {
+                cmd.Connection = conn;
+                cmd.CommandType = System.Data.CommandType.Text;
+
+                cmd.CommandText = "Select cte_stu_id, last_name  + ', ' + first_name + ' (' + convert(varchar(10), birth_date, 101) + ')' from cte_stu_demo where student_status = 'A' order by 2";
+
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+
+                    while (reader.Read())
+                    {
+
+                        student_field += "<option value='" + reader[0].ToString() + "'>" + reader[1].ToString() + "</option>";
+
+                    }
+                }
+
+            }
+
+            student_field += "</select>";
+
+            using (SqlCommand cmd = new SqlCommand())
+            {
+                cmd.Connection = conn;
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "[dbo].[nes_test_matcher]";
+                cmd.Parameters.Add(new SqlParameter("@admin_date_start", admin_date_start));
+                cmd.Parameters.Add(new SqlParameter("@admin_date_end", admin_date_end));
+                cmd.Parameters.Add(new SqlParameter("@test", test));
+                cmd.Parameters.Add(new SqlParameter("@last_name", last_name));
+                cmd.Parameters.Add(new SqlParameter("@dob", dob));
+
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+
+                    testlistHTML = testlistHTML + "<tr><th width='100' align='center'>Last Name</th><th width='100' align='center'>First Name</th><th width='100' align='center'>Middle Initial</th><th width='100' align='center'>Date of Birth</th><th width='100' align='center'>Admin Date</th><th width='100' align='center'>Test</th><th width='100' align='center'>Status</th><th width='100' align='center'>Scaled Score</th><th></th></tr>";
+
+                    while (reader.Read())
+                    {
+                        testlistHTML = testlistHTML + "<tr><td width='100' align='center'><input type='hidden' name='nes_id' value='" + reader[0].ToString() + "' />" + reader[1].ToString() + "</td><td width='100' align='center'>" + reader[2].ToString() + "</td><td width='100' align='center'>" + reader[3].ToString() + "</td><td width='100' align='center'>" + reader[4].ToString() + "</td><td width='100' align='center'>" + reader[5].ToString() + "</td><td width='100' align='center'>" + reader[6].ToString() + "</td><td width='100' align='center'>" + reader[7].ToString() + "</td><td width='100' align='center'>" + reader[8].ToString() + "</td><td> " + student_field + "</td></tr>";
+                    }
+                }
+
+            }
+
+        }
+
+        testlistHTML = testlistHTML + "</table>";
+    }
+    else
+    {
+        if (ViewBag.message == "")
+        {
+            testlistHTML = "Please select a filter above to display tests.";
+        }
+        else
+        {
+            testlistHTML = ViewBag.message;
+        }
+    }
+
+
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>EmailList</title>
+    <link rel="stylesheet" type="text/css" href="http://cte-s.education.illinois.edu/css/portals.css" title="fonts" />
+</head>
+<body>
+    <div class="row page-content portal-content">
+        <div class="small-12 column">
+
+            <a href="/dotnet/account.aspx/logout"><FONT COLOR="RED"><B>LOGOUT</B></FONT> <i class="fa fa-sign-out" aria-hidden="true"></i></a>
+
+            @MvcHtmlString.Create(@breadcrumb)
+
+            <h1>NES Test Matcher</h1>
+
+            <form action="nestestmatcher" method="post">
+
+                <div class="section-border">
+
+
+                    <h2>Filter</h2>
+
+                    @{
+
+                        string admin_date_start_field = "";
+                        string admin_date_end_field = "";
+                        string test_field = "";
+
+                        admin_date_start_field = "<font class='smtxt'>Start Date:<select name='admin_date_start' tabindex='1'><option value='' selected='selected'>-- Select a date --</option></font>";
+                        admin_date_end_field = "<font class='smtxt'>End Date:<select name='admin_date_end' tabindex='1'><option value='' selected='selected'>-- Select a date --</option></font>";
+
+                        using (SqlConnection conn = new SqlConnection(ConnString))
+                        {
+                            conn.Open();
+                            using (SqlCommand cmd = new SqlCommand())
+                            {
+                                cmd.Connection = conn;
+                                cmd.CommandType = System.Data.CommandType.Text;
+
+                                cmd.CommandText = "Select distinct admin_date, convert(varchar(10), admin_date, 101) from cte_stu_nes_test order by admin_date desc";
+
+                                using (SqlDataReader reader = cmd.ExecuteReader())
+                                {
+
+                                    while (reader.Read())
+                                    {
+
+                                        if (admin_date_start.ToString() != "" && admin_date_start.ToString() == reader[0].ToString())
+                                        {
+                                            admin_date_start_field += "<option value=" + reader[0].ToString() + " selected='selected'>" + reader[1].ToString() + "</option>";
+                                            admin_date_start_field = admin_date_start_field.Replace("<option value='' selected='selected'>", "<option value=''>");
+                                        }
+                                        else
+                                        {
+                                            admin_date_start_field += "<option value='" + reader[0].ToString() + "'>" + reader[1].ToString() + "</option>";
+                                        }
+
+                                        if (admin_date_end.ToString() != "" && admin_date_end.ToString() == reader[0].ToString())
+                                        {
+                                            admin_date_end_field += "<option value=" + reader[0].ToString() + " selected='selected'>" + reader[1].ToString() + "</option>";
+                                            admin_date_end_field = admin_date_end_field.Replace("<option value='' selected='selected'>", "<option value=''>");
+                                        }
+                                        else
+                                        {
+                                            admin_date_end_field += "<option value='" + reader[0].ToString() + "'>" + reader[1].ToString() + "</option>";
+                                        }
+
+                                    }
+                                }
+                            }
+
+                            @MvcHtmlString.Create(admin_date_start_field + "</select>");
+                            @MvcHtmlString.Create(admin_date_end_field + "</select>");
+
+                            test_field = "<font class='smtxt'>Test:<select name='test' tabindex='1'><option value='' selected='selected'>-- Select a test --</option></font>";
+
+                            using (SqlCommand cmd = new SqlCommand())
+                            {
+                                cmd.Connection = conn;
+                                cmd.CommandType = System.Data.CommandType.Text;
+
+                                cmd.CommandText = "Select test_no, '(' + convert(varchar(5),test_no) + ') ' + test_name as test_name_desc from cte_stu_nes_test_names where sub_area_no = 1 order by test_name";
+
+                                using (SqlDataReader reader = cmd.ExecuteReader())
+                                {
+
+                                    while (reader.Read())
+                                    {
+
+
+                                        if (test.ToString() != "" && test.ToString() == reader[0].ToString())
+                                        {
+                                            test_field += "<option value=" + reader[0].ToString() + " selected='selected'>" + reader[1].ToString() + "</option>";
+                                            test_field = test_field.Replace("<option value='' selected='selected'>", "<option value=''>");
+                                        }
+                                        else
+                                        {
+                                            test_field += "<option value='" + reader[0].ToString() + "'>" + reader[1].ToString() + "</option>";
+                                        }
+
+                                    }
+                                }
+
+                            }
+
+                            @MvcHtmlString.Create(test_field + "</select>");
+
+                            @MvcHtmlString.Create("Date of Birth<input type='date' id='date_of_birth' name='DOB' value='" + dob + "'>");
+                            @MvcHtmlString.Create("Last Name<input type='text' id='last_name' name='Last Name' value='" + last_name + "' maxlength='40' size='30'>");
+
+                        }
+                    }
+                    <br /><input type="submit" value="Filter" class="smtxt" />
+                </div>
+                <input type="hidden" name="section" value="Filter" />
+            </form>
+            <div class="section-border">
+                <h2>Tests</h2>
+                @using (Html.BeginForm("NESTestMatcher", "Tools", FormMethod.Post))
+                {
+                    @MvcHtmlString.Create(testlistHTML)
+
+                    <br /><input type="submit" name="Submit" value="Submit" />
+                    <br /><br />
+
+                }
+            </div>
+        </div>
+    </div>
+</body>
+</html>

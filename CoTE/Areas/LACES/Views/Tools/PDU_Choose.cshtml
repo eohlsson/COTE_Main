@@ -1,0 +1,43 @@
+﻿@{
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+    string left_menu = "/dotnet/areas/webpages/content/js/cc_left_menu.js";
+    string breadcrumb = "<nav class=\"site-breadcrumbs\"><ul>";
+    breadcrumb += " <li><a href=\"#\">Home</a> /</li>";
+    breadcrumb += " <li><a href=\"#\">Cooperating Personnel</a> /</li>";
+    breadcrumb += " <li><a href=\"#\">Cooperating Personnel Portal</a> /</li>";
+    breadcrumb += "</ul></nav>";
+}
+
+<!-- Hide menu since we are logged in -->
+<style>
+    .main-navigation {
+        display: none;
+    }
+</style>
+
+        <html>
+        <head>
+            <meta name="viewport" content="width=device-width" />
+            <title>PDU_Choose</title>
+        </head>
+        <body>
+            <div class="row page-content portal-content">
+                <div class="small-12 column">
+
+                    <div>
+                        Our records indicate that you had both an Early Field Experience Student and a Student Teaching Student.
+                        Please select which option you would like to complete:
+
+                        @using (Html.BeginForm("PDU_Choose", "Tools", FormMethod.Post))
+                        {
+
+                            <input type="radio" name="choice" value="EFE" /><text>Early Field Experience (for a sample of what is required, click <a href="https://cte-s.education.illinois.edu/documents/Early%20Field%20Experience%20Narrative%20Example.pdf">here</a>.)</text><br />
+                            <input type="radio" name="choice" value="ST" /><text>Student Teaching (for a sample of what is required, click <a href="https://cte-s.education.illinois.edu/documents/Student%20Teaching%20Experience%20Narrative%20Example.pdf">here</a>.</text><br />
+                            <br /><input type="submit" name="Submit" value="Submit" />
+                            <br /><br/>
+                        }
+                    </div>
+                </div>
+            </div>
+        </body>
+    </html>

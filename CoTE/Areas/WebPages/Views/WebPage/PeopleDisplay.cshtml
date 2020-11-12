@@ -1,0 +1,126 @@
+@model IEnumerable<CoTE.Areas.WebPages.Models.PeopleDisplay_Data>
+
+@{
+    int rowcount = 1;
+    string bgcolor = "";
+    string group = ViewBag.Group;
+    string role = "";
+    string program = "";
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+    string left_menu = "/dotnet/areas/webpages/content/js/ac_left_menu.js";
+    string breadcrumb = "<li><a href=\"/dotnet/webpages/webpage.aspx\">Home</a> /</li><li>&nbsp;<a href=\"/dotnet/webpages/webpage.aspx/webpage?page_level=1.1\">About CoTE</a> /</li><li>&nbsp;<a href=\"/dotnet/webpages/webpage.aspx/webpage?page_level=1.2.3\"> People</a></li>";
+}
+
+<!-- InstanceEndEditable -->
+    <!-- InstanceBeginEditable name="body-content" -->
+    <div class="row align-center page-content">
+        <div class="img-container">
+            <img src="/dotnet/areas/webpages/content/images/inside.jpg" class="img-header"/>
+        </div>
+        <div class="small-12 large-10 column site-top-border">
+            <nav class="site-breadcrumbs">
+                <ul>
+                    @MvcHtmlString.Create(@breadcrumb)
+                </ul>
+            </nav>
+            <section class="row align-center page-section">
+                <aside class="small-11 large-4 column page-aside">
+<script language="JavaScript1.2">
+ var strWhereAmI = 1
+</script>
+<script type="text/javascript" language="JavaScript1.2" src="@left_menu"></script>
+                </aside>
+                <div class="small-11 large-8 column page-text">
+<h1>@ViewBag.Title</h1>
+
+<table class="table-scroll" border="0" cellpadding="5">
+
+        <!-- Get the table headers -->
+        @switch (group)
+        {
+            case "Staff":
+            	<tr>
+				    <td bgcolor="#E7670C"><b>Name</b></td>
+				    <td bgcolor="#E7670C"><b>Title</b></td>
+				    <td bgcolor="#E7670C"><b>Phone</b></td>
+				    <td bgcolor="#E7670C"><b>Email</b></td>
+    			</tr>	
+                break;  
+        }
+           	
+@foreach (CoTE.Areas.WebPages.Models.PeopleDisplay_Data h in ViewData.Model)
+{
+    foreach (var person in h.PeopleDisplayDataSet)
+    { 
+        // Display the table data
+        switch (group)
+        {
+            case "Staff":
+                
+                    if (rowcount % 2 == 0)
+                    {
+                        //bgcolor = "#eeeeee";
+                    }
+                    else
+                    {
+                        //bgcolor = "#FFFFCC";
+                    }
+                    <tr>
+					    <td bgcolor="@bgcolor">@MvcHtmlString.Create(@person.full_name)</td>
+					    <td bgcolor="@bgcolor">@person.job_title</td>
+					    <td bgcolor="@bgcolor">@person.office_phone</td>
+					    <td bgcolor="@bgcolor">@person.email</td>
+                    </tr>
+                break;   
+            case "EC":
+                
+   				<tr>		
+					<td>
+				    @if (role == "" || role != person.role)
+                    {
+                        <b><h2 style="font-size: 12px; color: #31326b; padding: 0px; margin-top: 0px;">@person.role</h2></b>
+                    }
+						
+						&#160;&#160;&#160;&#160;&#160;<font style="font-size: 10px; color: #31326b; padding: 0px; margin-top: 0px;"><b>@MvcHtmlString.Create(@person.full_name)</b></font><br />
+						&#160;&#160;&#160;&#160;&#160;<font style="font-size: 10px; color: #31326b; padding: 0px; margin-top: 0px;">@person.office_address</font><br />
+						&#160;&#160;&#160;&#160;&#160;<font style="font-size: 10px; color: #31326b; padding: 0px; margin-top: 0px;">@person.office_phone</font><br />
+						<br />
+					</td>
+				</tr>
+                role = person.role;
+                break;
+            case "PC":
+
+				<tr>		
+					<td>
+				    @if (program == "" || program != person.UIUC_ProgramName)
+                    {
+                        <b><h2 style="font-size: 12px; color: #31326b; padding: 0px; margin-top: 0px;">@person.UIUC_ProgramName</h2></b>
+                    }
+						
+						&#160;&#160;&#160;&#160;&#160;<font style="font-size: 10px; color: #31326b; padding: 0px; margin-top: 0px;"><b>@MvcHtmlString.Create(@person.full_name)</b></font><br />
+						&#160;&#160;&#160;&#160;&#160;<font style="font-size: 10px; color: #31326b; padding: 0px; margin-top: 0px;">@person.office_address</font><br />
+						&#160;&#160;&#160;&#160;&#160;<font style="font-size: 10px; color: #31326b; padding: 0px; margin-top: 0px;">@person.office_phone</font><br />
+						<br />
+					</td>
+				</tr>            
+                program = person.UIUC_ProgramName;
+                break;
+                
+        }
+
+        rowcount++;
+    }
+}   
+	
+</table>
+
+                    	
+                    <div class="arrow-down-white"></div>
+                </div>
+            </section>
+        </div>
+    </div>
+	
+<body>
+<!-- InstanceEndEditable -->

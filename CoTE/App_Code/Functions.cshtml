@@ -1,0 +1,471 @@
+﻿@using System.Text;
+@using System.Data.Entity;
+@using FormProcessor.Models;
+@using System.Data;
+@using System.Data.SqlClient;
+@using System.Dynamic;
+@using System.Configuration;
+@using System.Collections;
+@using System.Web.Mvc.Html;
+@using System.Web.Mvc;
+
+
+@functions {
+
+    static List<System.Web.Mvc.SelectListItem> BuildDynamicSQLValueList(string question_value, string question_list, string null_value_name, string username, List<System.Web.Mvc.SelectListItem> new_values)
+    {
+        //List<SelectListItem> new_values = new List<SelectListItem>();
+
+        int count = 0;
+
+        using (var db = new CoTEDB())
+        {
+            db.Database.Initialize(force: false);
+
+            // Create a SQL command to execute the sproc
+            var cmd = db.Database.Connection.CreateCommand();
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "FRM_PROC.dbo.FRM_GetDynamicValueList";
+            cmd.Parameters.Add(new SqlParameter("@question_id", question_list));
+            cmd.Parameters.Add(new SqlParameter("@value", question_value));
+            cmd.Parameters.Add(new SqlParameter("@username", username));
+
+            try
+            {
+
+                db.Database.Connection.Open();
+                // Run the sproc 
+                var reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    // Set first SelectListItem to null value
+                    if (count == 0)
+                    {
+                        new_values.Add(new System.Web.Mvc.SelectListItem { Text = null_value_name, Value = "" });
+                    }
+
+                    // Create field string
+                    new_values.Add(new System.Web.Mvc.SelectListItem { Text = reader[1].ToString(), Value = reader[0].ToString() });
+
+                    count++;
+                }
+
+                reader.Close();
+                cmd.Parameters.Clear();
+
+
+
+            }
+            catch (Exception e)
+            {
+                //Redirect to an error page
+                Elmah.ErrorSignal.FromCurrentContext().Raise(e);
+
+            }
+            finally
+            {
+                db.Database.Connection.Close();
+            }
+
+        }
+
+        return new_values;
+
+    }
+
+    public static HtmlString GenerateFPField(System.Web.Mvc.WebViewPage page, string field_value, string field_id, Form_Question question, string input_type, List<Form_Valuelists> value_lists, string record_id, string form_id)
+    {
+
+        // Set defaults
+        String fp_field = "";
+        Int16? size = 50;
+        Int16? max_length = 150;
+
+        // Fix apostrophe in field value
+        field_value = field_value.Replace("'", "&apos;");
+
+        //Convert field values for true and false
+        switch (field_value.ToString())
+        {
+            case "True":
+                {
+                    field_value = "1";
+                    break;
+                }
+            case "False":
+                {
+                    field_value = "0";
+                    break;
+                }
+        }
+
+        // Modify defaults as necessary
+        if (question.input_size != null && question.input_size != 0)
+        {
+            size = question.input_size;
+        }
+        if (question.input_maxlength != null && question.input_maxlength != 0)
+        {
+            max_length = question.input_maxlength;
+        }
+
+        switch (input_type)
+        {
+            case "display":
+                {
+                    if (question.input_type == "checkbox")
+                    {
+                        if (field_value == "1" || field_value == "True")
+                        {
+                            fp_field = "<div class=''><input class='cs-input-checkbox' style='width:" + size * 10 + "px' type='checkbox' questionname = '" + question.question_name + "' nullable='" + question.nullable + "' datatype='" + question.input_type + "' name='" + field_id + "' id='" + field_id + "' value='" + field_value + "' size='" + size + "' maxlength='" + max_length + "' disabled  checked /><label for='" + field_id + "'></label></div>";
+                        }
+                        else
+                        {
+                            fp_field = "<div class=''><input class='cs-input-checkbox' style='width:" + size * 10 + "px' type='checkbox' questionname = '" + question.question_name + "' nullable='" + question.nullable + "' datatype='" + question.input_type + "' name='" + field_id + "' id='" + field_id + "' value='" + field_value + "' size='" + size + "' maxlength='" + max_length + "' disabled /><label for='" + field_id + "'></label></div>";
+                        }
+                    }
+                    else if (question.input_type == "file_path")
+                    {
+                        if (field_value.Length > 0)
+                        {
+                            fp_field += "<a href='file:///" + field_value + "'>" + field_value + "</a>";
+                        }
+                    }
+                    else if (question.data_type == "file_db")
+                    {
+                        if (field_value.Length > 0)
+                        {
+                            fp_field += "<a href='/dotnet/FormProcessor/form.aspx/getfile?question_id=" + question.question_id + "&record_id=" + record_id + "&form_id=" + form_id + "'><button type='button'>Open File</button></a>";
+                        }
+                    }
+                    else if (question.value_list_id > 0 && field_value != "")
+                    {
+                        // Add search for value_list_standard_search questions                
+                        if (question.value_list_standard_search.ToString() == "True")
+                        {
+                            //fp_field += "Search (Hit TAB to perform search):<input type='text' id='search_" + question.data_location + "' OnChange=\"question_filter('" + question.question_id + "', '" + question.data_location + "');\"></input><br/>";
+                            fp_field += "Search (Hit TAB to perform search):<input type='text' id='search_" + field_id + "' OnChange=\"question_filter('" + question.question_id + "', '" + field_id + "');\"></input>";
+                        }
+
+                        IEnumerable<Form_Valuelists> valuelist = value_lists.Where(values => values.question_id.ToString() == question.question_id.ToString());
+
+                        IEnumerable<System.Web.Mvc.SelectListItem> dropdownlist = valuelist.Select(
+                        (selectlist =>
+                          new System.Web.Mvc.SelectListItem
+                          {
+                              Selected = (selectlist.input_value == field_value),
+                              Text = selectlist.input_name,
+                              Value = selectlist.input_value
+                          }));
+
+                        if (valuelist.Count(sli => sli.input_value == field_value) == 0 && question.value_list_standard_search.ToString() != "True")
+                        {
+                            List<System.Web.Mvc.SelectListItem> list = null;
+                            list = dropdownlist.ToList();
+                            list.Add(new System.Web.Mvc.SelectListItem { Text = field_value, Value = field_value, Selected = true });
+                            dropdownlist = list.Select(
+                                (selectlist =>
+                                  new System.Web.Mvc.SelectListItem
+                                  {
+                                      Selected = selectlist.Selected,
+                                      Text = selectlist.Text,
+                                      Value = selectlist.Value
+                                  }));
+                        }
+
+                        field_id.Replace(".", "\\.");
+
+                        //Limiting question
+                        if (question.value_drilldown_question_id != null)
+                        {
+                            string question_list = question.value_drilldown_question_id.ToString().Replace(",", ";");
+
+                            fp_field += @page.Html.DropDownList(field_id, dropdownlist, new {  style = "width:" + size * 11 + "px", questionname = question.question_name, datatype = question.input_type, nullable = question.nullable, question_id = question.question_id, question_list = question_list, onchange = "OnChange(" + Char.ConvertFromUtf32(34) + field_id + Char.ConvertFromUtf32(34) + ", " + Char.ConvertFromUtf32(34) + question.question_id.ToString() + Char.ConvertFromUtf32(34) + "," + Char.ConvertFromUtf32(34) + question_list + Char.ConvertFromUtf32(34) + ");" }).ToString();
+                        }
+                        else
+                        {
+                            fp_field += @page.Html.DropDownList(field_id, dropdownlist, new { style = "width:" + size * 11 + "px", questionname = question.question_name, datatype = question.input_type, nullable = question.nullable }).ToString();
+                        }
+
+                        fp_field = fp_field.Replace("<select", "<select disabled");
+
+                        break;
+
+                    }
+                    //08-31-2018 This is old code that won't be reached because it is the same condition as the previous position       
+                    else if (question.value_list_id > 0 && field_value != "")
+                    {
+                        foreach (Form_Valuelists item in value_lists.Where(values => values.question_id.ToString() == question.question_id.ToString() && values.input_value == field_value))
+                        {
+                            if (field_value == item.input_value.ToString())
+                            {
+                                //fp_field = item.input_name;
+                                fp_field = "<input class='cs-input-field' type='text' questionname = '" + question.question_name + "' nullable='" + question.nullable + "' datatype='" + question.input_type + "' name='" + field_id + "' id='" + field_id + "' value='" + item.input_name.Replace("'", "&#39;") + "' size='" + size + "' maxlength='" + max_length + "' disabled />";
+                            }
+                        }
+                        //Add holder for blank fields
+                        if (fp_field == "")
+                        {
+                            fp_field = "<input class='cs-input-field' style='width:" + size * 10 + "px' type='text' questionname = '" + question.question_name + "' nullable='" + question.nullable + "' datatype='" + question.input_type + "' name='" + field_id + "' id='" + field_id + "' value='' size='" + size + "' maxlength='" + max_length + "' disabled />";
+                        }
+                    }
+                    else if (question.input_type == "textarea")
+                    {
+                        fp_field = "<textarea questionname = '" + question.question_name + "' nullable='" + question.nullable + "' datatype='" + question.input_type + "' name='" + field_id + "' id='" + field_id + "' rows='" + question.input_rows + "' cols='" + question.input_cols + "' maxlength='" + max_length + "' disabled >" + field_value + "</textarea>";
+                    }
+                    else if (question.input_type == "full_html_editor")
+                    {
+                        fp_field = "<textarea class='mceEditable' questionname = '" + question.question_name + "' nullable='" + question.nullable + "' datatype='" + question.input_type + "' name='" + field_id + "' id='" + field_id + "' rows='" + question.input_rows + "' cols='" + question.input_cols + "' maxlength='" + max_length + "' disabled >" + field_value + "</textarea>";
+                    }
+                    else if (question.input_type == "display-textarea")
+                    {
+                        if (max_length == 150)
+                        {
+                            max_length = 8000;
+                        }
+                        fp_field = "<textarea questionname = '" + question.question_name + "' nullable='" + question.nullable + "' datatype='" + question.input_type + "' name='" + field_id + "' id='" + field_id + "' rows='" + question.input_rows + "' cols='" + question.input_cols + "' maxlength='" + max_length + "' disabled >" + field_value + "</textarea>";
+                        break;
+                    }
+                    else
+                    {
+                        //fp_field = field_value;
+                        fp_field = "<input class='cs-input-field' style='width:" + size*10 + "px' type='text' questionname = '" + question.question_name + "' nullable='" + question.nullable + "' datatype='" + question.input_type + "' name='" + field_id + "' id='" + field_id + "' value='" + field_value + "' size='" + size + "' maxlength='" + max_length + "' disabled />";
+                    }
+                    break;
+                }
+            case "text":
+                {
+                    // If the field_value contains an apostrophe need to change to quotes instead
+                    if (field_value.Contains("'"))
+                    {
+                        fp_field = "<input class='cs-input-field' style='width:" + size * 10 + "px' type='text' questionname = '" + question.question_name + "' nullable='" + question.nullable + "' datatype='" + question.input_type + "' name='" + field_id + "' id='" + field_id + "' value=\"" + field_value + "\" size='" + size + "' maxlength='" + max_length + "' autocomplete='off' />";
+                    }
+                    else
+                    {
+                        fp_field = "<input class='cs-input-field' style='width:" + size * 10 + "px' type='text' questionname = '" + question.question_name + "' nullable='" + question.nullable + "' datatype='" + question.input_type + "' name='" + field_id + "' id='" + field_id + "' value='" + field_value + "' size='" + size + "' maxlength='" + max_length + "' autocomplete='off' placeholder='" + question.question_name + "'/>";
+                    }
+                    break;
+                }
+            case "display-textarea":
+                {
+                    if (max_length == 150)
+                    {
+                        max_length = 8000;
+                    }
+                    fp_field = "<textarea questionname = '" + question.question_name + "' nullable='" + question.nullable + "' datatype='" + question.input_type + "' name='" + field_id + "' id='" + field_id + "' rows='" + question.input_rows + "' cols='" + question.input_cols + "' maxlength='" + max_length + "' disabled >" + field_value + "</textarea>";
+                    break;
+                }
+            case "textarea":
+                {
+                    if (max_length == 150)
+                    {
+                        max_length = 8000;
+                    }
+                    fp_field = "<textarea questionname = '" + question.question_name + "' nullable='" + question.nullable + "' datatype='" + question.input_type + "' name='" + field_id + "' id='" + field_id + "' rows='" + question.input_rows + "' cols='" + question.input_cols + "' maxlength='" + max_length + "'>" + field_value + "</textarea>";
+                    break;
+                }
+            case "date":
+                {
+                    DateTime date_field;
+
+                    DateTime.TryParse(field_value, out date_field);
+
+                    if (date_field.ToShortDateString() == "1/1/0001")
+                    {
+                        fp_field = "<input type='date' class = 'datepicker' questionname = '" + question.question_name + "' nullable='" + question.nullable + "' datatype='" + question.input_type + "' name='" + field_id + "' id='" + field_id + "' value='' />";
+                    }
+                    else
+                    {
+                        fp_field = "<input type='date' class = 'datepicker' questionname = '" + question.question_name + "' nullable='" + question.nullable + "' datatype='" + question.input_type + "' name='" + field_id + "' id='" + field_id + "' value='" + string.Format("{0:yyyy-MM-dd}", date_field) + "' />";
+                    }
+
+                    break;
+                }
+            case "radio":
+                {
+                    int itemcount = 1;
+
+                    //if (question.radio_list_orientation == "t") 
+                    //{
+                    //    fp_field = "<div class='column'>";
+                    //}
+
+                    foreach (Form_Valuelists item in value_lists.Where(values => values.question_id.ToString() == question.question_id.ToString()))
+                    {
+                        // Horizontal or Vertical
+                        if (question.radio_list_orientation != "t")
+                        {
+
+                            if (item.input_value != "")
+                            {
+                                fp_field += "<div class='rdoOption'><input type='radio' class='cs-input-radio' questionname = '" + question.question_name + "' nullable='" + question.nullable + "' datatype='" + question.input_type + "' id='" + field_id + itemcount.ToString() + "' name='" + field_id + "' value='" + item.input_value + "'";
+                            }
+
+                            if (field_value.ToString().Trim() == item.input_value.ToString().Trim() && item.input_value != "")
+                            {
+                                fp_field += " checked ";
+                            }
+
+                            if (item.input_value != "")
+                            {
+                                fp_field += " ><label for='" + field_id + itemcount.ToString() + "'>" + item.input_name + "</label></div>";
+                            }
+
+                        }
+                        else // table orientation
+                        {
+                            if (item.input_value != "")
+                            {
+                                fp_field += item.input_name + "<hr><input type='radio' questionname = '" + question.question_name + "' nullable='" + question.nullable + "' datatype='" + question.input_type + "' id='" + field_id + itemcount.ToString() + "' name='" + field_id + "' value='" + item.input_value + "'";
+                            }
+
+                            if (field_value.ToString().Trim() == item.input_value.ToString().Trim() && item.input_value != "")
+                            {
+                                fp_field += " checked ";
+                            }
+
+                            if (item.input_value != "")
+                            {
+                                fp_field += " /><label for=" + field_id + itemcount.ToString() + ">" + item.input_name + "</label>";
+                            }
+
+                        }
+
+                        itemcount++;
+
+                    }
+
+                    // Wrap the field in a table
+                    //if (question.radio_list_orientation == "t")
+                    //{
+                    //    fp_field += "</div>";
+                    //}
+
+
+                    break;
+                }
+            case "checkbox":
+                {
+                    fp_field = "<div class=''><input id='" + field_id + "' type='checkbox' name='" + field_id + "' class='cs-input-checkbox' questionname = '" + question.question_name + "' nullable='" + question.nullable + "' datatype='" + question.input_type + "' name='" + field_id + "' ";
+                    //fp_field = "<input class = 'cs-input-checkbox' type='checkbox' id='" + field_id + "' questionname = '" + question.question_name + "' nullable='" + question.nullable + "' datatype='" + question.input_type + "' name='" + field_id + "' value='" + field_value + "'"; 
+                    if (field_value == "True" || field_value == "1")
+                    {
+                        fp_field += " checked ";
+                    }
+                    fp_field += "/><label for='" + field_id + "'></label></div>";
+                    bool ischecked;
+                    if (field_value == "True" || field_value == "1")
+                    {
+                        ischecked = true;
+                    }
+                    else
+                    {
+                        ischecked = false;
+                    }
+
+                    //                fp_field = "<div class=''>";
+                    //                fp_field += @page.Html.CheckBox(field_id, ischecked, new { questionname = question.question_name, datatype = question.input_type, nullable = question.nullable }).ToString();
+                    //                fp_field += "<label for='" + field_id + "'></label></div>";
+
+                    break;
+                }
+            case "select":
+                {
+
+                    // Add search for value_list_standard_search questions                
+                    if (question.value_list_standard_search.ToString() == "True")
+                    {
+                        //fp_field += "Search (Hit TAB to perform search):<input type='text' id='search_" + question.data_location + "' OnChange=\"question_filter('" + question.question_id + "', '" + question.data_location + "');\"></input><br/>";
+                        fp_field += "Search (Hit TAB to perform search):<input type='text' id='search_" + field_id + "' OnChange=\"question_filter('" + question.question_id + "', '" + field_id + "');\"></input>";
+                    }
+
+                    IEnumerable<Form_Valuelists> valuelist = value_lists.Where(values => values.question_id.ToString() == question.question_id.ToString());
+
+                    IEnumerable<System.Web.Mvc.SelectListItem> dropdownlist = valuelist.Select(
+                    (selectlist =>
+                      new System.Web.Mvc.SelectListItem
+                      {
+                          Selected = (selectlist.input_value == field_value),
+                          Text = selectlist.input_name,
+                          Value = selectlist.input_value
+                      }));
+
+                    if (valuelist.Count(sli => sli.input_value == field_value) == 0 && question.value_list_standard_search.ToString() != "True")
+                    {
+                        List<System.Web.Mvc.SelectListItem> list = null;
+                        list = dropdownlist.ToList();
+                        list.Add(new System.Web.Mvc.SelectListItem { Text = field_value, Value = field_value, Selected = true });
+                        dropdownlist = list.Select(
+                            (selectlist =>
+                              new System.Web.Mvc.SelectListItem
+                              {
+                                  Selected = selectlist.Selected,
+                                  Text = selectlist.Text,
+                                  Value = selectlist.Value
+                              }));
+                    }
+
+                    field_id.Replace(".", "\\.");
+
+                    //Limiting question
+                    if (question.value_drilldown_question_id != null)
+                    {
+                        string question_list = question.value_drilldown_question_id.ToString().Replace(",", ";");
+
+                        fp_field += @page.Html.DropDownList(field_id, dropdownlist, new { questionname = question.question_name, datatype = question.input_type, nullable = question.nullable, question_id = question.question_id, question_list = question_list, onchange = "OnChange(" + Char.ConvertFromUtf32(34) + field_id + Char.ConvertFromUtf32(34) + ", " + Char.ConvertFromUtf32(34) + question.question_id.ToString() + Char.ConvertFromUtf32(34) + "," + Char.ConvertFromUtf32(34) + question_list + Char.ConvertFromUtf32(34) + ");" }).ToString();
+                    }
+                    else
+                    {
+                        fp_field += @page.Html.DropDownList(field_id, dropdownlist, new { questionname = question.question_name, datatype = question.input_type, nullable = question.nullable }).ToString();
+                    }
+
+                    break;
+                }
+            case "file_db":
+                {
+                    if (field_value.Length > 0)
+                    {
+                        //                    fp_field += "<a href='/dotnet/FormProcessor/form.aspx/getfile?question_id=" + question.question_id + "&record_id=" + record_id + "&form_id=" + form_id + "'><button type='button'>Open File</button></a><input type='file' nullable='" + question.nullable + "' datatype='" + question.input_type + "' name='userFiles' id='" + field_id + "' />";
+                        fp_field += "<a href='/dotnet/FormProcessor/form.aspx/getfile?question_id=" + question.question_id + "&record_id=" + record_id + "&form_id=" + form_id + "'><button type='button'>Open File</button></a><input type='file' nullable='" + question.nullable + "' datatype='" + question.input_type + "' name='" + field_id + "' id='" + field_id + "' />";
+                    }
+                    else
+                    {
+                        //                    fp_field += field_value + "<input type='file' nullable='" + question.nullable + "' datatype='" + question.input_type + "' name='userFiles' id='" + field_id + "' />";
+                        fp_field += "<input type='file' nullable='" + question.nullable + "' datatype='" + question.input_type + "' name='" + field_id + "' id='" + field_id + "' />";
+                    }
+                    break;
+                }
+            case "file_path":
+                {
+                    fp_field += "<a href='file:///" + field_value + "'><button type='button'>Open File</button></a><input type='file' nullable='" + question.nullable + "' datatype='" + question.input_type + "' name='userFiles' id='" + field_id + "' />" + field_value;
+                    break;
+                }
+            case "full_html_editor":
+                {
+                    if (max_length == 150)
+                    {
+                        max_length = 8000;
+                    }
+                    fp_field = "<textarea class='mceEditable' questionname = '" + question.question_name + "' nullable='" + question.nullable + "' datatype='" + question.input_type + "' name='" + field_id + "' id='" + field_id + "' rows='" + question.input_rows + "' cols='" + question.input_cols + "' maxlength='" + max_length + "'>" + field_value + "</textarea>";
+                    break;
+                }
+            case "apa_xhmtl_editor":
+                {
+                    break;
+                }
+            case "inline_xhtml_editor":
+                {
+                    break;
+                }
+        }
+
+        if (question.question_HTML != null)
+        {
+            fp_field = question.question_HTML.ToString().Replace("[question]", fp_field);
+        }
+
+        return new HtmlString(fp_field);
+
+    }
+}

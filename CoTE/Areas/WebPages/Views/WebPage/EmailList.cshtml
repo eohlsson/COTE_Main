@@ -1,0 +1,147 @@
+﻿@using System.Configuration
+@using System.Data.SqlClient
+@{
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+    string breadcrumb = "<nav class=\"site-breadcrumbs\"><ul>";
+    breadcrumb += " <li><a href=\"#\">Home</a> /</li>";
+    breadcrumb += " <li><a href=\"/dotnet/portals/programportal.aspx\">Program Staff Portal</a> /</li>";
+    breadcrumb += "</ul></nav>";
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>EmailList</title>
+    <link rel="stylesheet" type="text/css" href="http://cte-s.education.illinois.edu/css/portals.css" title="fonts" />
+</head>
+<body>
+<div class="row page-content portal-content">
+    <div class="small-12 column">   
+
+<a href="/dotnet/account.aspx/logout"><FONT COLOR="RED"><B>LOGOUT</B></FONT> <i class="fa fa-sign-out" aria-hidden="true"></i></a>
+
+@MvcHtmlString.Create(@breadcrumb)
+
+	<form action="emaillist" method="post">
+
+	<h1>Cooperating Personnel Email Addresses for Courses</h1>
+
+    <div>
+
+            @{
+                
+                string term_field = "";
+                
+                term_field = "<font class='smtxt'>Term:<select name='term' tabindex='1'><option value='' selected='selected'>-- Select a term --</option></font>";
+
+                String ConnString = ConfigurationManager.ConnectionStrings["UserDb"].ConnectionString;
+
+                using (SqlConnection conn = new SqlConnection(ConnString))
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = new SqlCommand())
+                    {
+                        cmd.Connection = conn;
+                        cmd.CommandType = System.Data.CommandType.Text;
+
+                        cmd.CommandText = "Select term_id, term_title from cte_terms where term_id between '120108' and CTE.dbo.fn_get_relative_banner_term(CTE.dbo.fn_get_current_placement_term(), 2)";
+                        
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+
+                            while (reader.Read())
+                            {
+
+                                if (ViewBag.Term != "" && ViewBag.Term == reader[0].ToString())
+                                {
+                                    term_field += "<option value=" + reader[0].ToString() + " selected='selected'>" + reader[1].ToString() + "</option>";
+                                    term_field = term_field.Replace("<option value='' selected='selected'>", "<option value=''>");
+                                }
+                                else
+                                {
+                                    term_field += "<option value='" + reader[0].ToString() + "'>" + reader[1].ToString() + "</option>";
+                                }
+                                
+                            }
+                        }
+                    }
+                                
+                    @MvcHtmlString.Create(term_field + "</select>");
+                
+                    string course_field_hold = "";
+                    string course_field = "";
+                
+                    using (SqlCommand cmd = new SqlCommand())
+                    {
+                        cmd.Connection = conn;
+                        cmd.CommandType = System.Data.CommandType.Text;
+
+                        cmd.CommandText = "Select course_x_prog_id, program + ' - ' + course_title + ' ' + course_section as course " +
+			                 " from v_ce_courses " +
+			                 " where course_type IN ('EFE', 'ST') " + 
+			                 "	and (CTE.dbo.GetProgramPermissions ('" + ViewBag.Username + "', UIUC_Program_Id, 'PC,PA,AP,US,IP,IA', getdate(),'') = 'TRUE') " +
+			                 "	order by 2 ";
+                        
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+
+                            while (reader.Read())
+                            {
+
+                                course_field_hold += "<option value='" + reader[0].ToString() + "'>" + reader[1].ToString() + "</option>";
+                                    
+                            }
+                        }
+
+                    }
+                
+                    for (int i = 1; i < 11; i++)
+                    {
+                        course_field = "<br/><font class='smtx'>Course " + i + ":<select name='course" + i + "' tabindex='1'><option value='' selected='selected'>-- Select a course --</option>" + course_field_hold + "</select></font>";
+                      
+                        if (ViewBag.Course[i - 1] != "")
+                        {
+  
+                            course_field = course_field.Replace("option value='" + ViewBag.Course[i - 1] + "'", "option value='" + ViewBag.Course[i - 1] + "' selected='selected'");
+                            course_field = course_field.Replace("<option value='' selected='selected'>", "<option value=''>");
+                        }
+                        @MvcHtmlString.Create(course_field);
+
+                        if (ViewBag.Term != "" && ViewBag.Course[i - 1] != "")
+                        {
+                            using (SqlCommand cmd = new SqlCommand())
+                            {
+                                cmd.Connection = conn;
+                                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                                cmd.CommandText = "[dbo].[portal_program_coop_email_list]";
+                                cmd.Parameters.Add(new SqlParameter("@term", ViewBag.Term));
+                                cmd.Parameters.Add(new SqlParameter("@course_x_prog_id", ViewBag.Course[i - 1]));
+
+                                using (SqlDataReader reader = cmd.ExecuteReader())
+                                {
+
+                                    while (reader.Read())
+                                    {
+
+                                        <br /><textarea rows="10" cols="50">@reader[0].ToString()</textarea>;
+
+                                    }
+                                }
+
+                            }                            
+                        }
+                        
+                        course_field = "";
+
+                    }
+                }        
+         }        
+            <br /><input type="submit" value="Submit Courses" class="smtxt"/>
+        </div>
+    </form>
+            </div>
+          </div>
+</body>
+</html>

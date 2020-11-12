@@ -1,0 +1,337 @@
+﻿@model CoTE.Areas.Portals.Models.Danielson
+
+@{
+
+    String[] ratings = { "", "1", "2", "3", "4" };
+    String[] midterm_summary = { "", "Do not continue in placement", "Continue only with remediation", "Continue with reservation", "Continue without reservation" };
+    String[] final_summary = { "", "Do not continue in placement", "Continue only with remediation", "Continue with reservation", "Continue without reservation" };
+
+    List<SelectListItem> dropdownItems = new List<SelectListItem>();
+    dropdownItems.AddRange(new[]{
+                            new SelectListItem() { Text = "", Value = "" },
+                            new SelectListItem() { Text = "Needs Significant Improvement", Value = "1" },
+                            new SelectListItem() { Text = "Emerging", Value = "2" },
+                            new SelectListItem() { Text = "Competent", Value = "3" },
+                            new SelectListItem() { Text = "Exceeds Expectations", Value = "4" }});
+    
+}
+
+<table class="danielson" border=1 border-color="white" cellpadding="15px">
+
+<tr>
+
+	<td colspan=2 class="domain" valign=top bgcolor="F8F1A0">
+
+  <b><font size="+1">DOMAIN 1: Planning and Preparation (<a href="https://cte-s.education.illinois.edu/documents/danielson%20-%20domain%201%20rubric%20-%20LIS.pdf" target="_blank">Rubric</a>)</font></b>
+
+  <br/><br/><b>
+
+
+  1a &nbsp;demonstrating knowledge of pedagogy, literature and current trends in library media practice and information technology</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Knowledge of age-appropriate instructional strategies
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Knowledge of age-appropriate literature and information sources
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Knowledge of current trends in library media practice and information technology
+
+  <b>
+
+<br /><br />
+
+  1b &nbsp;Demonstrating knowledge of the library's program and student learning needs</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Knowledge of the school’s curriculum 
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Knowledge of technology and information skills within the standards
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Knowledge of students' skills, interests, cultural heritage, and special needs
+
+  <b>
+
+<br /><br />
+
+  1c &nbsp;Aligning library instruction with program goals, as appropriate to the setting and the students served</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Knowledge of lesson planning to meet instructional outcomes  
+
+  <b>
+
+<br /><br />
+
+  1d &nbsp;Demonstrating knowledge of resources in various formats, both within and beyond the school</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Knowledge of the library media collection  
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Knowledge of options for physical and virtual access to resources 
+
+  <b>
+
+<br /><br />
+
+  1e &nbsp;Designing instruction, as appropriate to the setting and students served</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Knowledge of lesson planning to meet instructional outcomes   
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Knowledge of strategies for differentiation 
+
+  <b>
+
+<br /><br />
+
+  1f &nbsp;Designing student assessments, as appropriate to the setting and students served</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Knowledge of a variety of assessment tools   
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Knowledge of strategies to improve student learning 
+
+  <b>
+
+<br /><br />
+       <b>Comments</b><br />
+       @Html.TextAreaFor(m => m.domain1_comments, 3, 60, new { @title = "Comment" })
+
+	</td>
+
+	<td colspan=2 class="domain" valign=top bgcolor="78C1F6">
+
+  <B><font size="+1">DOMAIN 2: The Environment (<a href="https://cte-s.education.illinois.edu/documents/danielson%20-%20domain%202%20rubric%20-%20LIS.pdf" target="_blank">Rubric</a>)</font></B>
+
+  <br/><br/><b>
+
+
+  2a &nbsp;Creating an environment of respect and rapport</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Interacts with members of the learning community  
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Interacts with students 
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Facilitates student interaction with other students 
+
+  <b>
+
+<br /><br />
+
+  2b &nbsp;Establishing a culture for learning and inquiry, and an appreciation of literature</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Maintains physical and virtual spaces that promote inquiry  
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Provides programming or activities that lead to appreciation of literature 
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Models principles of intellectual freedom
+
+  <b>
+
+<br /><br />
+
+  2c &nbsp;Implementing library policies/procedures and managing use of physical space</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Follows policies and models procedures  
+
+  <b>
+
+<br /><br />
+
+  2d &nbsp;Managing student behavior</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Sets student behavior expectations  
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Monitors student behavior  
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Responds to student misbehavior 
+
+  <b>
+
+<br /><br />
+
+  2e &nbsp;Managing use of physical space</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Maximizes flexible, equitable and efficient use of space  
+
+  <b>
+
+<br /><br />
+  <b>
+
+       <br /><br /><b>Comments</b><br />
+       @Html.TextAreaFor(m => m.domain2_comments, 3, 60, new { @title = "Comment" })
+
+	</td>
+
+</tr>
+
+<tr>
+
+	<td colspan=2 class="domain" valign=top bgcolor="B9D5C6">
+
+  <B><font size="+1">DOMAIN  4: Professional Responsibilities (<a href="https://cte-s.education.illinois.edu/documents/danielson%20-%20domain%204%20rubric%20-%20LIS.pdf" target="_blank">Rubric</a>)</font></B>
+
+  <br/><br/><b>
+
+
+  4a &nbsp;Reflecting on practice</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Engages in regular professional reflection  
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Connects practice to student learning  
+  <b>
+
+<br /><br />
+
+
+  4b &nbsp;Completing assigned tasks and program responsibilities </b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Exhibits self direction   
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Assumes responsibility for task completion  
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Demonstrates organizational strategies   
+
+  <b>
+
+<br /><br />
+
+
+  4c &nbsp;Communicating with the school community</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Promotes library programs and services   
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Interacts with members of the learning community
+
+  <b>
+
+<br /><br />
+
+  4d &nbsp;Participating in a professional community</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Participates in school and district events, initiatives, and projects   
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Participates in virtual or local professional networks
+
+  <b>
+
+<br /><br />
+
+  4e &nbsp;Growing and developing professionally</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Enhances knowledge of content and pedagogy 
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Establishes relationships with colleagues
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Participates in a culture of professional inquiry
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Seeks opportunities for professional development
+
+  <b>
+
+<br /><br />
+
+  4f &nbsp;Showing professionalism in actions and attitudes</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Demonstrates integrity and ethical conduct
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Complies with school and district regulations
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Advocates for student learning and needs
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Understands copyright laws
+
+  <b>
+
+       <br /><br /><b>Comments</b><br />
+       @Html.TextAreaFor(m => m.domain4_comments, 3, 60, new { @title = "Comment" })
+
+	</td>
+
+	<td colspan=2 class="domain" valign=top bgcolor="F4C4EA">
+
+  <B><font size="+1">DOMAIN 3: Delivery of Service (<a href="https://cte-s.education.illinois.edu/documents/danielson%20-%20domain%203%20rubric%20-%20LIS.pdf" target="_blank">Rubric</a>)</font></B>
+
+  <br/><br/><b>
+
+
+  3a &nbsp;Meeting student and staff needs for technology and other library services.</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Integrates technologies into library services
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Supports integration of technology    
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Provides library services to support instruction and student inquiry  
+
+  <b>
+
+<br /><br />
+
+
+  3b &nbsp;Collaborating in the design and teaching of effective lessons</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Seeks collaborative partnerships
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Uses co-teaching strategies    
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Implements  best practices to achieve learning outcomes  
+
+  <b>
+
+<br /><br />
+
+
+  3c &nbsp;Engaging students in learning, inquiry and the appreciation of literature </b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Promotes learning for enjoyment and personal growth
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Promotes the appreciation of literature    
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Encourages student participation and inquiry  
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Aligns instruction with standards  
+
+  <b>
+
+<br /><br />
+
+
+  3d &nbsp;Using assessment in instruction </b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Considers whole class, small group and one-on-one assessment    
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Applies feedback from assessments  
+
+  <b>
+
+
+<br /><br />
+
+  3e &nbsp;Demonstrating flexibility and responsiveness</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Makes adjustments to instruction and services    
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Responds to input by the members of the learning community  
+
+  <b>
+
+       <br /><br /><b>Comments</b><br />
+       @Html.TextAreaFor(m => m.domain3_comments, 3, 60, new { @title = "Comment" })
+
+	</td>
+
+</tr>
+<tr>
+    <td colspan="4" align="center">
+
+        @if (Model.eval_type != null && Model.eval_type == "M")
+        {
+                <b>Midterm Summary:</b>@Html.DropDownListFor(m => m.summary, new SelectList(midterm_summary))
+        }
+        else
+        {
+                <b>Final Summary:</b>@Html.DropDownListFor(m => m.summary, new SelectList(final_summary))
+        }        
+        <br /><br />
+        <b>Signature:</b>  @Html.CheckBoxFor(m => m.signature)  
+        <br /><br /><b><i>Note:</i> You may save changes to this form if you plan to return to edit by clicking the Save button. Once you click the signature box you <b><font color="red">WILL NOT</font></b> be able to edit or make changes to this evaluation. <br />Please <b><font color="red">DO NOT</font></b> click on the signature box until you are absolutely sure that you don't want to edit this form again.</b>
+
+        <br/><br/><input type="submit" value="Save" />
+    </td>
+</tr>
+</table>

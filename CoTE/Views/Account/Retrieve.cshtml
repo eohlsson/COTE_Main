@@ -1,0 +1,36 @@
+﻿@{
+    ViewBag.Title = "Confirm Your Account";
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+}
+<div class="row page-content portal-content">
+    <div class="small-12 column">   
+        <form method="post" action="/dotnet/account.aspx/retrieve">
+        <div class="section-border">
+            <div class="row medium-unstack">
+                        <b>Confirm Your Account</b>
+            </div>
+            <div class="row medium-unstack">
+                        <br />Please enter the email address you provided to your Placement Coordinator below
+                        <br />and click on the Submit button to confirm your account.</left>
+            </div>
+            <div class="row medium-unstack">
+                        <INPUT TYPE=text NAME="username"  onfocus="this.value='';" SIZE="35" valign=top onkeypress="if (event.which == 13 || event.keyCode == 13) {this.form.password.focus(); return false;}" value="">
+            </div>
+            <div class="row medium-unstack">
+                        <b><font color="red" size=-1 face=arial,helvetica>
+                                    @if (@ViewBag.ErrorMessage != null)
+                                    {
+                                        @Html.Raw(HttpUtility.HtmlDecode(@ViewBag.ErrorMessage));
+                                    }
+                        </font></b>
+            </div>
+            <div class="row medium-unstack">
+                     <input type="submit" value="Submit" name="action"><br /><br />
+            </div>
+            <div class="row medium-unstack">
+	                    <br><script type='text/javascript'>var a = new Array('lto:', '@@illin', 'upport', 'techs', 'cote-', 'ois.edu', 'mai'); document.write("For additional help, please email &nbsp;<br/><a href=" + a[6] + a[0] + "'" + a[4] + a[3] + a[2] + a[1] + a[5] + "'><br/>" + a[4] + a[3] + a[2] + a[1] + a[5] + "</a>");</script><br />&nbsp; or call <b><br />&nbsp;(217) 333-2804</b>.
+            </div>
+        </form>
+    </div>
+</div>
+

@@ -1,0 +1,101 @@
+﻿@using System.Configuration
+@using System.Data.SqlClient
+@{
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+    string breadcrumb = "<nav class=\"site-breadcrumbs\"><ul>";
+    breadcrumb += " <li><a href=\"#\">Home</a> /</li>";
+    breadcrumb += " <li><a href=\"/dotnet/portals/programportal.aspx\">Program Staff Portal</a> /</li>";
+    string link_group = " ";
+    string heading = " ";
+}
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<style>
+h1.ar   {text-transform: capitalize; font-size: 24px; font-family: Arial, Helvetica, sans-serif; color: black;}
+h2.ar   {text-transform: capitalize; font-size: 16px; font-family: Arial, Helvetica, sans-serif; color: black; border-bottom-width: 0; letter-spacing: normal;}
+h3.ar   {text-transform: capitalize; font-size: 14px; font-family: Arial, Helvetica, sans-serif; color: black; font-weight: bold;}
+font.ar   {text-transform: capitalize; font-size: 12px; font-family: Arial, Helvetica, sans-serif; color: black; border-bottom-width: 0; font-weight: normal;}
+a.ar   {line-height: 12px; text-transform: capitalize; font-size: 12px; font-family: Arial, Helvetica, sans-serif;}
+body.ar {line-height: 1em;}
+</style>
+<body class="ar">
+<div class="row page-content portal-content">
+    <div class="small-12 column">   
+
+<a href="/dotnet/account.aspx/logout"><FONT COLOR="RED"><B>LOGOUT</B></FONT> <i class="fa fa-sign-out" aria-hidden="true"></i></a>
+
+@MvcHtmlString.Create(@breadcrumb)
+ 
+<title>CoTE: Program Portal: Annual Reports</title>
+<br /><br /><h1 class="ar">Annual Reports</h1>
+<div class="indent" style="padding-left:40px;">
+@{
+     
+     String ConnString = ConfigurationManager.ConnectionStrings["UserDb"].ConnectionString;
+
+        using (SqlConnection conn = new SqlConnection(ConnString))
+        {
+            conn.Open();
+            using (SqlCommand cmd = new SqlCommand())
+            {
+                cmd.Connection = conn;
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                cmd.CommandText = "[dbo].[get_reports_annual]";
+                cmd.Parameters.Add(new SqlParameter("@netid", ViewBag.Username));
+                
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+
+                    reader.NextResult();
+
+                    while (reader.Read())
+                    {
+
+                        if (link_group == " " || link_group != reader[6].ToString())
+                        {
+                            <br /><h2 class="ar">@reader[6].ToString()</h2>
+                        }
+                                                 
+                        if (heading == " " || (heading != reader[2].ToString() && reader[2].ToString().Length > 0))
+                        {
+			                <br /><h3 class="ar">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;@reader[2].ToString()</h3>
+                        }
+                     
+                              
+                                switch (reader[7].ToString())
+                                {
+                                    case "1":
+@:                                        <text>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text>
+                                        break;
+                                    case "2":
+@:                            			<text>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text>
+                                        break;
+                                    case "3":
+@:                                        <text>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text>
+                                        break;
+                                }
+                                
+                                if (reader[4].ToString() != "")
+                                {
+                                    @:<a href="@reader[4].ToString()" class="ar">@reader[3].ToString()</a><br />
+                                }
+                                else
+                                {
+                                    <font class="ar">@reader[3].ToString()</font><br />
+                                }
+                                
+                        link_group = reader[6].ToString();
+                        heading = reader[2].ToString();
+                    }
+                }
+            }
+        }
+}
+</div>
+            </div>
+          </div>
+	</body>
+
+</html>
+	

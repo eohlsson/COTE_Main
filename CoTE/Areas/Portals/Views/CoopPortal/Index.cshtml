@@ -1,0 +1,467 @@
+@model IEnumerable<CoTE.Areas.Portals.Models.CoopData>
+
+@{
+    bool authorized = false;
+    string waiver_term = "";
+}
+
+<html xmlns:s="uuid:BDC6E3F0-6DA3-11d1-A2A3-00AA00C14882" xmlns:dt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882" xmlns:rs="urn:schemas-microsoft-com:rowset" xmlns:z="#RowsetSchema" xmlns="http://www.w3.org/1999/xhtml">
+
+	<head>
+
+		<meta name="generator" content="HTML Tidy for Linux/x86 (vers 1st November 2002), see www.w3.org"/>
+
+		<title>CoTE: Cooperating Personnel Portal</title>
+
+		<meta name="description" content="Council on Teacher Education: University of Illinois at Urbana-Champaign"/>
+
+		<meta name="keywords" content="Council on Teacher Education: University of Illinois at Urbana-Champaign"/>
+
+		<link rel="stylesheet" type="text/css" href="https://cte-s.education.illinois.edu/css/portals.css" title="fonts"/>
+
+		<script src="https://www-s2.education.illinois.edu/intranet/formapp/v3/fpfunctions.js"></script>
+
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+
+	</head>
+
+	<body background="https://cte-s.education.illinois.edu/images/backround.gif" text="#666666" link="#31326B" vlink="#FF6600" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+
+
+<!--- Check if authorized --->
+@foreach (CoTE.Areas.Portals.Models.CoopData h in ViewData.Model)
+{
+    foreach (var authorization in h.AuthorizedDataSet)
+    {
+        if (authorization.user_name.Length > 0)
+        {
+            authorized = true;
+        }
+    }
+}
+
+@if (authorized == true)
+{
+		<center>
+
+			<table border="0" cellpadding="0" cellspacing="0">
+
+				<tr>
+
+					<td width="15" align="right" valign="top" background="https://cte-s.education.illinois.edu/images/leftside.gif"><img src="https://cte-s.education.illinois.edu/images/leftside_top.gif" width="15" height="17" align="top"/>
+
+					</td>
+
+					<td width="750" colspan="2" align="left" valign="top" bgcolor="#FFFFFF">
+
+						<table width="750" cellpadding="0" cellspacing="0">
+
+							<tr>
+
+								<td width="336">
+
+									<a href="http://www.education.illinois.edu/cte/"><img src="https://cte-s.education.illinois.edu/images/portals/logo2.gif" alt="Council on Teacher Education" width="336" height="62" border="0"/></a></td>
+
+								<td width="375" align="left" valign="top"><img src="https://cte-s.education.illinois.edu/images/portals/l2_topright.gif" width="414" height="17" align="top"/>
+
+									<img src="https://cte-s.education.illinois.edu/images/portals/coop_portal.gif" alt="Coop Portal" width="402" height="36" align="top"/>
+
+								</td>
+
+							</tr>
+
+							<tr>
+
+								<td height="1" colspan="2" bgcolor="#E7670C">
+
+									<img src="https://cte-s.education.illinois.edu/images/clear.gif" width="10" height="1"/>
+
+								</td>
+
+							</tr>
+
+						</table>
+
+						<table width="750" cellpadding="0" cellspacing="0">
+
+							<tr background="https://cte-s.education.illinois.edu/images/portals/topbar_background.gif">
+
+								<td>
+
+									<img src="https://cte-s.education.illinois.edu/images/portals/currentlyloggedin.gif" alt="Currently Logged In" name="about" width="306" height="16" border="0" align="top" id="about"/>
+
+								</td>
+
+								<td align="right" background="https://cte-s.education.illinois.edu/images/portals/topbar_background.gif">
+
+                                    <a href="https://cte-s.education.illinois.edu/dotnet/account.aspx/logout"><img src="https://cte-s.education.illinois.edu/images/portals/topbar_background.gif" width="253" height="16" border="0" align="top"/><img src="https://cte-s.education.illinois.edu/images/portals/logout.gif" width="72" height="16" border="0" /></a>
+                                
+								</td>
+
+							</tr>
+
+						</table>
+
+						<table width="750" border="0" cellspacing="0" cellpadding="0">
+
+							<tr>
+
+								<td width="170" align="left" valign="top" cellpadding="5">
+
+									<img src="https://cte-s.education.illinois.edu/images/portals/tab_coop_profile.gif" alt="Coop Profile" width="170" height="23"/><br/>
+
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="7">
+
+<!-- Start Profile -->
+			<tr class="profile_row">
+@foreach (CoTE.Areas.Portals.Models.CoopData h in ViewData.Model)
+{
+    foreach (var profile in h.ProfileDataSet)
+    {
+            if (@profile.first_name.Length > 0) 
+            {
+                <td class="smtxt">
+                    Name: <strong>
+                        @profile.first_name  @profile.middle_name  @profile.last_name 
+                    </strong>
+                    <br /><br />
+                   UIN: <strong>
+                        @profile.uin
+                    </strong>
+                    <br /><br />
+					Email: <strong>
+                        @if (@profile.email.Length >= 20)
+                        {
+                            @profile.email.ToString().Substring(0, @profile.email.IndexOf("@") + 1) <br />@profile.email.ToString().Substring(@profile.email.IndexOf("@") + 1);
+                        }
+                        else
+                        {
+                            @profile.email
+                        }
+                    </strong>
+                </td>
+                break;
+            }
+    }
+}
+    		</tr>
+
+			<tr>
+				<td class="smtxt">
+					Program(s): <strong><br />
+@foreach (CoTE.Areas.Portals.Models.CoopData h in ViewData.Model)
+{
+    foreach (var profile in h.ProfileDataSet)
+    { 
+         <text>-</text> @profile.uiuc_programname<br />      
+    }
+}
+                    </strong>
+				</td>
+			</tr>
+			<tr>
+				<td class="smtxt">
+					Role: <strong>
+@foreach (CoTE.Areas.Portals.Models.CoopData h in ViewData.Model)
+{
+    string old_role = "";
+    foreach (var profile in h.ProfileDataSet)
+    {
+        if (@profile.full_role_type != old_role)
+        {
+            @profile.full_role_type <br />
+        }
+        old_role = @profile.full_role_type;
+    }
+}
+				    </strong>
+				</td>
+			</tr>
+<!-- End Profile -->
+
+									</table>
+
+									<br/><img src="https://cte-s.education.illinois.edu/images/portals/tab_links.gif" alt="Links" width="170" height="19"/><br/>
+
+									<div id="sidebar">
+
+<br />
+
+<!-- Start Links -->
+@foreach (CoTE.Areas.Portals.Models.CoopData h in ViewData.Model)
+{
+    foreach (var link in h.LinksDataSet)
+    {
+            if (@link.section_type == "M") 
+            {
+                <a href="@link.link" class="menuitems">@link.heading</a>
+            
+                waiver_term = @link.waiver_term;
+            }
+    }
+}
+
+
+<hr size="1" noshade="noshade" />
+                                                                                
+@foreach (CoTE.Areas.Portals.Models.CoopData h in ViewData.Model)
+{
+    foreach (var link in h.LinksDataSet)
+    {
+            if (@link.section_type == "L") 
+            {
+                <a href="@link.link" class="menuitems">@link.heading</a>
+            }
+    }
+}
+<!-- End Links -->
+
+									</div>
+
+									<img src="https://cte-s.education.illinois.edu/images/portals/tab_usethissite.gif" alt="To Use This Site" width="170" height="19"/><br/>
+
+									<table width="100%" border="0" cellpadding="0" cellspacing="7">
+
+										<tr>
+                                            <td>
+
+												<b><font color="red">Technical Support:</font></b>
+
+												<br/><br/>Email: <a href="mailto:cote-techsupport@illinois.edu">cote-techsupport@illinois.edu</a>
+
+												<br/><br/>Phone: <b>(217) 333-2804</b>
+
+											</td>
+
+										</tr>
+
+									</table>
+
+								</td>
+
+								<td bgcolor="#CCCCCC">
+
+									<img src="https://cte-s.education.illinois.edu/images/clear.gif" width="1" height="10"/>
+
+								</td>
+
+								<td width="579" align="left" valign="top">
+
+									<img src="https://cte-s.education.illinois.edu/images/portals/portalphoto01.jpg" width="579" height="50"/><br/>
+
+									<table width="100%" border="0" cellspacing="0" cellpadding="7">
+
+										<tr>
+
+											<td width="1">
+
+												<img src="..https://cte-s.education.illinois.edu/images/clear.gif" width="1" height="1"/>
+
+											</td>
+
+											<td width="400" align="left" valign="top">
+
+												<h2>Announcements</h2>
+
+<!-- Announcements -->                                                
+@foreach (CoTE.Areas.Portals.Models.CoopData h in ViewData.Model)
+{
+    foreach (var link in h.LinksDataSet)
+    {
+        if (@link.section_type == "A")
+        {
+            if (@link.link.IsEmpty()) 
+                {
+				    <span class="headline">
+					    <a href="@link.link">@link.short_title</a>
+				    </span>
+                }
+                else
+                {
+                    <span class="headline">@link.short_title</span>
+                }
+			        <br /><span class="smtxt">@link.short_heading... <a href="javascript:explain('@link.heading')">more</a></span>
+        }
+    }
+}
+
+                                                <h2>Cooperating Teacher Profile and Tuition and Fee Waivers</h2>
+												<br/>Waivers redeemed today will be applied to your <b><font color="red">@waiver_term</font></b> bill.
+												<br/><br/><font color="red"><b>IMPORTANT:</b> <i>Receipt of a Tuition & Fee Waiver from CTE does <b>not</b> guarantee your ability to apply the waiver to any courses on any campus.  Programs may restrict the use of waivers for some courses.  It is your responsibility to check with the host department to see if your waiver can apply to courses in which you enroll. </i><b>Waivers transferred to the University of Illinois at Springfield are only redeemable for 4 credit hours of tuition and fees.</b></font>
+												<br/><br/>
+<!-- Agreement check -->
+@foreach (CoTE.Areas.Portals.Models.CoopData h in ViewData.Model)
+{
+    foreach (var signature in h.AgreementDataSet)
+    {
+        if (@signature.signed == "Yes")
+        {
+    		<a href="/dotnet/formprocessor/index.aspx/index?form_id=229&index_id=262"><b>Click here to review your waiver information and to <font color="blue">redeem</font> your waivers.</b></a>
+        }
+        else
+        {
+			<b><font color="red">Before redeeming your waiver you must sign your Clinical Experiences Placement Agreement.</font></b><br/><br/><a href="/dotnet/formprocessor/index.aspx/index?form_id=326&index_id=399">Click here to fill out your agreement.</a>
+        }
+    }
+}
+<!-- End agreement check -->												
+												<br/><br/>
+
+											</td>
+
+											<td width="179" align="left" valign="top">
+
+												<h2>Deadlines</h2>
+
+<!-- Deadlines -->
+@foreach (CoTE.Areas.Portals.Models.CoopData h in ViewData.Model)
+{
+    foreach (var link in h.LinksDataSet)
+    {
+            if (@link.section_type == "D") 
+            {
+			    <span class="dates"><strong>@link.short_title</strong></span>
+			<br /><span class="smtxt">@link.heading</span>
+            }
+    }
+}
+
+											</td>
+
+										</tr>
+
+									</table>
+
+								</td>
+
+							</tr>
+
+						</table>
+
+					</td>
+
+					<td width="15" align="left" valign="top" background="https://cte-s.education.illinois.edu/images/rightside.gif">
+
+						<img src="https://cte-s.education.illinois.edu/images/rightside_top.gif" width="15" height="17" align="top"/><br/>
+
+						<img src="https://cte-s.education.illinois.edu/images/clear.gif" width="15" height="50"/>
+
+					</td>
+
+				</tr>
+
+			</table>
+
+			<table width="780" cellpadding="0" cellspacing="0">
+
+				<tr>
+
+					<td align="right" width="15"><img src="https://cte-s.education.illinois.edu/images/leftside_bottom.gif" width="15" height="17" align="top"/>
+
+					</td>
+
+					<td width="96" height="17" align="left" valign="top" bgcolor="#31326B">
+
+						<img src="https://cte-s.education.illinois.edu/images/left_bottomcorner.gif" width="15" height="17" align="top"/>
+
+						<a href="http://www.cote.illinois.edu/">
+
+							<img src="https://cte-s.education.illinois.edu/images/home.gif" alt="CTE Home" width="64" height="17" border="0" align="top"/></a>
+
+					</td>
+
+					<td width="656" align="right" valign="top" bgcolor="#31326B">
+
+						<a href="http://www.cote.illinois.edu/faqs.html">
+
+							<img src="https://cte-s.education.illinois.edu/images/faqs.gif" alt="FAQs" name="faqs" width="58" height="17" border="0" align="top"/>
+
+						</a>
+
+						<a href="http://www.cote.illinois.edu/contact.html">
+
+							<img src="https://cte-s.education.illinois.edu/images/contact.gif" alt="Contact Us" name="contact" width="93" height="17" border="0" align="top"/>
+
+						</a>
+
+						<img src="https://cte-s.education.illinois.edu/images/right_bottomcorner.gif" width="15" height="17" align="top"/>
+
+					</td>
+
+					<td align="left" width="15">
+
+						<img src="https://cte-s.education.illinois.edu/images/rightside_bottom.gif" width="15" height="17" align="top"/>
+
+					</td>
+
+				</tr>
+
+				<tr align="center">
+
+					<td colspan="4">
+
+						<img src="https://cte-s.education.illinois.edu/images/bottom.gif" width="780" height="7"/>
+
+					</td>
+
+				</tr>
+
+			</table>
+
+			<table border="0" cellpadding="0" cellspacing="0" width="780">
+
+				<tr>
+
+					<td width="15" align="left" valign="top">
+
+						<img src="https://cte-s.education.illinois.edu/images/clear.gif" width="15" height="30" border="0"/>
+
+					</td>
+
+					<td width="529" align="left" valign="top" nowrap="nowrap" class="footer">
+
+						<a href="http://www.uiuc.edu/">University of Illinois at Urbana-Champaign</a>
+
+					</td>
+
+					<td width="221" align="right" valign="top" nowrap="nowrap" class="footer">
+
+					E-mail: <a href="mailto:teachercertification@uiuc.edu">teachercertification@uiuc.edu</a>
+
+					</td>
+
+					<td width="15" align="right" valign="top">
+
+						<img src="https://cte-s.education.illinois.edu/images/clear.gif" width="15" height="30"/>
+
+					</td>
+
+				</tr>
+
+				<tr>
+
+					<td colspan="4" align="center" valign="top" nowrap="nowrap">
+
+						<p class="footer">
+
+							<a href="http://www.fs.uiuc.edu/cam/CAM/ii/ii-17.html" target="_blank">Copyright© 2005 The University of Illinois</a><br/>
+
+						</p>
+
+					</td>
+
+				</tr>
+
+			</table>
+
+		</center>
+
+}
+else
+{
+    		<center><br/><br/><br/><h2><font color="red" size="+2">You do not have access to view this page.  <br />For access to this page, please contact <a href="mailto:cote-techsupport@illinois.edu">cote-techsupport@illinois.edu</a></font></h2></center>
+}
+    
+	</body>
+
+</html>

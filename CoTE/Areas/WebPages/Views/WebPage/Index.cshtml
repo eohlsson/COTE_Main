@@ -1,0 +1,231 @@
+﻿@{
+    string location = ViewBag.Location;
+    string portal = ViewBag.Portal;
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+}
+    <script type="text/javascript">
+        var position = @Html.Raw(Json.Encode(ViewBag.Location));
+        var portal = @Html.Raw(Json.Encode(ViewBag.Portal));
+
+//        $(".main-navigation .menu a").each(function () {
+//           window.alert($(this).text());
+//        });
+
+    </script>
+
+<!-- InstanceEndEditable -->
+    <!-- InstanceBeginEditable name="body-content" -->
+    <section class="align-bottom">
+    <div class="small-11 column site-top-border">
+        <div class="row align-center">
+            <div class="small-10 column">
+                <h1>COVID-19 and Teacher Licensure</h1>
+                <p align="left">
+                    On April 24, 2020, Governor Pritzker signed Executive Order 2020-31.  The executive order provides relief on various licensure requirements including those candidates who were to complete student teaching, internships, and required exams, during the spring 2020 semester.
+                    The Illinois State Board of Education (ISBE) filed companion emergency rules on April 27, 2020 and released final emergency rules and supporting FAQs on April 29, 2020 regarding professional educator licensure requirements for the Spring 2020 semester. <br /><br />
+                    Please know that we are also directly communicating any new information with your preparation program coordinator/faculty.  The FAQs below have been updated to reflect the 4/29/20 ISBE emergency rules.  The Council on Teacher Education will keep you as updated as
+                    possible as we receive any new directives from the state and university that could specifically impact teacher education and licensure requirements.
+                </p>
+                <ol>
+                    <li style="text-align:left"><a href="/dotnet/webpages/webpage.aspx/webpage?page_level=5.1.3">How could grading changes impact courses in my program required for licensure?</a></li>
+                    <li style="text-align:left"><a href="/dotnet/webpages/webpage.aspx/webpage?page_level=5.1.4">What about clock hours in schools required for subsequent endorsements such as ESL or Bilingual?</a></li>
+                    <li style="text-align:left"><a href="/dotnet/webpages/webpage.aspx/webpage?page_level=5.1.5">What about content testing requirement and timelines?</a></li>
+                    <li style="text-align:left"><a href="/dotnet/webpages/webpage.aspx/webpage?page_level=5.1.6">What about edTPA?</a></li>
+                    <li style="text-align:left"><a href="/dotnet/webpages/webpage.aspx/webpage?page_level=5.1.7">How does this impact advanced licensure programs such as Speech Language Pathology; Social Work; LBSII; Principal; Superintendent?</a></li>
+                    <li style="text-align:left"><a href="/dotnet/webpages/webpage.aspx/webpage?page_level=5.1.8">I have other questions....</a></li>
+                </ol>
+                <p align="left">Please know we are here to help and assist you with any questions or concerns you have.  Please email questions to <strong><a href="mailto:cote-teachercertification@illinois.edu">cote-teachercertification@illinois.edu</a></strong> or call us at (217) 333-2804!</p>
+                <div class="arrow-down-white"></div>
+            </div>
+        </div>
+    </div>
+</section>
+    <a name="UserPortals"></a>
+    <section class="row align-center section-user-portals">
+        <div class="large-9 column">
+            <h2>User Portals</h2>
+            <hr>
+            <p>Log in to access required forms and information specific to your role.</p>
+            <div class="row align-center">
+                <div class="small-12 large-5 column">
+                    <ul class="menu vertical">
+                        <li><a href="#" class="is-active">Current Candidates</a></li>
+                        <li><a href="#">Cooperating Personnel</a></li>
+                        <li><a href="#">University Supervisors</a></li>
+                        <li><a href="#">Program Staff</a></li>
+                    </ul>
+                </div>
+                <div class="small-12 large-7 column">
+                    <div id="student-portal-container" class="portal-container">
+                        <form method="post" action="/dotnet/webpages/webpage.aspx#UserPortals">
+                            <input type="hidden" name="portal" value="student">
+                            <input type="hidden" name="portal_redirect" value="@portal">
+                            <input type="hidden" name="location" value="bottom">
+                            <h3 id="portal-title">Current Candidates Portal</h3>
+                            <div class="cs-input-group">
+							    <label for="txtEmail" class="cs-input-label">Network ID</label>
+                            <div class="input-group">
+                                <i class="fa fa-envelope-o" aria-hidden="true"></i>
+                                <input id="txtEmail" name="username" type="text" class="cs-input-field" placeholder="Network ID"/>
+                            </div>
+						    </div>
+                           <div class="cs-input-group">
+                           <label for="txtPassword" class="cs-input-label">Password</label>
+                            <div class="input-group">
+                                <i class="fa fa-lock" aria-hidden="true"></i>
+                                <input id="txtPassword" name="password" autocomplete='off' type="password" class="cs-input-field" placeholder="Password"/>
+                            </div>
+						    </div>
+                            <div>
+                                <b><font color="red" size=-1 face=arial,helvetica>
+                                    @if (@ViewBag.ErrorMessage != null && @ViewBag.Portal == "student" && @ViewBag.Location == "bottom")
+                                {
+                                    @Html.Raw(HttpUtility.HtmlDecode(@ViewBag.ErrorMessage));
+                                }
+                                </font></b>
+                            </div>
+                            <div class="button-container">
+                                <button type="submit" class="button button-portal">Log In</button>
+                            </div>
+                        </form>
+                        <p class="sub-portal">Visit the Technology Services website for information about your NetID. For
+                            additional help logging in, email cote-techsupport@illinois.edu or call (217) 333-2804.</p>
+                    </div>
+                    <div id="coop-portal-container" class="portal-container" style="display:none;">
+                        <form method="post" action="/dotnet/webpages/webpage.aspx#UserPortals">
+                            <input type="hidden" name="portal" value="coop">
+                            <input type="hidden" name="portal_redirect" value="@portal">
+                            <input type="hidden" name="location" value="bottom">
+                            <h3 id="portal-title">Cooperating Personnel Portal</h3>
+                            <div class="cs-input-group">
+							    <label for="txtEmail" class="cs-input-label">Email Address</label>
+                            <div class="input-group">
+                                <i class="fa fa-envelope-o" aria-hidden="true"></i>
+                                <input id="txtEmail" name="username" type="text" class="cs-input-field" placeholder="Email Address"/>
+                            </div>
+						    </div>
+                           <div class="cs-input-group">
+                           <label for="txtPassword" class="cs-input-label">Password</label>
+                            <div class="input-group">
+                                <i class="fa fa-lock" aria-hidden="true"></i>
+                                <input id="txtPassword" autocomplete='off' name="password" type="password" class="cs-input-field" placeholder="Password"/>
+                            </div>
+						    </div>
+                            <div>
+                                <b><font color="red" size=-1 face=arial,helvetica>
+                                    @if (@ViewBag.ErrorMessage != null && @ViewBag.Portal == "coop" && @ViewBag.Location == "bottom")
+                                {
+                                    @Html.Raw(HttpUtility.HtmlDecode(@ViewBag.ErrorMessage));
+                                }
+                                </font></b>
+                            </div>
+                            <div class="button-container">
+                                <button type="submit" class="button button-portal">Log In</button>
+                            </div>
+                        </form>
+                               <p class="sub-portal">If you have <b>NOT</b> already setup your account, click <a href="/dotnet/account.aspx/retrieve" style="text-decoration:underline;color:white;">here</a>.<br/><br />
+                                If you have already setup your account, but can't remember your password, click <a href='/dotnet/account.aspx/ResetPassword' style="text-decoration:underline;color:white;">here</a> to <b>reset your password.</b><br/><br />
+                                For detailed instructions for logging in and resetting your account, click <a href="http://www.cote.illinois.edu/documents/Coop_Portal_Login_Instructions.pdf" style="text-decoration:underline;color:white;">here</a>.<br /><br />
+                                For additional help logging in, email cote-techsupport@illinois.edu or call (217) 333-2804.</p>
+                    </div>
+                    <div id="supervisor-portal-container" class="portal-container" style="display:none;">
+                        <form method="post" action="/dotnet/webpages/webpage.aspx#UserPortals">
+                            <input type="hidden" name="portal" value="supervisor">
+                            <input type="hidden" name="portal_redirect" value="@portal">
+                            <input type="hidden" name="location" value="bottom">
+                            <h3 id="portal-title">Supervisor Portal</h3>
+                            <div class="cs-input-group">
+							    <label for="txtEmail" class="cs-input-label">Network ID</label>
+                            <div class="input-group">
+                                <i class="fa fa-envelope-o" aria-hidden="true"></i>
+                                <input id="txtEmail" name="username" type="text" class="cs-input-field" placeholder="Network ID"/>
+                            </div>
+						    </div>
+                           <div class="cs-input-group">
+                           <label for="txtPassword" class="cs-input-label">Password</label>
+                            <div class="input-group">
+                                <i class="fa fa-lock" aria-hidden="true"></i>
+                                <input id="txtPassword" autocomplete='off' name="password" type="password" class="cs-input-field" placeholder="Password"/>
+                            </div>
+						    </div>
+                            <div>
+                                <b><font color="red" size=-1 face=arial,helvetica>
+                                    @if (@ViewBag.ErrorMessage != null && @ViewBag.Portal == "supervisor" && @ViewBag.Location == "bottom")
+                                {
+                                    @Html.Raw(HttpUtility.HtmlDecode(@ViewBag.ErrorMessage));
+                                }
+                                </font></b>
+                            </div>
+                            <div class="button-container">
+                                <button type="submit" class="button button-portal">Log In</button>
+                            </div>
+                            <p class="sub-portal">Visit the Technology Services website for information about your NetID. For
+                                additional help logging in, email cote-techsupport@illinois.edu or call (217) 333-2804.</p>
+                        </form>
+                    </div>
+                    <div id="program-portal-container" class="portal-container" style="display:none;">
+                        <form method="post" action="/dotnet/webpages/webpage.aspx#UserPortals">
+                            <input type="hidden" name="portal" value="program">
+                            <input type="hidden" name="portal_redirect" value="@portal">
+                            <input type="hidden" name="location" value="bottom">
+                            <h3 id="portal-title">Program Portal</h3>
+                            <div class="cs-input-group">
+							    <label for="txtEmail" class="cs-input-label">Network ID</label>
+                            <div class="input-group">
+                                <i class="fa fa-envelope-o" aria-hidden="true"></i>
+                                <input id="txtEmail" name="username" type="text" class="cs-input-field" placeholder="Network ID"/>
+                            </div>
+						    </div>
+                           <div class="cs-input-group">
+                           <label for="txtPassword" class="cs-input-label">Password</label>
+                            <div class="input-group">
+                                <i class="fa fa-lock" aria-hidden="true"></i>
+                                <input id="txtPassword" autocomplete='off' name="password" type="password" class="cs-input-field" placeholder="Password"/>
+                            </div>
+						    </div>
+                            <div>
+                                <b><font color="red" size=-1 face=arial,helvetica>
+                                @if (@ViewBag.ErrorMessage != null && @ViewBag.Portal == "program" && @ViewBag.Location == "bottom")
+                                {
+                                    @Html.Raw(HttpUtility.HtmlDecode(@ViewBag.ErrorMessage));
+                                }
+                                </font></b>
+                            </div>
+                            <div class="button-container">
+                                <button type="submit" class="button button-portal">Log In</button>
+                            </div>
+                        </form>
+                        <p class="sub-portal">Visit the Technology Services website for information about your NetID. For
+                            additional help logging in, email cote-techsupport@illinois.edu or call (217) 333-2804.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="arrow-down-blue"></div>
+        </div>
+    </section>
+    <section class="row align-center section-quick-links">
+        <div class="small-11 column">
+            <h2 class="text-center">Quick Links</h2>
+            <div class="row align-center">
+                <div class="large-6 column">
+                    <ul>
+                        <li><a href="/dotnet/webpages/webpage.aspx/webpage?page_level=4.1.3.3" class="button">Bloodborne Pathogens Training</a></li>
+                        <li><a href="/dotnet/webpages/webpage.aspx/webpage?page_level=4.1.3.2" class="button">Criminal Background Check</a></li>
+                        <li><a href="/dotnet/webpages/webpage.aspx/webpage?page_level=4.1.3.4" class="button">Teacher Education Safety Training</a></li>
+                        <li><a href="/dotnet/webpages/webpage.aspx/webpage?page_level=4.1.3.6" class="button">Mandated Reporter Acknowledgement</a></li>
+                        <li><a href="/dotnet/webpages/webpage.aspx/facilitylist" class="button">Districts with Placement Contracts</a></li>
+                    </ul>
+                </div>
+                <div class="large-6 column">
+                    <ul>
+                        <li><a href="https://cte-s.education.illinois.edu/documents/Candidate_Petition.pdf" class="button">Candidate Petition Form</a></li>
+                        <li><a href="http://www.icts.nesinc.com/index.asp" class="button">Illinois Licensure Testing System</a></li>
+                        <li><a href="/dotnet/webpages/webpage.aspx/webpage?page_level=4.3.1" class="button">Tuition and Fee Waivers</a></li>
+                        <li><a href="https://cte-s.education.illinois.edu/dotnet/webpages/webpage.aspx/webpage?page_level=4.5.3" class="button">Guidance on Obtaining Approvals for Changes to Licensure Programs</a></li>
+                        <li><a href="http://www.edtpa.com/" class="button">edTPA</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+

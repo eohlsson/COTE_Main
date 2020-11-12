@@ -1,0 +1,428 @@
+﻿@using System.Data.Entity;
+@using System.Web.Helpers;
+@using FormProcessor.Models;
+@using System.Data;
+@using System.Data.SqlClient;
+@using System.Dynamic;
+@using System.Configuration;
+@using System.Collections;
+@using CoTE.Areas.FormProcessor.Helpers;
+
+@model IEnumerable<Form_Data>
+
+@{                 
+    
+        Form_Section form_section = ViewBag.section;
+        Form_Data h = ViewBag.h;
+        string form_action = ViewBag.form_action;
+        IEnumerable<Form_Data> form_data = ViewBag.form_data;
+        List<Form_Valuelists> value_lists = ViewBag.value_lists;
+        Dictionary<String, String> form_errors = ViewBag.form_errors;
+        string field_error = "";
+        Dictionary<string, string> insertparams = new Dictionary<string, string>();
+
+        if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "Section: " + form_section.section_id + " Start"); }
+
+
+                
+//***** One-to-One Sections
+                if (form_section.one_to_many_relation_id.ToString() == "") // One to One Sections
+                {
+
+                    int? section_row = 0;
+                    int rowcount = 1;
+                                               
+                    <div class="sections">
+                    <table class="one_to_one_section">
+
+
+                    @if (form_section.section_header_xslt != null)
+                    {
+                        @MvcHtmlString.Create(form_section.section_header_xslt);
+                    }
+                    else if (form_section.section_title != null)
+                    {
+                        @MvcHtmlString.Create("<a name=" + form_section.section_title.ToString().Replace(" ", "") + "></a><h2 class='section_title'>" + form_section.section_title + "</h2>");
+                    }
+
+                    @foreach (var question in h.QuestionsDataSet.Where(question => question.section_id.ToString() == form_section.section_id.ToString())) // Question
+                    {
+
+                        if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "Question: " + question.question_id + " Start"); }
+
+                        string field_value = "";
+                        string required = "";
+
+                        if (ViewData[question.data_location] != null)
+                        {
+                            field_value = ViewData[question.data_location].ToString();
+                        }
+                        else if (form_action != "add")
+                        {
+                            // Get field value if it exists
+                            if (form_data.ContainsKey(question.data_location))
+                            {
+                                field_value = form_data[question.data_location].ToString();
+                            }
+                        }
+
+                        if (ViewBag.form_errors != null && form_errors.ContainsKey(question.data_location))
+                        {
+                            field_error = "<br/><font color='red'><b>Error: " + question.question_name + " " + form_errors[question.data_location] + "</b></font>";
+                        }
+                        else
+                        {
+                            field_error = "";
+                        }
+
+                        if (!question.nullable)
+                        {
+                            required = "<span class='required_symbol'>* </span>";
+                        }
+
+                        if ((question.question_row == null) || (question.question_row > 0 && section_row != question.question_row))
+                        {
+                            @MvcHtmlString.Create("<tr class=\"question_and_input\"><td class=\"question\">");
+                            section_row = question.question_row;
+                        }
+                        else
+                        {
+                            @MvcHtmlString.Create("<td class=\"question\">");
+                        }                           
+
+                              
+                              if (question.question != "")
+                              {
+                                @MvcHtmlString.Create(@required)<span class="question_name">@MvcHtmlString.Create(@question.question_name)<br /></span><span class="question_question">@MvcHtmlString.Create(@question.question)</span> 
+                              }
+                              else
+                              {
+                                @MvcHtmlString.Create(@required)<span class="question_name">@MvcHtmlString.Create(@question.question_name)<br /></span>  
+                              }
+
+                        // Is question vertical or horizontal??
+                        if ((question.question_orientation == "H"))
+                        {
+                            @MvcHtmlString.Create("</td><td>");
+                        }
+                        else
+                        {
+                            @MvcHtmlString.Create("<br/>");
+                        }
+
+                        switch (form_action)
+                              {
+                                  case "add":
+                                      {
+                                      @Functions.GenerateFPField(this, field_value, question.data_location, question, question.input_type, value_lists)<span class="question_trailer">@MvcHtmlString.Create(@question.question_trailer)</span><span class="field_error">@MvcHtmlString.Create(@field_error)</span>@MvcHtmlString.Create("</td>")
+                                          break;
+                                      }
+                                  case "edit":
+                                      {
+                                      @Functions.GenerateFPField(this, field_value, question.data_location, question, question.input_type, value_lists)<span class="question_trailer">@MvcHtmlString.Create(@question.question_trailer)</span><span class="field_error">@MvcHtmlString.Create(@field_error)</span>@MvcHtmlString.Create("</td>")
+                                          break;
+                                      }
+                                  case "view":
+                                      {
+                                      @Functions.GenerateFPField(this, field_value, question.data_location, question, "display", value_lists)<span class="question_trailer">@MvcHtmlString.Create(@question.question_trailer)</span><span class="field_error">@MvcHtmlString.Create(@field_error)</span>@MvcHtmlString.Create("</td>")
+                                          break;
+                                      }
+                              }                    
+
+                              if ((question.question_row == null) || (question.question_row > 0 && section_row != question.question_row))
+                              {
+                                    @MvcHtmlString.Create("</tr>");
+                                    section_row = question.question_row;
+                              }
+
+                              if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "Question: " + question.question_id + " End "); }
+
+                              rowcount++;
+
+                    }
+                    </table>
+                    </div>
+
+                }
+// One-to-Many sections
+                else // One to Many Sections
+                {
+
+                    string section_HTML = "";
+                    int? section_row = 1;
+
+                    if (form_section.section_header_xslt != null)
+                    {
+                            @MvcHtmlString.Create(form_section.section_header_xslt);
+                    }
+                    else
+                    {
+                            @MvcHtmlString.Create("<a name=" + form_section.section_title.ToString().Replace(" ", "") + "></a><h2 class='section_title'>" + form_section.section_title + "</h2>");
+                    }
+
+                    var result = new List<dynamic>();
+                    int rowcount = 1;
+                    int fieldcount;
+
+                    // Get record_id value and insertparams
+                    string record_id_field = "";
+                    string primary_key_insert_values = "";
+                    string permissions_mask = "";
+                    string section_entity_name = "";
+
+                    // Get Permissions mask
+                    foreach (var relation in h.RelationsDataSet.Where(relation => relation.relation_id.ToString() == form_section.one_to_many_relation_id.ToString())) // Question
+                    {
+                        permissions_mask = relation.permissions_mask;
+                        section_entity_name = relation.entity_name;
+                    }
+
+                    // Only get record_id if it isn't an add
+                    foreach (var relation in h.RelationsDataSet.Where(relation => relation.relation_id.ToString() == form_section.one_to_many_relation_id.ToString())) // Question
+                    {
+
+                        if (form_action != "add")
+                        {
+                            // Make sure there are records
+                            if (form_data.ContainsKey(relation.table_name + "." + relation.record_id_field + "_1"))
+                            {
+
+                                record_id_field = relation.table_name + "." + relation.record_id_field;
+                                if (!relation.primary_key_insert_values.IsEmpty())
+                                {
+                                    primary_key_insert_values = relation.primary_key_insert_values.ToString();
+                                }
+
+                            }
+                            else if (relation.primary_key_insert_values != null && relation.primary_key_insert_values.ToString().Contains("[record_id]"))
+                            {
+                                record_id_field = relation.table_name + "." + relation.record_id_field;
+                                primary_key_insert_values = ViewBag.record_id;
+                            }
+
+
+                        }
+                        else if (relation.primary_key_insert_values != null && relation.primary_key_insert_values.ToString().Contains("[record_id]"))
+                        {
+                            record_id_field = relation.table_name + "." + relation.record_id_field;
+                            primary_key_insert_values = relation.primary_key_insert_values.Replace("'[record_id]'", ViewBag.record_id);
+                        }
+
+                    }
+
+                    insertparams.Add(form_section.section_id.ToString(), primary_key_insert_values);
+                        
+                    int editable_field_count = 0;
+                    var first_record = h.QuestionsDataSet.First(question => question.section_id.ToString() == form_section.section_id.ToString());
+                    string required = "";
+
+                    while (form_data.ContainsKey(first_record.data_location + "_" + rowcount))
+                    {
+
+                        var obj = (IDictionary<string, object>)new ExpandoObject();
+                        fieldcount = 1;
+                        section_row = 1;
+
+                        string record_id_value = "";
+
+                        if (record_id_field != "")
+                        {
+                            record_id_value = form_data[record_id_field + "_" + rowcount].ToString();
+                        }
+
+                        string row_label = form_section.section_id.ToString() + "_" + rowcount.ToString() + "_" + record_id_value.ToString();
+                        section_HTML = "<table id = 'grid_" + form_section.section_id.ToString() + "_" + rowcount.ToString() + "' border='0' cellpadding='5'><tr>";
+                        
+                        foreach (var question in h.QuestionsDataSet.Where(question => question.section_id.ToString() == form_section.section_id.ToString())) // Question
+                        {
+
+                            if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "Question: " + question.question_id + " Start"); }
+
+                            if (question.input_type != "display")
+                            {
+                                editable_field_count++;
+                            }
+
+                            string field_value = "";
+
+                            if (ViewData[question.data_location + "_" + rowcount.ToString()] != null)
+                            {
+                                field_value = ViewData[question.data_location + "_" + rowcount.ToString()].ToString();
+                            }
+                            else if (form_action != "add")
+                            {
+                                field_value = @form_data[@question.data_location + "_" + rowcount.ToString()].ToString();
+                            }
+
+                            if (ViewBag.form_errors != null && form_errors.ContainsKey(question.data_location))
+                            {
+                                field_error = "<br/><font color='red'><b>Error: " + question.question_name + " " + form_errors[question.data_location] + "</b></font>";
+                            }
+                            else
+                            {
+                                field_error = "";
+                            }
+
+                            if (!question.nullable)
+                            {
+                                required = "* ";
+                            }
+                            else
+                            {
+                                required = "";
+                            }
+
+
+                            // Add question to grid object
+                            //obj.Add(@Html.Raw(required) + @question.question_name, @MvcHtmlString.Create("<span id='Editable_" + fieldcount + "_" + row_label + "' style='display:none'>" + @Functions.GenerateFPField(this, field_value, question.data_location + "_" + rowcount.ToString(), question, question.input_type, value_lists) + "</span>" + "<span id='View_" + fieldcount + "_" + row_label + "'>" + @Functions.GenerateFPField(this, @form_data[@question.data_location + "_" + rowcount.ToString()].ToString(), question.question_name + "_" + rowcount.ToString(), question, "display", value_lists) + "</span>"));
+                            //section_HTML = "<td>" + @Html.Raw(required) + @question.question_name + "<span id='Editable_" + fieldcount + "_" + row_label + "' style='display:none'>" + @Functions.GenerateFPField(this, field_value, question.data_location + "_" + rowcount.ToString(), question, question.input_type, value_lists) + "</span>" + "<span id='View_" + fieldcount + "_" + row_label + "'>" + @Functions.GenerateFPField(this, @form_data[@question.data_location + "_" + rowcount.ToString()].ToString(), question.question_name + "_" + rowcount.ToString(), question, "display", value_lists) + "</span></td></table>";
+                            if (question.question_row > 0 && section_row != question.question_row)
+                            {
+                                section_HTML = section_HTML + "</tr><tr>";
+                                section_row = question.question_row;
+                            }
+
+                            section_HTML = section_HTML + "<td><b>" + Html.Raw(required) + question.question_name + "</b>:<br/> <span id='Editable_" + fieldcount + "_" + row_label + "' style='display:none'>" + Functions.GenerateFPField(this, field_value, question.data_location + "_" + rowcount.ToString(), question, question.input_type, value_lists) + "</span>" + "<span id='View_" + fieldcount + "_" + row_label + "'>" + Functions.GenerateFPField(this, form_data[question.data_location + "_" + rowcount.ToString()].ToString(), question.question_name + "_" + rowcount.ToString(), question, "display", value_lists) + "</span></td>";
+                            
+                            fieldcount++;
+
+                            if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "Question: " + question.question_id + " End "); }
+
+                        }
+
+                        // Add to grid as table                      
+                        section_HTML = section_HTML + "</tr></table>";
+                        obj.Add("Data", MvcHtmlString.Create(section_HTML));
+
+                        // Don't show Action column if in view mode or there are no editable fields
+                        if (form_action != "view" && editable_field_count > 0)
+                        {
+                            string strActionColumn = "";
+                            
+                            // Build action column
+                            if (permissions_mask.ToString().Contains("update"))
+                            {
+                                strActionColumn = strActionColumn + "<a href='#' id='Edit_" + fieldcount + "_" + row_label + "' class='edit'>Edit</a><a href='#' id='Update_" + fieldcount + "_" + row_label + "' style='display:none' class='update'>Update</a>&nbsp;&nbsp;&nbsp;<a href='#' id='Cancel_" + fieldcount + "_" + row_label + "' style='display:none' class='cancel'>Cancel</a>";
+                            }
+                            if (permissions_mask.Contains("delete"))                            
+                            {
+                                strActionColumn = strActionColumn + "&nbsp;&nbsp;&nbsp;<a href='#' id='Delete_" + fieldcount + "_" + row_label + "' class='delete'>Delete</a>&nbsp;&nbsp;&nbsp;";
+                            }
+                            
+                            // Open to form instead of inline editing if open_to_form is not null
+                            if (form_section.open_to_form == null)
+                            {
+                                obj.Add("  Action  ", @MvcHtmlString.Create(strActionColumn));
+                            }
+                            else
+                            {
+                                obj.Add("  Action  ", @MvcHtmlString.Create("<a href='../form.aspx/index?form_id=" + form_section.open_to_form + "&action=edit&amp;record_id=" + record_id_value.ToString() + "&amp;" + ViewBag.Username + "&subform=true&callingform=" + ViewBag.form_id + "&callingid=" + ViewBag.record_id + "' target='_New'>Edit</a>"));
+                            }
+                        }
+                        result.Add(obj);
+
+                        rowcount++;
+
+                    }
+
+                    // Pass in fieldcount to functions
+                    // Loop on fieldcount to set hide fields
+
+                    //Add an extra row for ADDING
+                    fieldcount = 1;
+                    section_HTML = "<span id='AddRowField_" + fieldcount + "_" + form_section.section_id.ToString() + "_" + rowcount.ToString() + "' style='display:none'><table id = 'grid_" + form_section.section_id.ToString() + "_" + rowcount.ToString() + "' border='0' cellpadding='5'><tr>";
+
+                    section_row = 1;
+
+                    var add_row = (IDictionary<string, object>)new ExpandoObject();
+                    
+                    foreach (var question in h.QuestionsDataSet.Where(question => question.section_id.ToString() == form_section.section_id.ToString())) // Question
+                    {
+                        if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "AddRow: Question: " + question.question_id + " Start "); }
+
+                        if (!question.nullable)
+                        {
+                            required = "* ";
+                        }
+                        else
+                        {
+                            required = "";
+                        }
+
+
+                        //add_row.Add(@Html.Raw(required) + @question.question_name, @MvcHtmlString.Create("<span id='AddRowField_" + fieldcount + "_" + form_section.section_id.ToString() + "_" + rowcount.ToString() + "' style='display:none'>" + @Functions.GenerateFPField(this, "", question.data_location + "_" + rowcount, question, question.input_type, value_lists) + "</span>"));
+                        if (question.question_row > 0 && section_row != question.question_row)
+                        {
+                            section_HTML = section_HTML + "</tr><tr>";
+                            section_row = question.question_row;
+                        }
+
+                        section_HTML = section_HTML + "<td>" + Html.Raw(required) + question.question_name + ": " + Functions.GenerateFPField(this, "", question.data_location + "_" + rowcount, question, question.input_type, value_lists) + "</td>";
+
+                        fieldcount++;
+
+                        if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "AddRow: Question: " + question.question_id + " End "); }
+
+                    }
+
+                    // Add "add" row as a table to grid
+                    section_HTML = section_HTML + "</tr></table></span>";
+                    add_row.Add("Data", MvcHtmlString.Create(section_HTML));
+    
+                    add_row.Add("  Action  ", @MvcHtmlString.Create("<span id='AddRowAction_" + fieldcount + "_" + form_section.section_id.ToString() + "_" + rowcount.ToString() + "' style='display:none'><a href='#' id='Save_" + fieldcount + "_" + form_section.section_id.ToString() + "_" + rowcount.ToString() + "_-1" + "' class='save'  data-insertparams=\"" + insertparams[form_section.section_id.ToString()] + "\">Save</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href='#' id='iCancel_" + fieldcount + "_" + form_section.section_id.ToString() + "_" + rowcount.ToString() + "'  class='icancel'>Cancel</a></span>"));
+                    result.Add(add_row);
+                    
+
+                    var grid = new WebGrid(result, rowsPerPage: 20, ajaxUpdateContainerId: "grid_" + form_section.section_id.ToString());
+
+                    int firstRecord = (grid.PageIndex * grid.RowsPerPage) + 1;
+                    int lastRecord = (grid.PageIndex * grid.RowsPerPage) + grid.Rows.Count();
+
+                    // Don't show Add if in view mode or if there are no editable fields
+                    if (form_action != "view" && permissions_mask.Contains("add"))
+                    {
+
+                        string add_text = "";
+                        if (section_entity_name.Substring(0).IndexOfAny(new char[] { 'a', 'A', 'e', 'E', 'i', 'I', 'o', 'O', 'u', 'U' }) == 0)
+                        {
+                            add_text = "Click here to add an " + section_entity_name.ToString();
+                        }
+                        else
+                        {
+                            add_text = "Click here to add a " + section_entity_name.ToString();
+                        }
+                            
+                        // Open to subform instead of inline editing if open_to_form is not null
+                        if (form_section.open_to_form == null)
+                        {                        
+                            @MvcHtmlString.Create("<a name=grid_" + form_section.section_id.ToString() + "></a><a href='#grid_" + form_section.section_id.ToString() + "' class='add' id='AddRow_" + fieldcount + "_" + form_section.section_id.ToString() + "_" + rowcount.ToString() + "'><b>" + add_text + "</b></a>");
+                        }
+                        else
+                        {
+                            @MvcHtmlString.Create("<a name=grid_" + form_section.section_id.ToString() + "></a><a href='../form.aspx/index?form_id=" + form_section.open_to_form + "&action=add&amp;record_id=-1&amp;" + ViewBag.Username + "&subform=true&callingform=" + ViewBag.form_id + "&callingid=" + ViewBag.record_id + "'><b>" + add_text + "</b></a>");
+                        }
+
+                    }
+
+                    if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "Grid: " + form_section.section_id.ToString() + " Start"); }
+
+                    @MvcHtmlString.Create(@grid.GetHtml(
+                        htmlAttributes: new { id = "grid_" + form_section.section_id.ToString() },
+                        mode: WebGridPagerModes.All,
+                        tableStyle: "grid",
+                        headerStyle: "grid-header",
+                        footerStyle: "grid-footer",
+                        alternatingRowStyle: "grid-alternating-row",
+                        selectedRowStyle: "grid-selected-row",
+                        rowStyle: "grid-row-style",
+                        firstText: "First", lastText: "Last"
+                    ).ToString().Replace("<tfoot>\r\n        <tr  class=\"grid-footer\">\r\n            <td col", "<tfoot><tr class='grid-footer'><td align='right' col").ToString().Replace("<tfoot><tr class='grid-footer'>", "<tfoot><tr class='grid-footer'><td align='left' class='footstuff'>Records " + firstRecord + " to " + lastRecord + " of " + grid.TotalRowCount + "          ")
+                    )                   
+
+                    if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "Grid: " + form_section.section_id.ToString() + " End "); }
+
+                }
+
+
+                
+            }

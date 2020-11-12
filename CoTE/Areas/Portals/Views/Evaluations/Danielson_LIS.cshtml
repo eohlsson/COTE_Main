@@ -1,0 +1,255 @@
+﻿@model CoTE.Areas.Portals.Models.Danielson
+
+@{
+
+    String[] ratings = { "", "1", "2", "3", "4" };
+    
+}
+
+<table class="danielson" border=1 border-color="white" cellpadding="15px">
+
+<tr>
+
+	<td colspan=2 class="domain" valign=top bgcolor="F8F1A0">
+
+  <b><font size="+1">DOMAIN 1: Planning and Preparation (<a href="https://cte-s.education.illinois.edu/documents/danielson%20-%20domain%201%20rubric%20-%20LIS.pdf" target="_blank">Rubric</a>)</font></b>
+
+  <br/><br/><b>
+
+      @Html.DropDownListFor(m => m.domain1_a, new SelectList(ratings), new { tabindex = 5 })
+
+  1a &nbsp;demonstrating knowledge of pedagogy, literature and current trends in library media practice and information technology</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Knowledge of age-appropriate instructional strategies
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Knowledge of age-appropriate literature and information sources
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Knowledge of current trends in library media practice and information technology
+
+  <b>
+
+<br /><br />
+      @Html.DropDownListFor(m => m.domain1_b, new SelectList(ratings), new { tabindex = 6 })
+  1b &nbsp;Demonstrating knowledge of the school's program and student information needs within that program</b>
+
+  <b>
+
+<br /><br />
+      @Html.DropDownListFor(m => m.domain1_c, new SelectList(ratings), new { tabindex = 7 })
+
+  1c &nbsp;Establishing goals for the library/media program appropriate to the setting and the students served</b>
+  <b>
+
+<br /><br />
+      @Html.DropDownListFor(m => m.domain1_d, new SelectList(ratings), new { tabindex = 8 })
+
+  1d &nbsp;Demonstrating knowledge of resources, both within and beyond the school and district, and access to such resources as interlibrary loan</b>
+  <b>
+
+<br /><br />
+      @Html.DropDownListFor(m => m.domain1_e, new SelectList(ratings), new { tabindex = 8 })
+
+  1e &nbsp;Planning the library/media program integrated with the overall school program</b>
+  <b>
+
+<br /><br />
+      @Html.DropDownListFor(m => m.domain1_f, new SelectList(ratings), new { tabindex = 9 })
+
+
+  1f &nbsp;Developing a plan to evaluate the library/media program</b>
+
+       <b>Comments</b><br />
+       @Html.TextAreaFor(m => m.domain1_comments, 3, 60, new { @title = "Comment" })
+
+	</td>
+
+	<td colspan=2 class="domain" valign=top bgcolor="78C1F6">
+
+  <B><font size="+1">DOMAIN 2: The Environment (<a href="https://cte-s.education.illinois.edu/documents/danielson%20-%20domain%202%20rubric%20-%20LIS.pdf" target="_blank">Rubric</a>)</font></B>
+
+  <br/><br/><b>
+
+      @Html.DropDownListFor(m => m.domain2_a, new SelectList(ratings), new { tabindex = 12 })
+
+  2a &nbsp;Creating an environment of respect and rapport</b>
+  <b>
+
+<br /><br />
+    @Html.DropDownListFor(m => m.domain2_b, new SelectList(ratings), new { tabindex = 13 })
+
+  2b &nbsp;Establishing a culture for investigation and love of literature</b>
+  <b>
+
+<br /><br />
+    @Html.DropDownListFor(m => m.domain2_c, new SelectList(ratings), new { tabindex = 14 })
+
+  2c &nbsp;Establishing and maintaining library procedures</b>
+  <b>
+
+<br /><br />
+    @Html.DropDownListFor(m => m.domain2_d, new SelectList(ratings), new { tabindex = 14 })
+
+  2d &nbsp;Managing student behavior</b>
+  <b>
+
+<br /><br />
+    @Html.DropDownListFor(m => m.domain2_e, new SelectList(ratings), new { tabindex = 15 })
+
+  2e &nbsp;Organizing physical space to enable smooth flow</b>
+  <b>
+
+       <br /><br /><b>Comments</b><br />
+       @Html.TextAreaFor(m => m.domain2_comments, 3, 60, new { @title = "Comment" })
+
+	</td>
+
+</tr>
+
+<tr>
+
+	<td align=right class="total" bgcolor="F8F1A0">
+   <b>&nbsp; Domain 1</b>
+
+    @Html.DropDownListFor(m => m.domain1_total, new SelectList(ratings), new { tabindex = 11 })
+
+  </td>
+
+	<td colspan=2 class="total" rowspan=2 align="center" bgcolor="cccccc">
+
+    @Html.DropDownListFor(m => m.domain_total, new SelectList(ratings), new { tabindex = 31 })
+
+  <b>&nbsp; Complete Domain Score</b>
+
+  <br/><br/><input type="submit" value="Save" />
+ 
+
+	</td>
+
+	<td class="total" bgcolor="78C1F6">
+
+    @Html.DropDownListFor(m => m.domain2_total, new SelectList(ratings), new { tabindex = 17 })
+
+   <b>&nbsp; Domain 2</b>	</td>
+
+</tr>
+
+<tr>
+
+	<td class="total" align=right bgcolor="B9D5C6">
+
+        <b>&nbsp; Domain 4</b>
+
+        @Html.DropDownListFor(m => m.domain4_total, new SelectList(ratings), new { tabindex = 24 })
+
+	</td>
+
+	<td class="total" bgcolor="F4C4EA">
+
+
+        @Html.DropDownListFor(m => m.domain3_total, new SelectList(ratings), new { tabindex = 30 })
+
+        <b>&nbsp; Domain 3</b>
+
+	</td>
+
+</tr>
+
+<tr>
+
+	<td colspan=2 class="domain" valign=top bgcolor="B9D5C6">
+
+  <B><font size="+1">DOMAIN  4: Professional Responsibilities (<a href="https://cte-s.education.illinois.edu/documents/danielson%20-%20domain%204%20rubric%20-%20LIS.pdf" target="_blank">Rubric</a>)</font></B>
+
+  <br/><br/><b>
+
+    @Html.DropDownListFor(m => m.domain4_a, new SelectList(ratings), new { tabindex = 18 })
+
+
+  4a &nbsp;Reflecting on practice</b>
+  <b>
+
+<br /><br />
+    @Html.DropDownListFor(m => m.domain4_b, new SelectList(ratings), new { tabindex = 19 })
+
+
+  4b &nbsp;Preparing and submitting reports and budgets</b>
+  <b>
+
+<br /><br />
+    @Html.DropDownListFor(m => m.domain4_c, new SelectList(ratings), new { tabindex = 20 })
+
+
+  4c &nbsp;Communicating with the larger community</b>
+  <b>
+
+<br /><br />
+    @Html.DropDownListFor(m => m.domain4_d, new SelectList(ratings), new { tabindex = 21 })
+
+  4d &nbsp;Participating in a professional community</b>
+  <b>
+
+
+<br /><br />
+    @Html.DropDownListFor(m => m.domain4_e, new SelectList(ratings), new { tabindex = 21 })
+
+  4e &nbsp;Engaging in professional development</b>
+  <b>
+
+<br /><br />
+    @Html.DropDownListFor(m => m.domain4_f, new SelectList(ratings), new { tabindex = 21 })
+
+  4f &nbsp;Showing professionalism</b>
+  <b>
+       <br /><br /><b>Comments</b><br />
+       @Html.TextAreaFor(m => m.domain4_comments, 3, 60, new { @title = "Comment" })
+
+	</td>
+
+	<td colspan=2 class="domain" valign=top bgcolor="F4C4EA">
+
+  <B><font size="+1">DOMAIN 3: Delivery of Service (<a href="https://cte-s.education.illinois.edu/documents/danielson%20-%20domain%203%20rubric%20-%20LIS.pdf" target="_blank">Rubric</a>)</font></B>
+
+  <br/><br/><b>
+
+    @Html.DropDownListFor(m => m.domain3_a, new SelectList(ratings), new { tabindex = 25 })
+
+
+  3a &nbsp;Maintaining and extending the library collection in accordance with the school's needs and within budget limitations</b>
+  <b>
+
+<br /><br />
+    @Html.DropDownListFor(m => m.domain3_b, new SelectList(ratings), new { tabindex = 26 })
+
+
+  3b &nbsp;Collaborating with teachers in the design of intructional units and lessons</b>
+  <b>
+
+<br /><br />
+    @Html.DropDownListFor(m => m.domain3_c, new SelectList(ratings), new { tabindex = 27 })
+
+
+  3c &nbsp;Engaging students in enjoying literature and in learning information skills</b>
+  <b>
+
+<br /><br />
+    @Html.DropDownListFor(m => m.domain3_d, new SelectList(ratings), new { tabindex = 28 })
+
+
+  3d &nbsp;Assisting students and teachers in the use of technology in the library/media center</b>
+  <b>
+
+
+<br /><br />
+    @Html.DropDownListFor(m => m.domain3_e, new SelectList(ratings), new { tabindex = 28 })
+
+  3e &nbsp;Demonstrating flexibility and responsiveness</b>
+  <b>
+
+       <br /><br /><b>Comments</b><br />
+       @Html.TextAreaFor(m => m.domain3_comments, 3, 60, new { @title = "Comment" })
+
+	</td>
+
+</tr>
+
+</table>

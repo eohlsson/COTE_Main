@@ -1,0 +1,296 @@
+﻿@model CoTE.Areas.LACES.Models.Student
+@using CoTE.Models
+@using System.Configuration
+@using System.Data.SqlClient
+@{
+    
+    // http://localhost:25903/dotnet/laces/tools.aspx/createbulkassignments
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+    string breadcrumb = "<nav class=\"site-breadcrumbs\"><ul>";
+    breadcrumb += " <li><a href=\"#\">Home</a> /</li>";
+    breadcrumb += " <li><a href=\"/dotnet/portals/programportal.aspx\">Program Staff Portal</a> /</li>";
+    breadcrumb += "</ul></nav>";
+
+    string bulkassignmentHTML = "";
+    string message = (string)ViewBag.message ?? "";
+    string term_id = (string)ViewBag.term_id ?? "";
+    string program_id = (string)ViewBag.program_id ?? "";
+    string username = (string)ViewBag.username ?? "";
+    string course_x_prog_id = (string)ViewBag.course_x_prog_id ?? "";
+
+
+    bulkassignmentHTML = "<form method='post' class='main_form' name='fp_form' id='Tools' action='' enctype='multipart/form-data'>";
+    bulkassignmentHTML = bulkassignmentHTML + "<div class='section-border'>";
+        
+    String ConnString = ConfigurationManager.ConnectionStrings["UserDb"].ConnectionString;
+
+    using (SqlConnection conn = new SqlConnection(ConnString))
+    {
+        conn.Open();
+        using (SqlCommand cmd = new SqlCommand())
+        {
+
+            string program_field = "";
+
+            program_field = "<select id='program_id' name='program_id' tabindex='1'><option value='' selected='selected'>-- Select a Program --</option>";
+
+            cmd.Connection = conn;
+            cmd.CommandType = System.Data.CommandType.Text;
+
+            cmd.CommandText = "Select uiuc_program_id, uiuc_programname from cte_programs_uiuc where discontinued_year is null order by 2;";
+
+            using (SqlDataReader reader = cmd.ExecuteReader())
+            {
+
+                while (reader.Read())
+                {
+
+                    if (program_id == "" || program_id != reader[0].ToString())
+                    {
+                        program_field = program_field + "<option value=" + reader[0].ToString() + ">" + reader[1].ToString() + "</option>";
+                    }
+                    else
+                    {
+                        program_field = program_field + "<option value=" + reader[0].ToString() + " selected>" + reader[1].ToString() + "</option>";
+                    }
+                    
+                }
+            }
+
+            program_field += "</select>";
+
+            bulkassignmentHTML = bulkassignmentHTML + "<div class='row medium-unstack'><div class='column cs-input-group'>Program:" + program_field + "</div></div>";
+
+            string term_field = "";
+
+            term_field = "<select name='term_id' tabindex='1'><option value='' selected='selected'>-- Select a Term --</option>";
+
+            cmd.Connection = conn;
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.CommandText = "[dbo].[CreateBannerTerms]";
+            cmd.Parameters.Add(new SqlParameter("@yearsBack", 0));
+            cmd.Parameters.Add(new SqlParameter("@yearsForward", 1));
+
+            using (SqlDataReader reader = cmd.ExecuteReader())
+            {
+
+                while (reader.Read())
+                {
+
+                    if (term_id == "" || term_id != reader[0].ToString())
+                    {
+                        term_field = term_field + "<option value=" + reader[0].ToString() + ">" + reader[1].ToString() + "</option>";
+                    }
+                    else
+                    {
+                        term_field = term_field + "<option value=" + reader[0].ToString() + " selected>" + reader[1].ToString() + "</option>";
+                    }
+                }
+            }
+
+            term_field += "</select>";
+
+            bulkassignmentHTML = bulkassignmentHTML + "<div class='row medium-unstack'><div class='column cs-input-group'>Term: " + term_field + "</div></div>";
+
+            string course_field = "";
+
+            course_field = "<select id='course_x_prog_id' name='course_x_prog_id' tabindex='1'><option value='' selected='selected'>-- Select a Course --</option>";
+
+            cmd.Parameters.Clear();
+            cmd.Connection = conn;
+            cmd.CommandType = System.Data.CommandType.Text;
+
+            cmd.CommandText = "Select distinct course_x_prog_id, course_title + ' ' + isnull(course_section, '') " +
+                                " from cte.dbo.v_ce_courses " +
+                                " where CTE.dbo.GetProgramPermissions ('" + ViewBag.username + "', UIUC_Program_Id, 'IP,IA,PC,PA,AP,US', getdate(), null) = 'TRUE'  " +
+	                                " and course_type IN ('ST', 'EFE', 'INT') " + 
+                                " order by course_title + ' ' + isnull(course_section, '')";
+
+            using (SqlDataReader reader = cmd.ExecuteReader())
+            {
+
+                while (reader.Read())
+                {
+
+                    if (course_x_prog_id == "" || course_x_prog_id != reader[0].ToString())
+                    {
+                        course_field = course_field + "<option value=" + reader[0].ToString() + ">" + reader[1].ToString() + "</option>";
+                    }
+                    else
+                    {
+                        course_field = course_field + "<option value=" + reader[0].ToString() + " selected>" + reader[1].ToString() + "</option>";
+                    }
+
+                }
+            }
+
+            course_field += "</select>";
+
+            bulkassignmentHTML = bulkassignmentHTML + "<div class='row medium-unstack'><div class='column cs-input-group'>Course:" + course_field + "</div></div>";
+
+            bulkassignmentHTML = bulkassignmentHTML + "<div><input class='button cs-input-button' accesskey='s' name='filter' type='submit' value='Filter'></input></div>";
+ 
+            bulkassignmentHTML = bulkassignmentHTML + "</form>";
+            bulkassignmentHTML = bulkassignmentHTML + "</div>";
+
+            bulkassignmentHTML = bulkassignmentHTML + "<div class='section-border'>";
+            bulkassignmentHTML = bulkassignmentHTML + "<form method='post' class='main_form' name='fp_form' id='Tools' action='' enctype='multipart/form-data'>";
+
+            string coop_field = "";
+
+            coop_field = "<select name='personnel_role_id' tabindex='1'><option value='' selected='selected'>-- Select a Cooperating Personnel --</option>";
+
+                    cmd.Parameters.Clear();
+                    cmd.Connection = conn;
+                    cmd.CommandType = System.Data.CommandType.Text;
+
+                    cmd.CommandText = "Select PR.personnel_role_id, last_name + ', ' + first_name + ' - ' + isnull(facility, 'NA') as person " +
+                        " from cte.dbo.ce_personnel P " +
+                          "  INNER JOIN cte.dbo.ce_personnel_roles PR ON PR.personnel_id = P.personnel_id " +
+                          "  INNER JOIN cte.dbo.ce_facilities F ON F.facility_id = PR.facility_id " +
+                        " where end_date is null " +
+                          "  and role_type = 'C' " +
+                          "  and PR.personnel_role_id IN " +
+                        "        (Select personnel_role_id from v_CE_PLACEMENTS_ALL_DETAILS where term >= cte.dbo.fn_get_term(dateadd(yy, -5, getdate()))) " +
+                        "order by 2;";
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+
+                        while (reader.Read())
+                        {
+
+                            coop_field = coop_field + "<option value=" + reader[0].ToString() + ">" + reader[1].ToString() + "</option>";
+
+                        }
+                    }
+
+                    coop_field += "</select>";
+
+                    bulkassignmentHTML = bulkassignmentHTML + "<div class='row medium-unstack'><div class='column cs-input-group'>Cooperating Personnel: " + coop_field + "</div></div>";
+
+                    string grade_level_field = "";
+
+                    grade_level_field = "<select name='grade_level' tabindex='1'><option value='' selected='selected'>-- Select a Grade Level --</option>";
+
+                    cmd.Parameters.Clear();
+                    cmd.Connection = conn;
+                    cmd.CommandType = System.Data.CommandType.Text;
+
+                    if (program_id != "")
+                    {
+                        cmd.CommandText = "Select grade_level_id, grade_level from CE_GRADE_LEVELS where uiuc_program_id =   " + program_id + " order by 1 "; 
+                    }
+                    else
+                    {
+                        cmd.CommandText = "Select grade_level_id, grade_level from CE_GRADE_LEVELS where 1=2 order by 1 "; 
+                    }
+            
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+
+                        while (reader.Read())
+                        {
+
+                            grade_level_field = grade_level_field + "<option value=" + reader[0].ToString() + ">" + reader[1].ToString() + "</option>";
+
+                        }
+                    }
+
+                    grade_level_field += "</select>";
+
+                    bulkassignmentHTML = bulkassignmentHTML + "<div class='row medium-unstack'><div class='column cs-input-group'>Grade Level: " + grade_level_field + "</div></div>";
+
+                    bulkassignmentHTML = bulkassignmentHTML + "<div class='row medium-unstack'><div class='column cs-input-group'>Start Date: <input type='date' style='width:170px' class = 'datepicker' questionname = 'start_date' name='start_date' id='start_date' value='' /></div></div>";
+                    bulkassignmentHTML = bulkassignmentHTML + "<div class='row medium-unstack'><div class='column cs-input-group'>End Date: <input type='date' style='width:170px' class = 'datepicker' questionname = 'end_date' name='end_date' id='end_date' value='' /></div></div>";
+
+                    string placement_field = "";
+
+                    if (!string.IsNullOrEmpty(term_id))
+                    {
+                        term_id = " and term_cd = " + term_id;
+                    }
+                    else 
+                    {
+                        if (DateTime.Now.Month >= 1 && DateTime.Now.Month < 6)
+                        {
+                            term_id = "and term_cd = '1" + DateTime.Now.Year.ToString() + "1'";
+                        }
+                        else
+                        {
+                            term_id = "and term_cd = '1" + DateTime.Now.Year.ToString() + "8'";
+                        }
+                    }
+                    
+                    if (!string.IsNullOrEmpty(program_id))
+                    {
+                        program_id = " and uiuc_program_id = " + program_id;
+                    }
+
+                    if (!string.IsNullOrEmpty(course_x_prog_id))
+                    {
+                        course_x_prog_id = " and course_x_prog_id = " + course_x_prog_id;
+                    }
+
+                    
+                    for (int i = 1; i < 11; i++)
+                    {
+                        placement_field = "<select name='placement_id_" + i.ToString() + "' tabindex='1'><option value='' selected='selected'>-- Select a Placement --</option>";
+
+                        cmd.Connection = conn;
+                        cmd.CommandType = System.Data.CommandType.Text;
+
+                        cmd.CommandText = "Select placement_id, student + ' - ' + course " + 
+                            " from v_ce_placements " +
+                            " where datediff(day, [start date], [end date]) >= 10 " + term_id + program_id + course_x_prog_id +
+                            " order by 2";
+
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+
+                            while (reader.Read())
+                            {
+
+                                placement_field = placement_field + "<option value=" + reader[0].ToString() + ">" + reader[1].ToString() + "</option>";
+
+                            }
+                        }
+
+                        placement_field += "</select>";
+
+                        bulkassignmentHTML = bulkassignmentHTML + "<div class='row medium-unstack'><div class='column cs-input-group'>Student " + i.ToString() + ": " + placement_field + "</div></div>";
+                    
+                    }
+
+                    bulkassignmentHTML = bulkassignmentHTML + "<div><input class='button cs-input-button' accesskey='s' name='submit' type='submit' value='Save'></input></div><br/>";
+
+                    bulkassignmentHTML = bulkassignmentHTML + "</div>";
+
+        }
+
+    }
+
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Create Bulk Assignments</title>
+</head>
+<body>
+
+<div class="row page-content portal-content">
+    <div class="small-12 column">   
+
+<a href="/dotnet/account.aspx/logout"><FONT COLOR="RED"><B>LOGOUT</B></FONT> <i class="fa fa-sign-out" aria-hidden="true"></i></a>
+
+@MvcHtmlString.Create(@breadcrumb)
+ 
+
+    <h2>Create Bulk Assignments</h2>
+    @MvcHtmlString.Create(bulkassignmentHTML)
+	</body>
+
+</html>

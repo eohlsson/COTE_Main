@@ -1,0 +1,128 @@
+﻿@using System.Configuration
+@using System.Data.SqlClient
+@{
+    Layout = null;
+    string uin = ViewBag.UIN;
+    if (uin == null)
+    {
+        uin = "000000";
+    }
+    
+}
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<HEAD>
+<link rel="stylesheet" type="text/css" href="https://cte-s.education.illinois.edu/testing.css"
+title="fonts" />
+</HEAD>
+
+<body>
+
+			<center>
+				<form name="results" action="testingresults" method="POST">
+						Enter the student's UIN.
+						<br/><br/><input name="uin" type="text" size="10" /><input type="submit" value="Search"/><br/><br/>
+				</form>
+				<table width="750">
+					<tr>
+						<td>
+							<center>
+
+
+ @{
+     
+     String ConnString = ConfigurationManager.ConnectionStrings["UserDb"].ConnectionString;
+
+        using (SqlConnection conn = new SqlConnection(ConnString))
+        {
+            conn.Open();
+            using (SqlCommand cmd = new SqlCommand())
+            {
+                cmd.Connection = conn;
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                cmd.CommandText = "[dbo].[PORTAL_PROGRAM_TESTING]";
+                cmd.Parameters.Add(new SqlParameter("@uin", uin));
+                cmd.Parameters.Add(new SqlParameter("@netid", ViewBag.Username));
+                
+                        
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+
+                    reader.NextResult();
+
+                    if (!reader.IsClosed)
+                    {
+                      	<b>Results for: @ViewBag.UIN</b><br/><br/>
+   	                    <table border="2">
+		                    <tr>
+			                    <td valign="top" width="250">
+				                    <b>Test:</b>
+			                    </td>
+			                    <td valign="top" width="250">
+				                    <b>Test Date:</b>
+			                    </td>
+			                    <td valign="top" width="250">
+				                    <b>Result:</b>
+			                    </td>
+		                    </tr>
+
+                        @while (reader.Read())
+                        {
+
+		                <tr>
+			                <td valign="top" width="250">
+				                @reader[1].ToString()
+			                </td>
+			                <td valign="top" width="250">
+				                @reader[3].ToString()
+			                </td>
+			                <td valign="top" width="250">
+				                @reader[2].ToString()
+			                </td>
+		                </tr>
+                    
+                        }
+                        </table>
+                    }
+                    else
+                    {
+                        	<b>Results for: @ViewBag.UIN</b><br/><br/>
+	                        <table border="2">
+		                        <tr>
+			                        <td width="650" align="center">
+				                        <font color="Red"><b><br/>No Results found<br/><br/></b></font>
+			                        </td>
+		                        </tr>
+	                        </table>
+                    }
+                    
+                }
+            }
+        }
+}
+
+							</center>
+						</td>
+					</tr>
+				</table>	
+				<table width="750">
+					<tr>
+						<td>
+							<i><br/>If no results show for the student you entered it may be due to one or more of the following:
+							<blockquote>
+								<ol>
+									<b><li>The student has not taken the test</li></b><br/>
+									<b><li>The student took the test, but didn't report the results to the University of Illinois - Urbana-Champaign</li></b><br/>
+									<b><li>The student has not applied to the University of Illinois - Urbana-Champaign</li></b><br/>
+								</ol>
+							</blockquote>
+							</i>
+						</td>
+					</tr>
+				</table>
+
+			</center>
+
+</body>
+</html>
+

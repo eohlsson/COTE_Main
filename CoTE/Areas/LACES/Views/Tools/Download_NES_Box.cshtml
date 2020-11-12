@@ -1,0 +1,67 @@
+﻿@{
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+    string left_menu = "/dotnet/areas/webpages/content/js/cc_left_menu.js";
+    string breadcrumb = "<nav class=\"site-breadcrumbs\"><ul>";
+    breadcrumb += " <li><a href=\"#\">Home</a> /</li>";
+    breadcrumb += " <li><a href=\"/dotnet/portals/programportal.aspx\">Program Staff Portal</a> /</li>";
+    breadcrumb += " <li><a href=\"/dotnet/laces/laces.aspx\">LACES</a> </li>";
+    breadcrumb += "</ul></nav>";
+    string error_message = "";
+    error_message = (string)ViewBag.error_string ?? "";
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Download NES File</title>
+</head>
+<body>
+    <div class="row page-content portal-content">
+        <div class="small-12 column">
+
+            <a href="/dotnet/account.aspx/logout"><FONT COLOR="RED"><B>LOGOUT</B></FONT> <i class="fa fa-sign-out" aria-hidden="true"></i></a>
+
+            @MvcHtmlString.Create(@breadcrumb)
+
+            <h2>Download NES Files</h2>
+            @using (Html.BeginForm("Download_NES_Box", "Tools", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                @:       <div class="section-border">
+                    @:        <div class="row medium-unstack">
+                        @:            <div class="column cs-input-group">
+                            @:              <b>Test Score File:</b><input type="file" name="UploadedTestScoreFile" />
+                            @:                        </div>
+                        @:                    </div>
+                    @:        <div class="row medium-unstack">
+                        @:            <div class="column cs-input-group">
+                            @:                <b>Statewide Score File:</b><input type="file" name="UploadedStatewideScoreFile" />
+                            @:                        </div>
+                        @:                    </div>
+                    @:        <div class="row medium-unstack">
+                        @:            <div class="column cs-input-group">
+                            @:                <input type="submit" name="Submit" value="Submit" />
+                            @:                        </div>
+                        @:                    </div>
+                    @:        <div class="row medium-unstack">
+                        @:            <div class="column cs-input-group">
+
+
+                if (ViewBag.record_count > 0)
+                {
+                    @MvcHtmlString.Create(ViewBag.record_count + " records loaded.");
+                }
+                if (error_message.Length > 0)
+                {
+                    @MvcHtmlString.Create("<br/><br/>The following records had errors:<br/>" + error_message);
+                }
+                @:            </div>
+            @:        </div>
+    }
+        </div>
+       </div>
+</div>
+</body>
+
+</html>

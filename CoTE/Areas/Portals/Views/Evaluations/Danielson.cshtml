@@ -1,0 +1,447 @@
+﻿@model CoTE.Areas.Portals.Models.Danielson
+@using CoTE.Models
+@using System.Configuration
+@using System.Data.SqlClient
+
+@{
+    Layout = null;
+
+    //String[] ratings = { "", "1", "2", "3", "4" };
+
+    string uiuc_program_id = "";
+    string uiuc_program_id_hold = "";
+    string read_only = "";
+    read_only = (string)ViewBag.read_only ?? "";
+}
+
+<!DOCTYPE html>
+
+
+<html>
+
+<head>
+<script src="/dotnet/Scripts/jquery-1.7.1.min.js" type="text/javascript"></script>          
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var readonly = $('#Read_Only').attr("value");
+        //window.alert("in read only:" + readonly);
+        if ($('#Read_Only').val() == 'True') {
+            //window.alert("Setting field to readonly");
+            $('input', 'form').attr('readonly', true);
+            $('textarea', 'form').attr('readonly', true);
+            $('select', 'form').attr('disabled', true).attr('readonly', true);
+            $('#signature').attr('disabled', true).attr('readonly', true);
+            $("input:radio").attr('disabled', true);;
+            $('input', 'form').addClass("disabled");
+            $('select', 'form').addClass("disabled");
+            $('textarea', 'form').addClass("disabled");
+            $("input[type='submit']").attr('disabled', true);
+        }
+    });
+
+    function CalcScores() {
+
+        //alert("CalcScores");
+        var total = 0;
+        $("[id^=domain]").each(function() {
+            //alert($('option:selected', $(this)).text());
+            if (!isNaN(parseInt($('option:selected', $(this)).text()))) {
+                total += parseInt($('option:selected', $(this)).text());
+            }
+            //alert(total);
+        });
+        //alert(total);
+        $('#total_score').val(total);
+
+    }
+    
+    function Print() {
+
+        //alert("Printing");
+        // Hide the text area <div>
+        $("#domain_comments_1").hide();
+        $("#domain_comments_2").hide();
+        $("#domain_comments_3").hide();
+        $("#domain_comments_4").hide();
+
+        //alert($("#domain1_comments").val());
+
+        // Set the print text
+        $("#domain_comments_print_1").replaceWith("<div id='domain_comments_print_1' hidden='true'>" + $("#domain1_comments").val() + "</div>");
+        $("#domain_comments_print_2").replaceWith("<div id='domain_comments_print_2' hidden='true'>" + $("#domain2_comments").val() + "</div>");
+        $("#domain_comments_print_3").replaceWith("<div id='domain_comments_print_3' hidden='true'>" + $("#domain3_comments").val() + "</div>");
+        $("#domain_comments_print_4").replaceWith("<div id='domain_comments_print_4' hidden='true'>" + $("#domain4_comments").val() + "</div>");
+
+        // Show the print text area <div>
+        $("#domain_comments_print_1").show();
+        $("#domain_comments_print_2").show();
+        $("#domain_comments_print_3").show();
+        $("#domain_comments_print_4").show();
+
+        // Print
+        window.print();
+
+        // Hide print text
+        $("#domain_comments_print_1").hide();
+        $("#domain_comments_print_2").hide();
+        $("#domain_comments_print_3").hide();
+        $("#domain_comments_print_4").hide();
+
+        // Show text area
+        $("#domain_comments_1").show();
+        $("#domain_comments_2").show();
+        $("#domain_comments_3").show();
+        $("#domain_comments_4").show();
+
+    }
+</script>
+<style>
+
+
+.field-validation-error
+{
+    font-weight: bold;
+    color: Red;
+}
+
+.validation-summary-errors
+{
+    font-weight: bold;
+    color: Red;
+}
+
+.field-validation-valid {
+    display: none;
+}
+
+td
+{
+
+	font-size: 12px;
+
+	font-family: arial;
+
+}
+
+h1
+{
+
+	font-size: 24px;
+
+	font-family: arial;
+
+}
+
+td.tdleft
+{
+
+	text-align: left;
+    width: 33%;
+
+}
+
+td.tdcenter
+{
+
+	text-align: center;
+    width: 33%;
+
+}
+
+td.tdright
+{
+
+	text-align: right;
+    width: 33%;
+
+}
+
+td.domain 
+{
+    width: 540px;
+}
+
+td.total 
+{
+    width: 360px;
+}
+
+table.danielson {
+    width: 1080px;
+}
+
+.disabled {
+  background: #e1dbdb;
+}
+
+</style>
+
+</head>
+
+<center>
+
+
+<body bgcolor=white  onload="CalcScores()">
+
+    
+
+@using (Html.BeginForm()) {
+    @Html.ValidationSummary(true)
+
+<table class="danielson" border=1 cellpadding="5" bgcolor="#AAAAAA">
+
+	<tr>
+
+		<td class="tdleft">
+
+			<b>Candidate</b>: 
+
+            @{
+                
+                string candidate_field = "";
+                string evaluator_field = "";
+                
+                if (ViewBag.Action == "Edit")
+                {
+                    candidate_field = "<select name='cte_stu_id' tabindex='1'>";
+                }
+                else
+                {
+                    candidate_field = "<select name='cte_stu_id' tabindex='1'><option value='' selected='selected'>-- Select a Student --</option>";
+                }
+
+                String ConnString = ConfigurationManager.ConnectionStrings["UserDb"].ConnectionString;
+
+                using (SqlConnection conn = new SqlConnection(ConnString))
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = new SqlCommand())
+                    {
+                        cmd.Connection = conn;
+                        cmd.CommandType = System.Data.CommandType.Text;
+
+                        cmd.CommandText = "Select distinct LAST_NAME + ', ' + first_name, uiuc_program_id " +
+                            " FROM cte.dbo.v_cte_stu_x_programs " +
+                            " WHERE cte_stu_id = " + Model.cte_stu_id.ToString() + " and uiuc_program_id = " + Model.uiuc_program_id.ToString();
+                        
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+
+                            while (reader.Read())
+                            {
+
+
+                                candidate_field = reader[0].ToString();
+                                uiuc_program_id = reader[1].ToString();
+                                    
+                            }
+                        }
+
+                        cmd.CommandText = "Select Name " +
+                          " FROM cte.dbo.v_cte_stu_eval_danielson " +
+                          " WHERE cte_stu_eval_id = " + Model.cte_stu_eval_id;
+
+                        using (SqlDataReader reader2 = cmd.ExecuteReader())
+                        {
+
+                            while (reader2.Read())
+                            {
+
+                                evaluator_field = reader2[0].ToString();
+                               
+                            }
+                        }
+                        
+                    }
+                }
+                                
+                @MvcHtmlString.Create(candidate_field)
+                <br/>@Html.ValidationMessageFor(model => model.cte_stu_id, "Student required, please select a student above")
+
+            }
+
+		</td>
+
+        <td class="tdcenter">
+            <b>Evaluator: </b>@evaluator_field
+        </td>
+        <td class="tdcenter">
+            <b>Type:</b>
+            @Html.RadioButtonFor(model =>model.eval_type,"M", new { tabindex = 2 }) Midterm 
+            @Html.RadioButtonFor(model =>model.eval_type,"F", new { tabindex = 3 }) Final
+            <br/>@Html.ValidationMessageFor(model => model.eval_type, "Evaluation type required, please pick an evaluation type.")
+
+        </td>
+
+		<td class="tdright">
+
+			<b>Evaluation Date <br />(format yyyy/mm/dd) :</b>
+
+            @{
+            
+                string field_value = "";
+                
+                if (ViewBag.Action == "Edit")
+                {
+                    field_value = Model.evaluation_date.ToString();
+                    if (field_value == "")
+                    {
+                        field_value = DateTime.Now.ToString();
+                    }
+                }
+                else
+                {
+                    field_value = DateTime.Now.ToString();
+                }
+                
+                DateTime date_field;      
+                DateTime.TryParse(field_value, out date_field);    
+                field_value = string.Format("{0:yyyy-MM-dd}", date_field);                            
+                               
+                @Html.TextBox(name:"evaluation_date",
+                value: field_value,
+                    htmlAttributes: new { type="date", tabindex='4'});
+
+                <br/>@Html.ValidationMessageFor(model => model.evaluation_date, "Evaluation date required, please select an evaluation date.")
+
+            }
+
+            <br>
+		</td>
+
+	</tr>
+
+</table>
+
+    uiuc_program_id_hold = uiuc_program_id;
+    // @Html.Partial("Danielson_Standard", Model, new ViewDataDictionary { { "uiuc_program_id", uiuc_program_id_hold } })
+
+
+    switch (Model.uiuc_program_id.ToString())
+    {
+        case "90":
+        {
+            @Html.Partial("Danielson_SLP", Model)
+            break;
+        }
+        case "73":
+        {
+            @Html.Partial("Danielson_SSW", Model)
+            break;
+        }
+        case "131":
+        {
+            if (Model.placement_type == "EFE")
+            {
+                if (Model.position == "U")
+                {
+                    @Html.Partial("Danielson_LIS_EFE_Supervisor", Model)
+                }
+                else
+                {
+                    @Html.Partial("Danielson_LIS_EFE_Coop", Model)
+                }
+            }
+            else
+            {
+                if (Model.position == "U")
+                {
+                    @Html.Partial("Danielson_LIS_Supervisor", Model)
+                }
+                else
+                {
+                    @Html.Partial("Danielson_LIS_Coop", Model)
+                }
+            }
+            break;
+        }
+        case "17":
+        {
+            if (Model.placement_type == "EFE")
+            {
+                    @Html.Partial("Danielson_LBSI_EFE", Model)
+            }
+            else
+            {
+                if (Model.position == "U")
+                {
+                    @Html.Partial("Danielson_LBSI_Supervisor", Model)
+                }
+                else
+                {
+                    @Html.Partial("Danielson_LBSI_Coop", Model)
+                }
+            }
+            break;
+        }
+        default:
+        {
+            if (Model.placement_type == "EFE")
+            {
+                    @Html.Partial("Danielson_Standard_EFE", Model)
+            }
+            else
+            {
+                IEnumerable<string> coop_eval_programs = new List<string> { "1" };
+
+                //if ((Model.position == "C") || (Model.position == "T" && coop_eval_programs.Contains(Model.uiuc_program_id.ToString())))
+                // 3/5/2015 looks like all the students are going to be using the Coop version
+                if ((Model.position == "C") || (Model.position == "T"))
+                {
+                    @Html.Partial("Danielson_Standard_Coop", Model)
+                }
+                else
+                {
+                    switch (Model.uiuc_program_id.ToString())
+                    {
+                        case "36":
+                        case "129":
+                        case "130":
+                        case "147":
+                        case "119":
+                        case "120":
+                        case "128":
+                            {
+                            @Html.Partial("Danielson_Standard_Supervisor_Split2", Model)
+                            break;                            
+                        }    
+                        default:
+                        {
+                            @Html.Partial("Danielson_Standard_Supervisor", Model)
+                            break;
+                        }
+                    }
+                }
+            }
+            break;
+        }
+    }
+
+    
+    
+<input type="hidden" name="Action" value="@ViewBag.Action"/>
+<input type="hidden" name="Username" value="@ViewBag.Username"/>   
+<input type="hidden" name="Read_Only" id="Read_Only" value="@read_only"/>   
+<input type="hidden" name="modified_by" value="@ViewBag.Username"/>
+<input type="hidden" name="modified_date" value="@DateTime.Now"/>
+
+    if (ViewBag.Action == "Edit")
+    {
+        <input type="hidden" name="cte_stu_eval_id" value="@Model.cte_stu_eval_id"/>
+        <input type="hidden" name="cte_stu_id" value="@Model.cte_stu_id"/>
+        <input type="hidden" name="uiuc_program_id" value="@Model.uiuc_program_id"/>
+        <input type="hidden" name="eval_type" value="@Model.eval_type"/>
+        <input type="hidden" name="position" value="@Model.position"/>
+        <input type="hidden" name="placement_type" value="@Model.placement_type"/>
+    }
+    
+}
+
+</center>
+
+
+
+</body>
+
+</html>

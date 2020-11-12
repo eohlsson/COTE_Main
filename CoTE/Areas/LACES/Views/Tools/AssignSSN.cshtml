@@ -1,0 +1,104 @@
+﻿@model CoTE.Areas.LACES.Models.Student
+@using CoTE.Models
+@using System.Configuration
+@using System.Data.SqlClient
+@{
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+    string breadcrumb = "<nav class=\"site-breadcrumbs\"><ul>";
+    breadcrumb += " <li><a href=\"#\">Home</a> /</li>";
+    breadcrumb += " <li><a href=\"/dotnet/portals/programportal.aspx\">Program Staff Portal</a> /</li>";
+    breadcrumb += " <li><a href=\"/dotnet/laces/laces.aspx\">LACES</a> </li>";
+    breadcrumb += "</ul></nav>";
+        
+    string candidate_field = "";
+    string message = (string)ViewBag.message ?? "";
+    
+    candidate_field = "<select name='cte_stu_id' tabindex='1'><option value='' selected='selected'>-- Select a Student --</option>";
+
+    String ConnString = ConfigurationManager.ConnectionStrings["UserDb"].ConnectionString;
+
+    using (SqlConnection conn = new SqlConnection(ConnString))
+    {
+        conn.Open();
+        using (SqlCommand cmd = new SqlCommand())
+        {
+            cmd.Connection = conn;
+            cmd.CommandType = System.Data.CommandType.Text;
+
+            cmd.CommandText = "Select cte_stu_id, last_name + ', ' + first_name + ' (' + isnull(i_card_number, '') + ')'" +
+                " from cte.dbo.cte_stu_demo " +
+                " where ssn is null" +
+                " and last_name is not null" +
+                " order by 2";
+                        
+            using (SqlDataReader reader = cmd.ExecuteReader())
+            {
+
+                while (reader.Read())
+                {
+
+                    candidate_field = candidate_field + "<option value=" + reader[0].ToString() + ">" + reader[1].ToString() + "</option>";
+
+                }
+            }
+
+            candidate_field += "</select>";
+        }
+    }                               
+        
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Assign SSN</title>
+</head>
+<body>
+
+<div class="row page-content portal-content">
+    <div class="small-12 column">   
+
+<a href="/dotnet/account.aspx/logout"><FONT COLOR="RED"><B>LOGOUT</B></FONT> <i class="fa fa-sign-out" aria-hidden="true"></i></a>
+
+@MvcHtmlString.Create(@breadcrumb)
+ 
+
+    <h2>Assign SSN</h2>
+    @using(Html.BeginForm("AssignSSN", "Tools", FormMethod.Post))
+    {
+
+@:       <div class="section-border">
+@:        <div class="row medium-unstack">
+@:            <div class="column cs-input-group">
+@:            Student:
+@:            @MvcHtmlString.Create(candidate_field)
+@:            </div>
+@:        </div>
+@:        <div class="row medium-unstack">
+@:            <div class="column cs-input-group">
+@:                SSN:
+@:                <input type="text" id="ssn" name="ssn" />
+@:            </div>
+@:        </div>
+@:        <div class="row medium-unstack">
+@:            <div class="column cs-input-group">
+@:                <br /><input type="submit" name="Submit" value="Submit"/>
+@:            </div>
+@:        </div>
+            if (message != "")
+            {
+                @MvcHtmlString.Create(message)
+            }
+
+
+    }
+
+            </div>
+          </div>
+        </div>
+	</body>
+
+</html>
+

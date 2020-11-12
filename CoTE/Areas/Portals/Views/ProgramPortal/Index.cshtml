@@ -1,0 +1,169 @@
+@model IEnumerable<CoTE.Areas.Portals.Models.ProgramData>
+
+@{
+    bool authorized = false;
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+    string left_menu = "/dotnet/areas/webpages/content/js/cc_left_menu.js";
+    string breadcrumb = "<nav class=\"site-breadcrumbs\"><ul>";
+    breadcrumb += " <li><a href=\"#\">Home</a> /</li>";
+    breadcrumb += " <li><a href=\"#\">Program Staff</a> /</li>";
+    breadcrumb += " <li><a href=\"#\">Program Staff Portal</a> /</li>";
+    breadcrumb += "</ul></nav>";
+}
+
+<!-- Hide menu since we are logged in -->
+<style>
+    .main-navigation {
+        display: none;
+    }
+</style>
+
+<div class="row page-content portal-content">
+    <div class="small-12 column">   
+
+<a href="/dotnet/account.aspx/logout"><FONT COLOR="RED"><B>LOGOUT</B></FONT> <i class="fa fa-sign-out" aria-hidden="true"></i></a>
+
+@MvcHtmlString.Create(@breadcrumb)
+ 
+<!--- Check if authorized --->
+@foreach (CoTE.Areas.Portals.Models.ProgramData h in ViewData.Model)
+{
+    foreach (var authorization in h.AuthorizedDataSet)
+    {
+        if (authorization.user_name.Length > 0)
+        {
+            authorized = true;
+        }
+    }
+}
+
+@if (authorized == true)
+{
+
+<!-- Start Profile -->
+foreach (CoTE.Areas.Portals.Models.ProgramData h in ViewData.Model)
+{
+    foreach (var profile in h.ProfileDataSet)
+    {
+            if (@profile.first_name.Length > 0) 
+            {
+@: <div class="row page-content portal-content">
+@:  <div class="small-12 column">
+@:   <div class="section-border">
+@:       <div class="row medium-unstack">
+@:          <div class="column cs-input-group">
+@:                 Name: <strong><br />
+@:                       @profile.first_name  @profile.middle_name  @profile.last_name </strong>
+@:           </div>                    
+@:            <div class="column cs-input-group">
+@:					Email: <strong><br />
+@:                        @if (@profile.email.Length >= 20)
+                          {
+                            @profile.email.ToString().Substring(0, @profile.email.IndexOf("@") + 1) <br />@profile.email.ToString().Substring(@profile.email.IndexOf("@") + 1);
+                          }
+                          else
+                          {
+@:                            @profile.email
+                           }
+@:                   </strong>
+                break;
+            }
+    }
+}
+@:            </div>                    
+@:            <div class="column cs-input-group">
+@:					Program(s): <br />
+
+foreach (CoTE.Areas.Portals.Models.ProgramData h in ViewData.Model)
+{
+    foreach (var profile in h.ProfileDataSet.Select(u => u.uiuc_programname).Distinct())
+    { 
+         <text>-</text> @profile<br />   
+    }
+}
+@:            </div>                    
+@:            <div class="column cs-input-group">
+@:                Role: <strong><br />
+foreach (CoTE.Areas.Portals.Models.ProgramData h in ViewData.Model)
+{
+    foreach (var profile in h.ProfileDataSet.Select(u => u.role).Distinct())
+    {
+            <text>-</text> @profile <br />
+    }
+}
+@:				    </strong>
+@:            </div>                    
+<!-- End Profile -->
+@:		</div>
+@:		</div>
+
+<!-- Deficiency Report -->
+foreach (CoTE.Areas.Portals.Models.ProgramData h in ViewData.Model)
+{
+    foreach (var deficiency in h.DeficiencyDataSet)
+    {
+           @Html.Raw(HttpUtility.HtmlDecode(@deficiency.deficiency))
+    }
+}
+<!-- End Deficiency Report -->
+
+<!-- Menu Links -->                                                
+foreach (CoTE.Areas.Portals.Models.ProgramData h in ViewData.Model)
+{
+    string old_link_group = "";
+    
+    foreach (var link in h.LinksDataSet)
+    {
+            if (@link.section_type == "L") 
+            {
+                
+                if (old_link_group != @link.link_group)
+                {
+                        <h4>@link.link_group</h4>
+                }
+                
+                switch (@link.link_level)
+                {
+                    case 1:
+                        if (link.link.IsEmpty())
+                        {
+                            <br /><p class="program_portal_menu_item_level1"><b>@link.heading</b></p>
+                        }
+                        else
+                        {    
+                            <p class="program_portal_menu_item_level1"><a href="@link.link" class="menuitems">@link.heading</a></p>
+                        }
+                        break;
+                    case 2:
+                        if (link.link.IsEmpty())
+                        {
+                             <p class="program_portal_menu_item_level2"><h3>@link.heading</h3></p>
+                        }
+                        else    
+                        {
+                              <p class="program_portal_menu_item_level2"><a href="@link.link" class="menuitems">@link.heading</a></p>
+                        }       
+                        break;
+                    case 3:
+                        <p class="program_portal_menu_item_level3"><a href="@link.link" class="menuitems">@link.heading</a></p>
+                        break;                    
+                 }
+                 
+                 old_link_group = @link.link_group;
+            
+             }
+    }
+}
+
+}
+else
+{
+    @Html.Partial("AccessDenied")
+}
+                   </div>
+               </div>
+           </div>    
+        </div>    
+	</body>
+
+</html>

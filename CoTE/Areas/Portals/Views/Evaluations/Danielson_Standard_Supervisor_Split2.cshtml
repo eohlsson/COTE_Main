@@ -1,0 +1,335 @@
+﻿@model CoTE.Areas.Portals.Models.Danielson
+
+@{
+
+    //String[] ratings = { "", "1", "2", "3", "4" };
+
+    SelectList ratings = new SelectList(
+    new List<SelectListItem>
+    {
+        new SelectListItem { Selected = true, Text = "", Value = ""},
+        new SelectListItem { Selected = false, Text = "1", Value = "1"},
+        new SelectListItem { Selected = false, Text = "2 Low", Value = "2.25"},
+        new SelectListItem { Selected = false, Text = "2 Middle", Value = "2.50"},
+        new SelectListItem { Selected = false, Text = "2 High", Value = "2.75"},
+        new SelectListItem { Selected = false, Text = "3", Value = "3"},
+        new SelectListItem { Selected = false, Text = "4", Value = "4"},
+    }, "Value", "Text", "");
+    
+
+    String rubric1_link = "";
+    String rubric2_link = "";
+    String rubric3_link = "";
+    String rubric4_link = "";
+
+/*
+    switch (uiuc_program_id)
+    {
+        case "90":
+        {
+            rubric1_link = "https://cte-s.education.illinois.edu/documents/danielson%20-%20domain%201%20rubric.pdf";
+            rubric2_link = "https://cte-s.education.illinois.edu/documents/danielson%20-%20domain%202%20rubric.pdf";
+            rubric3_link = "https://cte-s.education.illinois.edu/documents/danielson%20-%20domain%203%20rubric.pdf";
+            rubric4_link = "https://cte-s.education.illinois.edu/documents/danielson%20-%20domain%204%20rubric.pdf";
+            break;
+        }
+        default:
+        {
+            rubric1_link = "https://cte-s.education.illinois.edu/documents/danielson%20-%20domain%201%20rubric.pdf";
+            rubric2_link = "https://cte-s.education.illinois.edu/documents/danielson%20-%20domain%202%20rubric.pdf";
+            rubric3_link = "https://cte-s.education.illinois.edu/documents/danielson%20-%20domain%203%20rubric.pdf";
+            rubric4_link = "https://cte-s.education.illinois.edu/documents/danielson%20-%20domain%204%20rubric.pdf";
+            break;
+        }
+    }
+*/
+   
+    rubric1_link = "https://cte-s.education.illinois.edu/documents/danielson%20-%20domain%201%20rubric.pdf";
+    rubric2_link = "https://cte-s.education.illinois.edu/documents/danielson%20-%20domain%202%20rubric.pdf";
+    rubric3_link = "https://cte-s.education.illinois.edu/documents/danielson%20-%20domain%203%20rubric.pdf";
+    rubric4_link = "https://cte-s.education.illinois.edu/documents/danielson%20-%20domain%204%20rubric.pdf";
+ 
+}
+
+<table class="danielson" border=1 border-color="white" cellpadding="15px">
+
+<tr>
+
+	<td colspan=2 class="domain" valign=top bgcolor="F8F1A0">
+
+  <b><font size="+1">DOMAIN 1: Planning and Preparation (<a href=@rubric1_link target="_blank">Rubric</a>)</font></b>
+
+  <br/><br/><b>
+
+      @Html.DropDownListFor(m => m.domain1_a, ratings, new { tabindex = 5, @onchange="CalcScores();"  })
+
+  1a &nbsp;Demonstrating Knowledge of Content and Pedagogy</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Content knowledge &#149; Prerequisite relationships &#149; Content pedagogy
+
+  <br/><br/><b>
+
+      @Html.DropDownListFor(m => m.domain1_b, ratings, new { tabindex = 6, @onchange="CalcScores();" })
+
+  1b &nbsp;Demonstrating Knowledge of Students</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Child development &#149; Learning process &#149; Special needs
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Student skill, knowledge, and proficiency &#149; Interests and cultural heritage
+
+  <br/><br/><b>
+
+      @Html.DropDownListFor(m => m.domain1_c, ratings, new { tabindex = 7, @onchange="CalcScores();"  })
+
+  1c &nbsp;Setting Instructional Outcomes</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Value, sequence, alignment &#149; Clarity&nbsp; &#149; Balance
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Suitability for diverse learners
+
+  <br/><br/><b>
+
+      @Html.DropDownListFor(m => m.domain1_d, ratings, new { tabindex = 8, @onchange="CalcScores();"  })
+
+  1d &nbsp;Demonstrating Knowledge of Resources</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; For classroom &#149; To extend content knowledge &#149; For students
+
+  <br/><br/><b>
+
+      @Html.DropDownListFor(m => m.domain1_e, ratings, new { tabindex = 9, @onchange="CalcScores();"  })
+
+  1e &nbsp;Designing Coherent Instruction</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Learning activities &#149; Instructional materials and resources
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Instructional groups &#149; Lesson and unit structure
+
+  <br/><br/><b>
+
+      @Html.DropDownListFor(m => m.domain1_f, ratings, new { tabindex = 10, @onchange="CalcScores();"  })
+
+  1f &nbsp;Designing Student Assessments</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Congruence with outcomes &#149; Criteria and standards
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Formative assessments &#149; Use for planning
+       <br /><br /><b>Comments</b><br />
+       <div id="domain_comments_1">@Html.TextAreaFor(m => m.domain1_comments, 3, 60, new { @title = "Comment" })</div>
+       <div id="domain_comments_print_1" hidden="true"></div>
+         
+	</td>
+
+	<td colspan=2 class="domain" valign=top bgcolor="78C1F6">
+
+  <B><font size="+1">DOMAIN 2: The Classroom Environment (<a href=@rubric2_link target="_blank">Rubric</a>)</font></B>
+
+  <br/><br/><b>
+
+      @Html.DropDownListFor(m => m.domain2_a, ratings, new { tabindex = 12, @onchange="CalcScores();"  })
+
+  2a &nbsp;Creating an Environment of Respect and Rapport</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Teacher interaction with students &#149; Student interaction with students
+
+  <br/><br/><b>
+
+    @Html.DropDownListFor(m => m.domain2_b, ratings, new { tabindex = 13, @onchange="CalcScores();"  })
+
+  2b &nbsp;Establishing a Culture for Learning</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Importance of content &#149; Expectations for learning and behavior
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Student pride in work
+
+  <br/><br/><b>
+
+    @Html.DropDownListFor(m => m.domain2_c, ratings, new { tabindex = 14, @onchange="CalcScores();"  })
+
+  2c &nbsp;Managing Classroom Procedures</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Instructional groups &#149; Transitions
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Materials and supplies &#149; Non-instructional duties
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Supervision of volunteers and paraprofessionals
+
+  <br/><br/><b>
+
+    @Html.DropDownListFor(m => m.domain2_d, ratings, new { tabindex = 15, @onchange="CalcScores();"  })
+
+  2d &nbsp;Managing Student Behavior</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Expectations &#149; Monitoring behavior &#149; Response to misbehavior
+
+  <br/><br/><b>
+
+    @Html.DropDownListFor(m => m.domain2_e, ratings, new { tabindex = 16, @onchange="CalcScores();"  })
+
+  2e &nbsp;Organizing Physical Space</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Safety and accessibility &#149; Arrangement of furniture and resources
+
+       <br /><br /><b>Comments</b><br />
+       <div id="domain_comments_2">@Html.TextAreaFor(m => m.domain2_comments, 3, 60, new { @title = "Comment" })</div>
+       <div id="domain_comments_print_2" hidden="true"></div>
+
+	</td>
+
+</tr>
+
+
+<tr>
+
+	<td colspan=2 class="domain" valign=top bgcolor="B9D5C6">
+
+  <B><font size="+1">DOMAIN  4: Professional Responsibilities (<a href=@rubric4_link target="_blank">Rubric</a>)</font></B>
+
+  <br/><br/><b>
+
+    @Html.DropDownListFor(m => m.domain4_a, ratings, new { tabindex = 18, @onchange="CalcScores();"  })
+
+
+  4a &nbsp;Reflecting on Teaching</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Accuracy &#149; Use of future teaching
+
+  <br/><br/><b>
+
+    @Html.DropDownListFor(m => m.domain4_b, ratings, new { tabindex = 19, @onchange="CalcScores();"  })
+
+
+  4b &nbsp;Maintaining Accurate Records</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Student completion of assignments
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Student progress in learning &#149; Non-instructional records
+
+  <br/><br/><b>
+
+    @Html.DropDownListFor(m => m.domain4_c, ratings, new { tabindex = 20, @onchange="CalcScores();"  })
+
+
+  4c &nbsp;Communicating with Families</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; About instructional program &#149; About individual students
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Engagement of families in instructional program
+
+  <br/><br/><b>
+
+    @Html.DropDownListFor(m => m.domain4_d, ratings, new { tabindex = 21, @onchange="CalcScores();"  })
+
+  4d &nbsp;Participating in a Professional Community</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Relationships with colleagues &#149; Participation in school projects
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Involvement in culture of professional inquiry &#149; Service to school
+
+  <br/><br/><b>
+
+    @Html.DropDownListFor(m => m.domain4_e, ratings, new { tabindex = 22, @onchange="CalcScores();"  })
+
+
+  4e &nbsp;Growing and Developing Professionally</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Enhancement of content knowledge and pedagogical skill
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Service to the profession
+
+  <br/><br/><b>
+
+    @Html.DropDownListFor(m => m.domain4_f, ratings, new { tabindex = 23, @onchange="CalcScores();"  })
+
+
+  4f &nbsp;Showing Professionalism</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Integrity/ethical conduct &#149;  Service to students &#149; Advocacy
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Decision-making &#149; Compliance with school/district regulations
+
+       <br /><br /><b>Comments</b><br />
+       <div id="domain_comments_4">@Html.TextAreaFor(m => m.domain4_comments, 3, 60, new { @title = "Comment" })</div>
+       <div id="domain_comments_print_4" hidden="true"></div>
+
+	</td>
+
+	<td colspan=2 class="domain" valign=top bgcolor="F4C4EA">
+
+  <B><font size="+1">DOMAIN 3: Instruction (<a href=@rubric3_link target="_blank">Rubric</a>)</font></B>
+
+  <br/><br/><b>
+
+    @Html.DropDownListFor(m => m.domain3_a, ratings, new { tabindex = 25, @onchange="CalcScores();"  })
+
+
+  3a &nbsp;Communicating with Students</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Expectations for learning &#149; Directions and procedures
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Explanations of content &#149; Use of oral and written langauges
+
+  <br/><br/><b>
+
+    @Html.DropDownListFor(m => m.domain3_b, ratings, new { tabindex = 26, @onchange="CalcScores();"  })
+
+
+  3b &nbsp;Using Questioning and Discussion Techniques</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Quality of questions &#149; Discussion techniques &#149; Student participation
+
+  <br/><br/><b>
+
+    @Html.DropDownListFor(m => m.domain3_c, ratings, new { tabindex = 27, @onchange="CalcScores();"  })
+
+
+  3c &nbsp;Engaging Students in Learning</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Activities and assignments &#149; Student groups
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Instructional materials and resources &#149; Structure and pacing
+
+  <br/><br/><b>
+
+    @Html.DropDownListFor(m => m.domain3_d, ratings, new { tabindex = 28, @onchange="CalcScores();"  })
+
+
+  3d &nbsp;Using Assessment in Instruction</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Assessment criteria &#149; Monitoring of student learning
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Feedback to students &#149; Student self-assessment and monitoring
+
+  <br/><br/><b>
+
+    @Html.DropDownListFor(m => m.domain3_e, ratings, new { tabindex = 29, @onchange="CalcScores();"  })
+
+  3e &nbsp;Demonstrating Flexibility and Responsiveness</b>
+
+  <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#149; Lesson adjustment &#149; Response to students &#149; Persistence
+
+       <br /><br /><b>Comments</b><br />
+       <div id="domain_comments_3">@Html.TextAreaFor(m => m.domain3_comments, 3, 60, new { @title = "Comment" })</div>
+       <div id="domain_comments_print_3" hidden="true"></div>
+
+	</td>
+
+</tr>
+<tr>
+    <td colspan="4" align="center">
+        <b>Scoring Key:</b><br />
+        1 = unsatisfactory performance on component<br />
+        2 = satisfactory performance on component<br />
+        3 = advanced performance on component<br />
+        4 = exceptional performance on component<br />
+        <br />
+        <b>Total Score:</b> @Html.TextBoxFor(m => m.total_score, (object)new { disabled="disabled" })<br /><br />
+
+        <b>Signature:</b>  @Html.CheckBoxFor(m => m.signature)  
+        <br /><br /><b><i>Note:</i> You may save changes to this form if you plan to return to edit by clicking the Save button. Once you click the signature box you <b><font color="red">WILL NOT</font></b> be able to edit or make changes to this evaluation. <br />Please <b><font color="red">DO NOT</font></b> click on the signature box until you are absolutely sure that you don't want to edit this form again.</b>
+
+        <br/><br/><input type="submit" value="Save" />&nbsp;&nbsp;<input type="button" value="Print" onclick="Print()"/>
+
+    </td>
+</tr>
+</table>

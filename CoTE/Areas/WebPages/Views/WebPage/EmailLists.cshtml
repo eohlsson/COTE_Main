@@ -1,0 +1,212 @@
+﻿@using System.Configuration
+@using System.Data.SqlClient
+@{
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+    string breadcrumb = "<nav class=\"site-breadcrumbs\"><ul>";
+    breadcrumb += " <li><a href=\"#\">Home</a> /</li>";
+    breadcrumb += " <li><a href=\"/dotnet/portals/programportal.aspx\">Program Staff Portal</a> /</li>";
+    breadcrumb += "</ul></nav>";
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>EmailLists</title>
+    <link rel="stylesheet" type="text/css" href="http://cte-s.education.illinois.edu/css/portals.css" title="fonts" />
+</head>
+<body>
+<div class="row page-content portal-content">
+    <div class="small-12 column">   
+
+<a href="/dotnet/account.aspx/logout"><FONT COLOR="RED"><B>LOGOUT</B></FONT> <i class="fa fa-sign-out" aria-hidden="true"></i></a>
+
+@MvcHtmlString.Create(@breadcrumb)
+
+	<form action="emaillists" method="post">
+
+	<h1>Email Lists</h1>
+
+    <div>
+
+            @{
+                
+                string audience_field = "";
+
+                audience_field = "<font class='smtxt'>Audience:<select name='term' tabindex='1'><option value='' selected='selected'>-- Select an audience --</option></font>";
+
+                String ConnString = ConfigurationManager.ConnectionStrings["UserDb"].ConnectionString;
+
+                using (SqlConnection conn = new SqlConnection(ConnString))
+                {
+                    conn.Open();
+/*               
+                    using (SqlCommand cmd = new SqlCommand())
+                    {
+                        cmd.Connection = conn;
+                        cmd.CommandType = System.Data.CommandType.Text;
+
+                        cmd.CommandText = "Select distinct audience from cte.dbo.email_lists";
+                        
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+
+                            while (reader.Read())
+                            {
+
+                                if (ViewBag.Audience != "" && ViewBag.Audience == reader[0].ToString())
+                                {
+                                    audience_field += "<option value=" + reader[0].ToString() + " selected='selected'>" + reader[1].ToString() + "</option>";
+                                    audience_field = audience_field.Replace("<option value='' selected='selected'>", "<option value=''>");
+                                }
+                                else
+                                {
+                                    audience_field += "<option value='" + reader[0].ToString() + "'>" + reader[0].ToString() + "</option>";
+                                }
+                                
+                            }
+                        }
+                    }
+                                
+                    @MvcHtmlString.Create(audience_field + "</select>");
+*/                
+                    string condition_field = "";
+                
+                    using (SqlCommand cmd = new SqlCommand())
+                    {
+                        cmd.Connection = conn;
+                        cmd.CommandType = System.Data.CommandType.Text;
+
+                        cmd.CommandText = "Select distinct email_list_id, audience + ' - ' + list_name from email_lists order by 2";
+                        
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+
+                            while (reader.Read())
+                            {
+
+                                if (ViewBag.List_id != "" && ViewBag.List_id == reader[0].ToString())
+                                {
+                                    condition_field += "<option value='" + reader[0].ToString() + "' selected='selected'>" + reader[1].ToString() + "</option>";
+                                    condition_field = condition_field.Replace("<option value='' selected='selected'>", "<option value=''>");
+                                }
+                                else
+                                {
+                                    condition_field += "<option value='" + reader[0].ToString() + "'>" + reader[1].ToString() + "</option>";
+                                }   
+                            }
+                        }
+
+                    }
+                
+                        condition_field = "<br/><font class='smtx'>Condition:<select name='condition' tabindex='1'><option value='' selected='selected'>-- Select a condition --</option>" + condition_field + "</select></font>";
+
+                        @MvcHtmlString.Create(condition_field);
+
+                        string program_field = "";
+
+                        using (SqlCommand cmd = new SqlCommand())
+                        {
+                            cmd.Connection = conn;
+                            cmd.CommandType = System.Data.CommandType.Text;
+
+                            cmd.CommandText = "Select distinct uiuc_program_id, uiuc_programname from cte_programs_uiuc  where CTE.dbo.GetProgramPermissions ('" + ViewBag.Username + "', uiuc_Program_Id, 'PC,PA,AP,US,IP,IA', getdate(),uiuc_programgroup) = 'TRUE' and discontinued_year is null order by 2";
+
+                            using (SqlDataReader reader = cmd.ExecuteReader())
+                            {
+
+                                while (reader.Read())
+                                {
+
+                                    if (ViewBag.Program != "" && ViewBag.Program == reader[0].ToString())
+                                    {
+                                        program_field += "<option value='" + reader[0].ToString() + "' selected='selected'>" + reader[1].ToString() + "</option>";
+                                        program_field = program_field.Replace("<option value='' selected='selected'>", "<option value=''>");
+                                    }
+                                    else
+                                    {
+                                        program_field += "<option value='" + reader[0].ToString() + "'>" + reader[1].ToString() + "</option>";
+                                    } 
+
+                                }
+                            }
+
+                        }
+
+                        program_field = "<br/><font class='smtx'>Program:<select name='program' tabindex='1'><option value='' selected='selected'>-- Select a program --</option>" + program_field + "</select></font>";
+                    
+                        @MvcHtmlString.Create(program_field);
+
+                        string term_field = "";
+
+                        using (SqlCommand cmd = new SqlCommand())
+                        {
+                            cmd.Connection = conn;
+                            cmd.CommandType = System.Data.CommandType.Text;
+
+                            cmd.CommandText = "Select distinct term_id, term_title from cte_terms where start_date between dateadd(year, -5, getdate()) and dateadd(year, 2, getdate())";
+
+                            using (SqlDataReader reader = cmd.ExecuteReader())
+                            {
+
+                                while (reader.Read())
+                                {
+
+                                    if (ViewBag.Term != "" && ViewBag.Term == reader[0].ToString())
+                                    {
+                                        term_field += "<option value='" + reader[0].ToString() + "' selected='selected'>" + reader[1].ToString() + "</option>";
+                                        term_field = term_field.Replace("<option value='' selected='selected'>", "<option value=''>");
+                                    }
+                                    else
+                                    {
+                                        term_field += "<option value='" + reader[0].ToString() + "'>" + reader[1].ToString() + "</option>";
+                                    } 
+                                }
+                            }
+
+                        }
+
+                        term_field = "<br/><font class='smtx'>Term:<select name='term' tabindex='1'><option value='' selected='selected'>-- Select a term --</option>" + term_field + "</select></font>";
+                    
+                        @MvcHtmlString.Create(term_field);
+
+                        @MvcHtmlString.Create("<br /><input type='submit' value='Create List' class='smtxt'/><br />")
+
+                        if (ViewBag.Condition != "")
+                        {
+                            using (SqlCommand cmd = new SqlCommand())
+                            {
+                                cmd.Connection = conn;
+                                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                                cmd.CommandText = "[dbo].[email_list]";
+                                cmd.Parameters.Add(new SqlParameter("@username", ViewBag.Username));
+                                cmd.Parameters.Add(new SqlParameter("@list_id", ViewBag.List_id));
+                                cmd.Parameters.Add(new SqlParameter("@uiuc_program_id", ViewBag.Program));
+                                cmd.Parameters.Add(new SqlParameter("@term_id", ViewBag.Term));
+
+                                using (SqlDataReader reader = cmd.ExecuteReader())
+                                {
+
+                                    while (reader.Read())
+                                    {
+
+                                        <br /><b>@MvcHtmlString.Create("Email Addresses:")</b><br /><textarea rows="10" cols="50">@reader[0].ToString()</textarea>;
+                                        <b>Names:</b>@MvcHtmlString.Create(reader[1].ToString());                        
+                
+                                    }
+                                }
+
+                            }                            
+                        }
+                        
+                        condition_field = "";
+                        }
+                        
+         }        
+        </div>
+    </form>
+            </div>
+          </div>
+</body>
+</html>

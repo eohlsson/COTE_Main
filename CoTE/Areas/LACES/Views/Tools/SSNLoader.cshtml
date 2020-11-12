@@ -1,0 +1,85 @@
+﻿@using System.Configuration
+@using System.Data.SqlClient
+@using System.Data;
+@{
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+    string breadcrumb = "<nav class=\"site-breadcrumbs\"><ul>";
+    breadcrumb += " <li><a href=\"#\">Home</a> /</li>";
+    breadcrumb += " <li><a href=\"/dotnet/portals/programportal.aspx\">Program Staff Portal</a> /</li>";
+    breadcrumb += "</ul></nav>";
+
+    string studentlistHTML = "";
+    string cte_stu_id_list = (string)ViewBag.cte_stu_id_list ?? "";
+    //    string message = (string)ViewBag.message ?? "";
+    //    string action = (string)ViewBag.action ?? "";
+    
+    cte_stu_id_list = cte_stu_id_list.Substring(1, cte_stu_id_list.Length - 3);
+
+    if (cte_stu_id_list != "")
+    {
+        using (SqlCommand cmd = new SqlCommand())
+        {
+            String ConnString = ConfigurationManager.ConnectionStrings["UserDb"].ConnectionString;
+
+            studentlistHTML = "<table border='1'>";
+
+            using (SqlConnection conn = new SqlConnection(ConnString))
+            {
+                conn.Open();
+
+                cmd.Connection = conn;
+                cmd.CommandType = CommandType.Text;
+                cmd.CommandText = "Select cte_stu_id, last_name + ', '  + first_name, network_id, i_card_number from cte_stu_demo where cte_stu_id IN (" + cte_stu_id_list + ") order by 1 ";
+
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+
+                    studentlistHTML = studentlistHTML + "<tr><th width='100' align='center'>Name</th><th width='100' align='center'>NetID</th><th width='100' align='center'>UIN</th><th width='100' align='center'>SSN</th><th></th></tr>";
+
+                    while (reader.Read())
+                    {
+                        studentlistHTML = studentlistHTML + "<tr><td width='100' align='center'><input type='hidden' name='uin' value='" + reader[3].ToString() + "' /><input type='hidden' name='cte_stu_id' value='" + reader[0].ToString() + "' />" + reader[1].ToString() + "</td><td width='100' align='center'>" + reader[2].ToString() + "</td><td width='100' align='center'>" + reader[3].ToString() + "</td><td><input type='text' id='SSN' name='SSN' maxlength='50' size='50'></td></tr>";
+                    }
+                }
+
+            }
+
+            studentlistHTML = studentlistHTML + "</table>";
+        }
+
+    }
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>EmailList</title>
+    <link rel="stylesheet" type="text/css" href="http://cte-s.education.illinois.edu/css/portals.css" title="fonts" />
+</head>
+<body>
+    <div class="row page-content portal-content">
+        <div class="small-12 column">
+
+            <a href="/dotnet/account.aspx/logout"><FONT COLOR="RED"><B>LOGOUT</B></FONT> <i class="fa fa-sign-out" aria-hidden="true"></i></a>
+
+            @MvcHtmlString.Create(@breadcrumb)
+
+            <h1>SSN Loader</h1>
+
+            <div class="section-border">
+                <h2>Students whose SSNs are not in the SSN file</h2>
+                @using (Html.BeginForm("SSNLoader", "Tools", FormMethod.Post))
+                {
+                    @MvcHtmlString.Create(studentlistHTML)
+
+                    <br /><input type="submit" name="Submit" value="Submit" />
+                    <br /><br />
+
+                }
+            </div>
+        </div>
+    </div>
+</body>
+</html>

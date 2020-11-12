@@ -1,0 +1,284 @@
+﻿@model CoTE.Areas.Portals.Models.Danielson
+
+@{
+
+    String[] ratings = { "", "1", "2", "3", "4" };
+    
+}
+
+<table class="danielson" border=1 border-color="white" cellpadding="15px">
+
+<tr>
+
+	<td colspan=2 class="domain" valign=top bgcolor="F8F1A0">
+
+  <b><font size="+1">DOMAIN 1: Planning and Preparation (<a href="https://cte-s.education.illinois.edu/documents/danielson%20-%20domain%201%20rubric%20-%20SLP.pdf" target="_blank">Rubric</a>)</font></b>
+
+  <br/><br/><b>
+
+      @Html.DropDownListFor(m => m.domain1_a, new SelectList(ratings), new { tabindex = 5, @onchange="CalcScores();"   })
+
+  1a &nbsp;Demonstrating content knowledge</b>
+  <blockquote>
+    <ul>
+        <li>Demonstrates content knowledge adequate to serve the needs of the students in the following possible areas:  articulation, receptive and expressive language, fluency, voice, hearing, cognitive aspects of communication (attention, memory, sequencing, problem-solving), social aspects of communication, augmentative/alternative communication modalities</li>
+    </ul>
+  </blockquote>
+  <b>
+
+      @Html.DropDownListFor(m => m.domain1_b, new SelectList(ratings), new { tabindex = 6, @onchange="CalcScores();"   })
+
+  1b &nbsp;Establishing goals and plans appropriate to the setting and the students served</b>
+    <blockquote>
+        <ul>
+            <li>Develops setting-appropriate intervention plans with measurable and achievable goals that meet students' needs</li>
+            <li>Writes appropriate long-term goals and measurable short-term objectives</li>
+            <li>Constructs appropriate and clearly written lesson plans</li>
+        </ul>
+    </blockquote>
+  <b>
+
+      @Html.DropDownListFor(m => m.domain1_c, new SelectList(ratings), new { tabindex = 7, @onchange="CalcScores();"   })
+
+  1c &nbsp;Demonstrating Knowledge of Resources</b>
+    <blockquote>
+        <ul>
+            <li>Demonstrates knowledge of professional resources available for research and therapy applications</li>
+            <li>Identifies and refers students for services as appropriate</li>
+            <li>Organizes information within a theoretical perspective that is guided by current research and clinical experience</li>
+        </ul>
+    </blockquote>
+  <b>
+
+      @Html.DropDownListFor(m => m.domain1_d, new SelectList(ratings), new { tabindex = 8, @onchange="CalcScores();"   })
+
+  1d &nbsp;Designing Coherent, Individualized Therapy Program</b>
+    <blockquote>
+        <ul>
+            <li>Develops organized, therapeutically appropriate and engaging lessons</li>
+            <li>Thoroughly prepares all materials, instrumentation and activities before lesson</li>
+            <li>Incorporates academic goals to support students within the broader educational program</li>
+        </ul>
+    </blockquote>
+  <b>
+
+      @Html.DropDownListFor(m => m.domain1_e, new SelectList(ratings), new { tabindex = 9, @onchange="CalcScores();"   })
+
+  1e &nbsp;Developing a plan to evaluate the effectiveness of the intervention program</b>
+    <blockquote>
+        <ul>
+            <li>Analyzes observational data to determine effective and ineffective aspects of treatment</li>
+            <li>Measures and evaluates students’ performance and progress through periodic data collection</li>
+            <li>Implements suggestions from previous sessions and supervisory conferences</li>
+        </ul>
+    </blockquote>
+  <b>
+
+       <b>Comments</b><br />
+       @Html.TextAreaFor(m => m.domain1_comments, 3, 60, new { @title = "Comment" })
+
+	</td>
+
+	<td colspan=2 class="domain" valign=top bgcolor="78C1F6">
+
+  <B><font size="+1">DOMAIN 2: The Environment (<a href="https://cte-s.education.illinois.edu/documents/danielson%20-%20domain%202%20rubric%20-%20SLP.pdf" target="_blank">Rubric</a>)</font></B>
+
+  <br/><br/><b>
+
+      @Html.DropDownListFor(m => m.domain2_a, new SelectList(ratings), new { tabindex = 12, @onchange="CalcScores();"   })
+
+  2a &nbsp;Creating and Environment of Respect and Rapport</b>
+    <blockquote>
+        <ul>
+            <li>Develops professional and positive interactions with students</li>
+            <li>Demonstrates ability to focus on client's needs and to modify case management as needed to meet those needs</li>
+            <li>Communicates effectively, recognizing the needs, values, preferred mode of communication, and cultural/linguistic background of the students</li>
+        </ul>
+    </blockquote>
+  <b>
+
+    @Html.DropDownListFor(m => m.domain2_b, new SelectList(ratings), new { tabindex = 13, @onchange="CalcScores();"   })
+
+  2b &nbsp;Organizing Time Effectively</b>
+    <blockquote>
+        <ul>
+            <li>Accomplishes clinical work in an efficient and effective manner</li>
+            <li>Plans lessons that address multiple goals within one session</li>
+            <li>Begins and ends lessons on time</li>
+        </ul>
+    </blockquote>
+  <b>
+
+    @Html.DropDownListFor(m => m.domain2_c, new SelectList(ratings), new { tabindex = 14, @onchange="CalcScores();"   })
+
+  2c &nbsp;Managing Student Behavior</b>
+    <blockquote>
+        <ul>
+            <li>Accurately observes student behavior and its effect on therapeutic progress</li>
+            <li>Develops and implements behavior modification strategies to manage student behavior when needed</li>
+            <li>Modifies behavior modification strategies based on student response</li>
+        </ul>
+    </blockquote>
+  <b>
+
+       <br /><br /><b>Comments</b><br />
+       @Html.TextAreaFor(m => m.domain2_comments, 3, 60, new { @title = "Comment" })
+
+	</td>
+
+</tr>
+
+<tr>
+
+	<td colspan=2 class="domain" valign=top bgcolor="B9D5C6">
+
+  <B><font size="+1">DOMAIN  4: Professional Responsibilities (<a href="https://cte-s.education.illinois.edu/documents/danielson%20-%20domain%204%20rubric%20-%20SLP.pdf" target="_blank">Rubric</a>)</font></B>
+
+  <br/><br/><b>
+
+    @Html.DropDownListFor(m => m.domain4_a, new SelectList(ratings), new { tabindex = 18, @onchange="CalcScores();"   })
+
+
+  4a &nbsp;Reflecting on Practice</b>
+    <blockquote>
+        <ul>
+            <li>Appropriately evaluates own performance as evidenced through discussions and/or reflective journals</li>
+            <li>Actively participates in own clinical development by recognizing and stating own needs and requesting meaningful feedback</li>
+            <li>Responds constructively to supervisory feedback by thoughtful consideration of new ideas and information</li>
+            <li>Initiates discussions of clinically relevant information</li>
+        </ul>
+    </blockquote>
+  <b>
+
+    @Html.DropDownListFor(m => m.domain4_b, new SelectList(ratings), new { tabindex = 19, @onchange="CalcScores();"   })
+
+
+  4b &nbsp;Collaborating with Teachers and Families</b>
+    <blockquote>
+        <ul>
+            <li>Collaborates with parents, teachers and other professionals to maximize effectiveness of intervention</li>
+            <li>Clearly and effectively communicates with parents, teachers and other professionals concerning ongoing progress and changing needs of student</li>
+            <li>Refers clients/patients for appropriate services</li>
+        </ul>
+    </blockquote>
+  <b>
+
+    @Html.DropDownListFor(m => m.domain4_c, new SelectList(ratings), new { tabindex = 20, @onchange="CalcScores();"   })
+
+
+  4c &nbsp;Participating in a Professional Community</b>
+    <blockquote>
+        <ul>
+            <li>Develops professional and positive interactions with teachers, parents, and cooperating SLP</li>
+            <li>Provides counseling regarding communication disorders to teachers, families, caregivers, and relevant others when needed</li>
+            <li>Attends staff meetings, RtI/team meetings, parent-teacher conferences, and in-services as requested</li>
+        </ul>
+    </blockquote>
+  <b>
+
+    @Html.DropDownListFor(m => m.domain4_d, new SelectList(ratings), new { tabindex = 21, @onchange="CalcScores();"   })
+
+  4d &nbsp;Showing Professionalism</b>
+    <blockquote>
+        <ul>
+            <li>Adheres to the ASHA Code of Ethics</li>
+            <li>Demonstrates an active and responsible approach to clinical work</li>
+            <li>Demonstrates responsibility by punctuality, attendance and timeliness</li>
+            <li>Maintains confidentiality of student information</li>
+        </ul>
+    </blockquote>
+  <b>
+
+       <br /><br /><b>Comments</b><br />
+       @Html.TextAreaFor(m => m.domain4_comments, 3, 60, new { @title = "Comment" })
+
+	</td>
+
+	<td colspan=2 class="domain" valign=top bgcolor="F4C4EA">
+
+  <B><font size="+1">DOMAIN 3: Service Delivery (<a href="https://cte-s.education.illinois.edu/documents/danielson%20-%20domain%203%20rubric%20-%20SLP.pdf" target="_blank">Rubric</a>)</font></B>
+
+  <br/><br/><b>
+
+    @Html.DropDownListFor(m => m.domain3_a, new SelectList(ratings), new { tabindex = 25, @onchange="CalcScores();"   })
+
+
+  3a &nbsp;Evaluation</b>
+    <blockquote>
+        <ul>
+            <li>Conducts screening and prevention procedures (including prevention activities)</li>
+            <li>Collects case history information and integrates information from students, family, caregivers, teachers, and relevant others, including other professionals</li>
+            <li>Selects and administers appropriate evaluation procedures, such as behavioral observations, non-standardized and standardized tests, and instrumental procedures</li>
+            <li>Adapts evaluation procedures to meet student needs when appropriate</li>
+            <li>Interprets, integrates, and synthesizes all information to develop diagnoses and make appropriate recommendations for intervention</li>
+        </ul>
+    </blockquote>
+  <b>
+
+    @Html.DropDownListFor(m => m.domain3_b, new SelectList(ratings), new { tabindex = 26, @onchange="CalcScores();"   })
+
+
+  3b &nbsp;Intervention</b>
+    <blockquote>
+        <ul>
+            <li>Selects or develops and uses appropriate materials and instrumentation for prevention and intervention</li>
+            <li>Provides specific instructions, prompts and feedback to students</li>
+            <li>Modifies activities, prompts and level of intervention within session based on student response</li>
+            <li>Incorporates technology into lessons when appropriate</li>
+        </ul>
+    </blockquote>
+  <b>
+
+    @Html.DropDownListFor(m => m.domain3_c, new SelectList(ratings), new { tabindex = 27, @onchange="CalcScores();"   })
+
+
+  3c &nbsp;Clinical Writing</b>
+    <blockquote>
+        <ul>
+            <li>Uses accurate Standard American English grammar, syntax, and vocabulary</li>
+            <li>Effectively communicates evaluation/diagnostic results in written form</li>
+            <li>Writes appropriate long-term goals and measurable short-term objectives</li>
+            <li>Prepares IEPs in accordance with state and district guidelines</li>
+        </ul>
+    </blockquote>
+  <b>
+
+    @Html.DropDownListFor(m => m.domain3_d, new SelectList(ratings), new { tabindex = 28, @onchange="CalcScores();"   })
+
+
+  3d &nbsp;Demonstrating Flexibility and Responsiveness</b>
+    <blockquote>
+        <ul>
+            <li>Modifies intervention plans, strategies, materials, or instrumentation as appropriate to meet the needs of students </li>
+            <li>Modifies subsequent sessions based upon session analysis and supervisor feedback</li>
+            <li>Demonstrates responsibility by punctuality, attendance and timeliness</li>
+            <li>Modifies treatment procedures, materials, and/or instrumentation within sessions based on client's response</li>
+        </ul>
+    </blockquote>
+  <b>
+
+       <br /><br /><b>Comments</b><br />
+       @Html.TextAreaFor(m => m.domain3_comments, 3, 60, new { @title = "Comment" })
+
+	</td>
+
+</tr>
+<tr>
+    <td colspan="4" align="center">
+        <b>Scoring Key:</b><br />
+        1 = unsatisfactory performance on component<br />
+        2 = satisfactory performance on component<br />
+        3 = advanced performance on component<br />
+        4 = exceptional performance on component<br />
+        <br />
+        <b>Total Score:</b> @Html.TextBoxFor(m => m.total_score, (object)new { disabled="disabled" })<br /><br />
+
+        <b>Signature:</b>  @Html.CheckBoxFor(m => m.signature)  
+        <br /><br /><b><i>Note:</i> You may save changes to this form if you plan to return to edit by clicking the Save button. Once you click the signature box you <b><font color="red">WILL NOT</font></b> be able to edit or make changes to this evaluation. <br />Please <b><font color="red">DO NOT</font></b> click on the signature box until you are absolutely sure that you don't want to edit this form again.</b>
+
+        <br/><br/><input type="submit" value="Save" />&nbsp;&nbsp;<input type="button" value="Print" onclick="Print()"/>
+
+    </td>
+</tr>
+
+</table>

@@ -1,0 +1,226 @@
+﻿@model IEnumerable<CoTE.Areas.Portals.Models.EOC_Data>
+
+@{
+    bool authorized = false;
+}
+
+<!--- Check if authorized --->
+@foreach (CoTE.Areas.Portals.Models.EOC_Data h in ViewData.Model)
+{
+    foreach (var authorization in h.AuthorizedDataSet)
+    {
+        if (authorization.user_name.Length > 0)
+        {
+            authorized = true;
+        }
+    }
+}
+
+
+
+@if (authorized == true)
+{
+      			<center>
+				<table width="750">
+					<tr>
+						<td>
+							<CENTER>
+								<img src="https://cte-s.education.illinois.edu/images/cte_logo.gif"/>
+								<hr width="90%" />
+								<hr width="100%" />
+							</CENTER>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<font color="black" face="times" size="2">
+							<br/><b>Council on Teacher Education</b>
+							<br/>1310 South Sixth Street, Suite 130
+							<br/>MC-425
+							<br/>Champaign, IL 61820
+							<br/><br/>
+							</font>
+						</td>
+					</tr>
+					<tr>
+						<td>
+								<center>
+									<br/>	<h1>Evidence of Completion of Supervision for Teacher Education Candidates</h1>
+								</center>
+							<font color="black" face="times" size="2">
+								This document verifies that the teacher named below has provided a minimum of 45 contact hours of supervision for a student(s)
+								connected with a pre-student teaching practicum and/or supervised a student teacher(s) as a part of a University of Illinois as Urbana-
+								Champaign Teacher Education Program.
+								<center>
+									<br/><b>(Please print this document and keep for your files.)</b>
+									<br/><br/>
+
+									<u><b>If any information is incorrect, please contact the Council on Teacher Education at 217-333-7195.</b></u>
+								</center>
+								<br/><br/>
+							</font>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<center>
+@foreach (CoTE.Areas.Portals.Models.EOC_Data h in ViewData.Model)
+{
+    foreach (var profile in h.EOCCoopDataSet)
+    { 
+	<table>
+		<tr>
+			<td width="20">
+			</td>
+			<td valign="top">
+				Cooperating Teacher:
+			</td>
+			<td width="50">
+			</td>
+			<td valign="top" width="250">
+				School and District:
+			</td>
+			<td width="50">
+			</td>
+		</tr>
+		<tr>
+			<td width="20">
+			</td>
+			<td valign="top">
+				<b>@profile.coop</b>
+			</td>
+			<td width="50">
+			</td>
+			<td valign="top" width="250">
+				@profile.facility<br/>
+				@profile.district<br/>
+				@profile.address<br/>
+				@profile.city, @profile.state @profile.zip<br/>
+			</td>
+			<td width="50">
+			</td>
+		</tr>
+	</table>
+    }
+}							</center>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<table style="border-left:1px solid #000000;border-top:1px solid #000000;border-bottom:1px solid #000000;border-right:1px solid #000000;">
+								<tr>
+									<td width="100">
+										<b>Term:</b>
+									</td>
+									<td width="180">
+										<b>Placement Type:</b>
+									</td>
+									<td width="220">
+										<b>Certification Program:</b>
+									</td>
+									<td width="150">
+										<b>University Course #:</b>
+									</td>
+									<td width="250">
+										<b>Teacher Education Candidate:</b>
+									</td>
+								</tr>
+							</table>
+
+							<table>
+@foreach (CoTE.Areas.Portals.Models.EOC_Data h in ViewData.Model)
+{
+    foreach (var student in h.EOCStudentDataSet)
+    { 
+				<tr>
+					<td width="100">
+						@student.pretty_term
+					</td>
+					<td width="180">
+						@student.placement_type
+					</td>
+					<td width="220">
+						@student.UIUC_ProgramName
+					</td>
+					<td width="150">
+						@student.course
+					</td>
+					<td width="250">
+						@student.student
+					</td>
+				</tr>    
+    }
+}							</table>
+						</td>
+					</tr>
+				</table>
+				<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+				<table style="border-left:1px solid #000000;border-top:1px solid #000000;border-bottom:1px solid #000000;border-right:1px solid #000000;">
+					<tr>
+						<td colspan="5">
+							<b>School Administrator's Signature (if required):</b>
+						</td>
+					</tr>
+					<tr>
+						<td width="10">
+						</td>
+						<td width="350">
+						</td>
+						<td width="10">
+						</td>
+						<td width="350">
+						</td>
+						<td width="5">
+						</td>
+					</tr>
+					<tr>
+						<td width="10">
+						</td>
+						<td width="350" style="border-left:1px solid #000000;border-top:1px solid #000000;border-bottom:1px solid #000000;border-right:1px solid #000000;">
+						&#160;
+						</td>
+						<td width="10">
+						</td>
+						<td width="350" style="border-left:1px solid #000000;border-top:1px solid #000000;border-bottom:1px solid #000000;border-right:1px solid #000000;">
+						<b>X</b>
+						</td>
+						<td width="5">
+						</td>
+					</tr>
+					<tr>
+						<td width="10">
+						</td>
+						<td width="350">
+						Name of School Administrator
+						</td>
+						<td width="10">
+						</td>
+						<td width="350">
+						Name of School Administrator
+						</td>
+						<td width="5">
+						</td>
+					</tr>
+				</table>
+				<table width="750">
+					<tr>
+						<td>
+							<CENTER>
+								<hr width="100%" />
+								<hr width="90%" />
+							</CENTER>
+						</td>
+					</tr>
+				</table>
+			<i>Telephone:</i> 217-333-2804 &#160;&#160;&#160;<i>fax:</i> 217-265-5188 &#160;&#160;&#160;<i>url:</i> http://www.cote.illinois.edu
+			<br/><i>Certification Services:</i> 1310 South Sixth Street, Suite 130, 217-333-7195
+			</center>
+}
+else
+{
+    		<center><br/><br/><br/><h2><font color="red" size="+2">You do not have access to view this page.  <br />For access to this page, please contact <a href="mailto:cote-techsupport@illinois.edu">cote-techsupport@illinois.edu</a></font></h2></center>
+}
+    
+	</body>
+
+</html>

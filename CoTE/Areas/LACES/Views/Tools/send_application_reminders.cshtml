@@ -1,0 +1,42 @@
+﻿@{
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+    string left_menu = "/dotnet/areas/webpages/content/js/cc_left_menu.js";
+    string breadcrumb = "<nav class=\"site-breadcrumbs\"><ul>";
+    breadcrumb += " <li><a href=\"#\">Home</a> /</li>";
+    breadcrumb += " <li><a href=\"/dotnet/portals/programportal.aspx\">Program Staff Portal</a> /</li>";
+    breadcrumb += " <li><a href=\"/dotnet/laces/laces.aspx\">LACES</a> /</li>";
+    breadcrumb += "</ul></nav>";
+   
+    string message = "";
+    message = ViewBag.message.ToString();
+
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Send Application Reminders</title>
+</head>
+<body>
+ <div class="row page-content portal-content">
+    <div class="small-12 column">   
+
+<a href="/dotnet/account.aspx/logout"><FONT COLOR="RED"><B>LOGOUT</B></FONT> <i class="fa fa-sign-out" aria-hidden="true"></i></a>
+
+@MvcHtmlString.Create(@breadcrumb)
+ 
+    <div>
+        <br /><br />
+ 
+        @MvcHtmlString.Create(@message)<br /><br />
+
+        Click <a href="/dotnet/laces/laces.aspx">here</a> to return to the LACES Menu
+    
+            </div>
+          </div>
+        </div>
+    </div>
+</body>
+</html>

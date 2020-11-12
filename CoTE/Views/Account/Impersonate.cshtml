@@ -1,0 +1,79 @@
+﻿@{
+    ViewBag.Title = "Impersonate";
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+}
+
+<head>
+    <title>Impersonate</title>
+<script src="@Url.Content("~/Scripts/jquery-1.7.1.min.js")" type="text/javascript"></script>
+       <script type="text/javascript">
+           function get_impersonatees(impersonator) {
+
+            //alert("IN");
+            //alert(impersonator);
+            //alert(document.getElementById(search_question).value);
+
+            var portal = document.getElementById('PortalType').value || "";
+
+            //alert(portal);
+
+            $.ajax({
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                url: '@Url.Action("GetImpersonatees", "Account")',
+                data: { "impersonator": impersonator, "portal": portal },
+                dataType: "json",
+                beforeSend: function () { },
+                success: function (new_values) {
+
+                    var values = "";
+
+                    $.each(new_values, function (i, new_values) {
+                        //alert(i);
+                        values += '<option value="' + new_values.Value + '">' +
+                                new_values.Text + '</option>';
+                        //alert('<option value="' + new_values.Value + '">' + new_values.Text + '</option>')
+                    })
+
+                    $("#Users").empty().append(values);
+
+                }
+            })
+
+        }
+      </script>
+</head>
+
+<div class="row page-content portal-content">
+    <div class="small-12 column">   
+        <h2>Impersonate User Page</h2><br />
+            <h5>Select a Portal and then select the User to access that person's portal page.</h5>
+        <form method="post" action="/dotnet/account.aspx/impersonate">
+        <div class="section-border">
+            <div class="row medium-unstack">
+                    <font size="-1" face="arial,helvetica">Portal</font>
+                        @Html.DropDownList("PortalType", null, new { onchange = "get_impersonatees('" + ViewBag.Username + "');" })
+            </div>
+            <div class="row medium-unstack">
+    	                <font size=-1 face=arial,helvetica>User Name:&nbsp;
+                        @Html.DropDownList("Users")
+            </div>
+            <div class="row medium-unstack">
+                    <td colspan="3">
+                        <b><font color="red" size=-1 face=arial,helvetica>
+                                    @if (@ViewBag.ErrorMessage != null)
+                                    {
+                                        @Html.Raw(HttpUtility.HtmlDecode(@ViewBag.ErrorMessage));
+                                    }
+                        </font></b>
+            </div>
+            <div class="row medium-unstack">
+                    <input type="submit" value="Submit" name="action"><br/><br />
+            </div>
+            <div class="row medium-unstack">
+	                    For additional help, please email&nbsp;<script type='text/javascript'>var a = new Array('lto:', '@@illin', 'upport', 'techs', 'cote-', 'ois.edu', 'mai'); document.write("<a href=" + a[6] + a[0] + "'" + a[4] + a[3] + a[2] + a[1] + a[5] + "'> " + a[4] + a[3] + a[2] + a[1] + a[5] + "</a>"); </script>&nbsp;or call<b>&nbsp;(217) 333-2804</b>.
+            </div>
+        </div>
+        </form>
+    </div>
+</div>

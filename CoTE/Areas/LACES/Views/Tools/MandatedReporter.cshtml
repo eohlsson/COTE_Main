@@ -1,0 +1,71 @@
+﻿@model CoTE.Areas.LACES.Models.Student
+@using CoTE.Models
+@using System.Configuration
+@using System.Data.SqlClient
+@{
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+
+    string mandatedreporterHTML = "";
+    string message = (string)ViewBag.message ?? "";
+
+    mandatedreporterHTML = "<table border='1'>";
+        
+    String ConnString = ConfigurationManager.ConnectionStrings["UserDb"].ConnectionString;
+
+    using (SqlConnection conn = new SqlConnection(ConnString))
+    {
+        conn.Open();
+        using (SqlCommand cmd = new SqlCommand())
+        {
+            cmd.Connection = conn;
+            cmd.CommandType = System.Data.CommandType.Text;
+
+            cmd.CommandText = "SELECT STU.cte_stu_id, STU.FIRST_NAME, MR.documents_received, STU.LAST_NAME, STU.MIDDLE_NAME" +
+                " FROM CTE.DBO.CTE_STU_DEMO STU " +
+                    "INNER JOIN CTE.DBO.cte_stu_mandated_reporter MR ON MR.cte_stu_id = STU.cte_stu_id " +
+                "WHERE (ISNULL(MR.documents_received, 0) = 0) ORDER BY STU.LAST_NAME;";
+                        
+            using (SqlDataReader reader = cmd.ExecuteReader())
+            {
+
+                while (reader.Read())
+                {
+
+                    mandatedreporterHTML = mandatedreporterHTML + "<tr><td width='100' align='center'>" + reader[3].ToString() + "," + reader[1].ToString() + " " + reader[4].ToString() + "</td><td width='100' align='center'><div class=''><input type='checkbox' class='cs-input-checkbox' datatype='checkbox' id='checkbox_" + reader[0].ToString() + "' name='checkbox_" + reader[0].ToString() + "' value=" + reader[0].ToString() + " /><label for='checkbox_" + reader[0].ToString() + "'></label></div></td></tr>";
+
+                }
+            }
+        }
+    }                               
+       
+    mandatedreporterHTML = mandatedreporterHTML + "</table>"; 
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Mandated Reporter</title>
+</head>
+<body>
+
+    <h2>Mandated Reporter</h2>
+    @using(Html.BeginForm("MandatedReporter", "Tools", FormMethod.Post))
+    {
+            @MvcHtmlString.Create(mandatedreporterHTML)
+
+         if (message != "")
+            {
+                @MvcHtmlString.Create(message)
+            }       
+            
+            <br/><input type="submit" name="Submit" value="Submit"/>
+        
+
+    }
+
+</body>
+</html>
+
+

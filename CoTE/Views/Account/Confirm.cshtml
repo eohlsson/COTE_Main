@@ -1,0 +1,64 @@
+﻿@{
+    ViewBag.Title = "Confirm Your Account";
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+}
+<div class="row page-content portal-content">
+    <div class="small-12 column">   
+        <form method="post" action="/dotnet/account.aspx/confirm">
+        <div class="section-border">
+            <div class="row medium-unstack">
+                        <b>Confirm Your Account</b>
+            </div>
+            <div class="row medium-unstack">
+                        <b><font color="orange" size=-1 face=arial,helvetica>
+                                    @if (@ViewBag.InformationMessage != null)
+                                    {
+                                        @MvcHtmlString.Create(ViewBag.InformationMessage)
+                                    }
+                        </font></b>
+            </div>
+            @if (@ViewBag.ShowFields == true)
+            {
+            <div class="row medium-unstack">
+  	                    <font size=-1 face=arial,helvetica>Password:&nbsp;</font>
+            </div>
+            <div class="row medium-unstack">
+                            <INPUT TYPE=password NAME="password"  onfocus="this.value='';" SIZE="35" valign=top onkeypress="if (event.which == 13 || event.keyCode == 13) {this.form.password.focus(); return false;}" value="">
+            </div>
+            <div class="row medium-unstack">
+                            <font size=-1 face=arial,helvetica>Confirm Password:&nbsp;</font>
+            </div>
+            <div class="row medium-unstack">
+                            <INPUT TYPE=password NAME="confirm_password"  SIZE="35" valign=top onkeypress="if (event.which == 13 || event.keyCode == 13) {this.form.submit(); return false;}"> 
+            </div>
+            }
+           
+            <div class="row medium-unstack">
+                        <b><font color="red" size=-1 face=arial,helvetica>
+                                    @if (@ViewBag.ErrorMessage != null)
+                                    {
+                                        @ViewBag.ErrorMessage
+                                    }
+                        </font></b>
+            </div>
+ 
+        @if (@ViewBag.ShowFields == true)
+        {        
+            <div class="row medium-unstack">
+                        <input type="submit" value="Save" name="action">
+
+                        <input type="hidden" name="logon" value="true">
+                        <input type="hidden" name="username" value="@ViewBag.Username">
+                        <input type="hidden" name="token" value="@ViewBag.Token">
+                        <input type="hidden" name="confirmationtype" value="@ViewBag.ConfirmationType">
+                        <input type="hidden" name="portal" value="coop">
+                        <input type="hidden" name="location" value="bottom">
+            </div>
+        }
+            <div class="row medium-unstack">
+	                    For additional help, please email <script type='text/javascript'>var a = new Array('lto:', '@@illin', 'upport', 'techs', 'cote-', 'ois.edu', 'mai'); document.write("<a href=" + a[6] + a[0] + "'" + a[4] + a[3] + a[2] + a[1] + a[5] + "'>" + a[4] + a[3] + a[2] + a[1] + a[5] + "</a>");</script> or call <b>(217) 333-2804</b>.
+            </div>
+
+        </form>
+    </div>
+</div>

@@ -1,0 +1,88 @@
+﻿@model CoTE.Areas.LACES.Models.Student
+@using CoTE.Models
+@using System.Configuration
+@using System.Data.SqlClient
+@{
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+    string left_menu = "/dotnet/areas/webpages/content/js/cc_left_menu.js";
+    string breadcrumb = "<nav class=\"site-breadcrumbs\"><ul>";
+    breadcrumb += " <li><a href=\"#\">Home</a> /</li>";
+    breadcrumb += " <li><a href=\"/dotnet/portals/programportal.aspx\">Program Staff Portal</a> /</li>";
+    breadcrumb += " <li><a href=\"/dotnet/laces/laces.aspx\">LACES</a> </li>";
+    breadcrumb += " <li><a href=\"#\">Offender Checks</a> /</li>";
+    breadcrumb += "</ul></nav>";
+
+    string offenderchecksHTML = "";
+    string message = (string)ViewBag.message ?? "";
+
+    offenderchecksHTML = "<table border='1'>";
+        
+    String ConnString = ConfigurationManager.ConnectionStrings["UserDb"].ConnectionString;
+
+    using (SqlConnection conn = new SqlConnection(ConnString))
+    {
+        conn.Open();
+        using (SqlCommand cmd = new SqlCommand())
+        {
+            cmd.Connection = conn;
+            cmd.CommandType = System.Data.CommandType.Text;
+
+            cmd.CommandText = "SELECT STU.cte_stu_id, STU.FIRST_NAME, STU.offender_db_checked, STU.LAST_NAME, STU.MIDDLE_NAME, convert(varchar(10), STU.BIRTH_DATE, 101) " +
+                " FROM CTE.DBO.CTE_STU_DEMO STU " +
+                    "INNER JOIN CTE.DBO.CE_PLACEMENTS PL ON PL.cte_stu_id = STU.cte_stu_id " +
+                "WHERE (PL.term = CTE.dbo.fn_get_current_placement_term()) AND (ISNULL(STU.offender_db_checked, 0) = 0) ORDER BY STU.LAST_NAME;";
+                        
+            using (SqlDataReader reader = cmd.ExecuteReader())
+            {
+
+                while (reader.Read())
+                {
+
+                    //offenderchecksHTML = offenderchecksHTML + "<tr><td width='100' align='center'>" + reader[3].ToString() + "," + reader[1].ToString() + " " + reader[4].ToString() + "</td><td width='100' align='center'>" + reader[5].ToString() + "</td><td width='100' align='center'><input type='checkbox' name='checkbox_" + reader[0].ToString() + "' value='" + reader[0].ToString() +"'></td></tr>";
+                    offenderchecksHTML = offenderchecksHTML + "<tr><td width='100' align='center'>" + reader[3].ToString() + "," + reader[1].ToString() + " " + reader[4].ToString() + "</td><td width='100' align='center'>" + reader[5].ToString() + "</td><td width='100' align='center'><div class=''><input type='checkbox' class='cs-input-checkbox' datatype='checkbox' id='checkbox_" + reader[0].ToString() + "' name='checkbox_" + reader[0].ToString() + "' value=" + reader[0].ToString() + " /><label for='checkbox_" + reader[0].ToString() + "'></label></div></td></tr>";
+                }
+            }
+        }
+    }                               
+       
+    offenderchecksHTML = offenderchecksHTML + "</table>"; 
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Offender Checks</title>
+</head>
+<body>
+ <div class="row page-content portal-content">
+    <div class="small-12 column">   
+
+<a href="/dotnet/account.aspx/logout"><FONT COLOR="RED"><B>LOGOUT</B></FONT> <i class="fa fa-sign-out" aria-hidden="true"></i></a>
+
+@MvcHtmlString.Create(@breadcrumb)
+
+    <h2>Offender Checks</h2>
+    @using(Html.BeginForm("OffenderChecks", "Tools", FormMethod.Post))
+    {
+            @MvcHtmlString.Create(offenderchecksHTML)
+
+         if (message != "")
+            {
+                @MvcHtmlString.Create(message)
+            }       
+            
+            <br/><input type="submit" name="Submit" value="Submit"/>
+            <br /><br />
+
+    }
+
+            </div>
+          </div>
+        </div>
+
+    </body>
+</html>
+
+

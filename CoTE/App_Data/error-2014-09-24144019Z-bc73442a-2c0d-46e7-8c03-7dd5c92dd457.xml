@@ -1,0 +1,162 @@
+﻿<error errorId="bc73442a-2c0d-46e7-8c03-7dd5c92dd457" application="/LM/W3SVC/13/ROOT/dotnet" host="ED-EOHLSSON-MAC" type="Microsoft.CSharp.RuntimeBinder.RuntimeBinderException" message="Cannot perform runtime binding on a null reference" source="Anonymously Hosted DynamicMethods Assembly" detail="Microsoft.CSharp.RuntimeBinder.RuntimeBinderException: Cannot perform runtime binding on a null reference&#xD;&#xA;   at CallSite.Target(Closure , CallSite , Object , Int32 )&#xD;&#xA;   at System.Dynamic.UpdateDelegates.UpdateAndExecute2[T0,T1,TRet](CallSite site, T0 arg0, T1 arg1)&#xD;&#xA;   at ASP._Page_Areas_WebPages_Views_webpage_EmailList_cshtml.Execute() in g:\Data Operations\SQL\VS 2012\dotnet\CoTE\CoTE\Areas\WebPages\Views\WebPage\EmailList.cshtml:line 86&#xD;&#xA;   at System.Web.WebPages.WebPageBase.ExecutePageHierarchy()&#xD;&#xA;   at System.Web.Mvc.WebViewPage.ExecutePageHierarchy()&#xD;&#xA;   at System.Web.WebPages.WebPageBase.ExecutePageHierarchy(WebPageContext pageContext, TextWriter writer, WebPageRenderingBase startPage)&#xD;&#xA;   at System.Web.Mvc.RazorView.RenderView(ViewContext viewContext, TextWriter writer, Object instance)&#xD;&#xA;   at System.Web.Mvc.BuildManagerCompiledView.Render(ViewContext viewContext, TextWriter writer)&#xD;&#xA;   at System.Web.Mvc.ViewResultBase.ExecuteResult(ControllerContext context)&#xD;&#xA;   at System.Web.Mvc.ControllerActionInvoker.InvokeActionResult(ControllerContext controllerContext, ActionResult actionResult)&#xD;&#xA;   at System.Web.Mvc.ControllerActionInvoker.InvokeActionResultFilterRecursive(IList`1 filters, Int32 filterIndex, ResultExecutingContext preContext, ControllerContext controllerContext, ActionResult actionResult)&#xD;&#xA;   at System.Web.Mvc.ControllerActionInvoker.InvokeActionResultFilterRecursive(IList`1 filters, Int32 filterIndex, ResultExecutingContext preContext, ControllerContext controllerContext, ActionResult actionResult)&#xD;&#xA;   at System.Web.Mvc.ControllerActionInvoker.InvokeActionResultWithFilters(ControllerContext controllerContext, IList`1 filters, ActionResult actionResult)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncControllerActionInvoker.&lt;&gt;c__DisplayClass21.&lt;&gt;c__DisplayClass2b.&lt;BeginInvokeAction&gt;b__1c()&#xD;&#xA;   at System.Web.Mvc.Async.AsyncControllerActionInvoker.&lt;&gt;c__DisplayClass21.&lt;BeginInvokeAction&gt;b__1e(IAsyncResult asyncResult)" user="eohlsson" time="2014-09-24T14:40:19.5511678Z">
+  <serverVariables>
+    <item name="ALL_HTTP">
+      <value string="HTTP_CACHE_CONTROL:max-age=0&#xD;&#xA;HTTP_CONNECTION:keep-alive&#xD;&#xA;HTTP_ACCEPT:text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8&#xD;&#xA;HTTP_ACCEPT_ENCODING:gzip,deflate,sdch&#xD;&#xA;HTTP_ACCEPT_LANGUAGE:en-US,en;q=0.8&#xD;&#xA;HTTP_COOKIE:.ASPXAUTH=F447D06474A5BF043FDAB9EDD6A7B9921A142DB1E549B53D7763B5654B09A2290C0CCD3FFB5745AD1AF9D6ABCE1426A1EA899D91B06A6762AEE733319FD8E3A92BAB49592D15D02A9EA8ACF4B4CC5EC237675B2F0E7CEB52948003179407BE50&#xD;&#xA;HTTP_HOST:localhost:25903&#xD;&#xA;HTTP_USER_AGENT:Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.120 Safari/537.36&#xD;&#xA;" />
+    </item>
+    <item name="ALL_RAW">
+      <value string="Cache-Control: max-age=0&#xD;&#xA;Connection: keep-alive&#xD;&#xA;Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8&#xD;&#xA;Accept-Encoding: gzip,deflate,sdch&#xD;&#xA;Accept-Language: en-US,en;q=0.8&#xD;&#xA;Cookie: .ASPXAUTH=F447D06474A5BF043FDAB9EDD6A7B9921A142DB1E549B53D7763B5654B09A2290C0CCD3FFB5745AD1AF9D6ABCE1426A1EA899D91B06A6762AEE733319FD8E3A92BAB49592D15D02A9EA8ACF4B4CC5EC237675B2F0E7CEB52948003179407BE50&#xD;&#xA;Host: localhost:25903&#xD;&#xA;User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.120 Safari/537.36&#xD;&#xA;" />
+    </item>
+    <item name="APPL_MD_PATH">
+      <value string="/LM/W3SVC/13/ROOT/dotnet" />
+    </item>
+    <item name="APPL_PHYSICAL_PATH">
+      <value string="G:\Data Operations\SQL\VS 2012\dotnet\CoTE\CoTE\" />
+    </item>
+    <item name="AUTH_TYPE">
+      <value string="Forms" />
+    </item>
+    <item name="AUTH_USER">
+      <value string="eohlsson" />
+    </item>
+    <item name="AUTH_PASSWORD">
+      <value string="" />
+    </item>
+    <item name="LOGON_USER">
+      <value string="eohlsson" />
+    </item>
+    <item name="REMOTE_USER">
+      <value string="eohlsson" />
+    </item>
+    <item name="CERT_COOKIE">
+      <value string="" />
+    </item>
+    <item name="CERT_FLAGS">
+      <value string="" />
+    </item>
+    <item name="CERT_ISSUER">
+      <value string="" />
+    </item>
+    <item name="CERT_KEYSIZE">
+      <value string="" />
+    </item>
+    <item name="CERT_SECRETKEYSIZE">
+      <value string="" />
+    </item>
+    <item name="CERT_SERIALNUMBER">
+      <value string="" />
+    </item>
+    <item name="CERT_SERVER_ISSUER">
+      <value string="" />
+    </item>
+    <item name="CERT_SERVER_SUBJECT">
+      <value string="" />
+    </item>
+    <item name="CERT_SUBJECT">
+      <value string="" />
+    </item>
+    <item name="CONTENT_LENGTH">
+      <value string="0" />
+    </item>
+    <item name="CONTENT_TYPE">
+      <value string="" />
+    </item>
+    <item name="GATEWAY_INTERFACE">
+      <value string="CGI/1.1" />
+    </item>
+    <item name="HTTPS">
+      <value string="off" />
+    </item>
+    <item name="HTTPS_KEYSIZE">
+      <value string="" />
+    </item>
+    <item name="HTTPS_SECRETKEYSIZE">
+      <value string="" />
+    </item>
+    <item name="HTTPS_SERVER_ISSUER">
+      <value string="" />
+    </item>
+    <item name="HTTPS_SERVER_SUBJECT">
+      <value string="" />
+    </item>
+    <item name="INSTANCE_ID">
+      <value string="13" />
+    </item>
+    <item name="INSTANCE_META_PATH">
+      <value string="/LM/W3SVC/13" />
+    </item>
+    <item name="LOCAL_ADDR">
+      <value string="::1" />
+    </item>
+    <item name="PATH_INFO">
+      <value string="/dotnet/webpages/webpage.aspx/emaillist" />
+    </item>
+    <item name="PATH_TRANSLATED">
+      <value string="G:\Data Operations\SQL\VS 2012\dotnet\CoTE\CoTE\webpages\webpage.aspx\emaillist" />
+    </item>
+    <item name="QUERY_STRING">
+      <value string="" />
+    </item>
+    <item name="REMOTE_ADDR">
+      <value string="::1" />
+    </item>
+    <item name="REMOTE_HOST">
+      <value string="::1" />
+    </item>
+    <item name="REMOTE_PORT">
+      <value string="54348" />
+    </item>
+    <item name="REQUEST_METHOD">
+      <value string="GET" />
+    </item>
+    <item name="SCRIPT_NAME">
+      <value string="/dotnet/webpages/webpage.aspx/emaillist" />
+    </item>
+    <item name="SERVER_NAME">
+      <value string="localhost" />
+    </item>
+    <item name="SERVER_PORT">
+      <value string="25903" />
+    </item>
+    <item name="SERVER_PORT_SECURE">
+      <value string="0" />
+    </item>
+    <item name="SERVER_PROTOCOL">
+      <value string="HTTP/1.1" />
+    </item>
+    <item name="SERVER_SOFTWARE">
+      <value string="Microsoft-IIS/8.0" />
+    </item>
+    <item name="URL">
+      <value string="/dotnet/webpages/webpage.aspx/emaillist" />
+    </item>
+    <item name="HTTP_CACHE_CONTROL">
+      <value string="max-age=0" />
+    </item>
+    <item name="HTTP_CONNECTION">
+      <value string="keep-alive" />
+    </item>
+    <item name="HTTP_ACCEPT">
+      <value string="text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8" />
+    </item>
+    <item name="HTTP_ACCEPT_ENCODING">
+      <value string="gzip,deflate,sdch" />
+    </item>
+    <item name="HTTP_ACCEPT_LANGUAGE">
+      <value string="en-US,en;q=0.8" />
+    </item>
+    <item name="HTTP_COOKIE">
+      <value string=".ASPXAUTH=F447D06474A5BF043FDAB9EDD6A7B9921A142DB1E549B53D7763B5654B09A2290C0CCD3FFB5745AD1AF9D6ABCE1426A1EA899D91B06A6762AEE733319FD8E3A92BAB49592D15D02A9EA8ACF4B4CC5EC237675B2F0E7CEB52948003179407BE50" />
+    </item>
+    <item name="HTTP_HOST">
+      <value string="localhost:25903" />
+    </item>
+    <item name="HTTP_USER_AGENT">
+      <value string="Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.120 Safari/537.36" />
+    </item>
+  </serverVariables>
+  <cookies>
+    <item name=".ASPXAUTH">
+      <value string="F447D06474A5BF043FDAB9EDD6A7B9921A142DB1E549B53D7763B5654B09A2290C0CCD3FFB5745AD1AF9D6ABCE1426A1EA899D91B06A6762AEE733319FD8E3A92BAB49592D15D02A9EA8ACF4B4CC5EC237675B2F0E7CEB52948003179407BE50" />
+    </item>
+  </cookies>
+</error>

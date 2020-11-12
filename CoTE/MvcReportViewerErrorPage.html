@@ -1,0 +1,16 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Report Error</title>
+</head>
+<body>
+    <h1>Report Error</h1>
+    <p>An error occurred while retrieving your report, please try again. </p>
+    <script src="Scripts/url.js"></script>
+    <script>
+        var error = decodeURIComponent(url('?error')),
+            errorType = decodeURIComponent(url('?errorType'));
+        document.write(errorType.replace(new RegExp("\\+", "g"), ' ') + ': ' + error.replace(new RegExp("\\+", "g"), ' '));
+    </script>
+</body>
+</html>

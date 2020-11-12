@@ -1,0 +1,62 @@
+﻿@model CoTE.Areas.LACES.Models.Student
+@using CoTE.Models
+@using System.Configuration
+@using System.Data.SqlClient
+@{
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+    string breadcrumb = "<nav class=\"site-breadcrumbs\"><ul>";
+    breadcrumb += " <li><a href=\"#\">Home</a> /</li>";
+    breadcrumb += "</ul></nav>";
+}
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Educator Employment Survey</title>
+</head>
+<body>
+
+<div class="row page-content portal-content">
+    <div class="small-12 column">   
+
+@MvcHtmlString.Create(@breadcrumb)
+
+<h1>Educator Employment Survey</h1>
+
+<div class="directions" id="directions" name="directions">
+
+<b>For verification purposes, please enter your last name (at the time of licensure) and your birth date below.</b>
+<br /><br />
+</div>
+
+<form class="main_form" id="add" method="post" action="/dotnet/WebPages/EmploymentSurvey.aspx/">
+
+        <div class="row medium-unstack">
+            <div class="column cs-input-group">
+                Last Name (at time of licensure):
+                <input type="text" id="lastname" name="lastname" style="width: 300px;" />
+            </div>
+        </div>
+
+
+        <div class="row medium-unstack">
+            <div class="column cs-input-group">
+                Birth Date:
+                <input type="date" id="birthdate" name="birthdate" style="width: 150px;" />
+            </div>
+        </div>
+
+        <div class="row medium-unstack">
+            <div class="column cs-input-group">
+                <br /><input type="submit" name="Submit" value="Submit"/>
+                <br /><br />
+            </div>
+        </div>
+ 
+</form>
+    </div>
+</div>
+</BODY>
+
+</HTML>
+

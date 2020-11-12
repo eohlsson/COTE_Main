@@ -1,0 +1,99 @@
+@* http://localhost:54017/LACES.aspx/index *@
+@model IEnumerable<CoTE.Areas.LACES.Models.LACES_Data>
+
+@{
+    bool authorized = false;
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+    string left_menu = "/dotnet/areas/webpages/content/js/cc_left_menu.js";
+    string breadcrumb = "<nav class=\"site-breadcrumbs\"><ul>";
+    breadcrumb += " <li><a href=\"#\">Home</a> /</li>";
+    breadcrumb += " <li><a href=\"/dotnet/portals/programportal.aspx\">Program Staff Portal</a> /</li>";
+    breadcrumb += " <li><a href=\"/dotnet/laces/laces.aspx\">LACES</a> /</li>";
+    breadcrumb += "</ul></nav>";
+}
+
+<!-- Hide menu since we are logged in -->
+<style>
+    .main-navigation {
+        display: none;
+    }
+</style>
+
+<div class="row page-content portal-content">
+    <div class="small-12 column">   
+
+<a href="/dotnet/account.aspx/logout"><FONT COLOR="RED"><B>LOGOUT</B></FONT> <i class="fa fa-sign-out" aria-hidden="true"></i></a>
+
+@MvcHtmlString.Create(@breadcrumb)
+ 
+<!--- Check if authorized --->
+@foreach (CoTE.Areas.LACES.Models.LACES_Data h in ViewData.Model)
+{
+    foreach (var authorization in h.AuthorizedDataSet)
+    {
+        if (authorization.user_name.Length > 0)
+        {
+            authorized = true;
+        }
+    }
+}
+
+@if (authorized == true)
+{
+
+<!-- Menu Links -->                                                
+foreach (CoTE.Areas.LACES.Models.LACES_Data h in ViewData.Model)
+{
+    string old_link_group = "";
+    
+    foreach (var link in h.LinksDataSet)
+    {
+            if (@link.section_type == "L") 
+            {
+                
+                if (old_link_group != @link.link_group)
+                {
+                        <h2>@link.link_group</h2>
+                }
+                
+                switch (@link.link_level)
+                {
+                    case 1:
+                        <text>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text> <a href="@link.link" class="menuitems">@link.heading</a><br />
+                        break;
+                    case 2:
+                        <text>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text> <a href="@link.link" class="menuitems">@link.heading</a><br />
+                        break;
+                    case 3:
+                        <text>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text> <a href="@link.link" class="menuitems">@link.heading</a><br />
+                        break;                    
+                    case 4:
+                        <text>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text> <a href="@link.link" class="menuitems">@link.heading</a><br />
+                        break;                    
+                    case 5:
+                        <text>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text> <a href="@link.link" class="menuitems">@link.heading</a><br />
+                        break;                    
+                    case 6:
+                        <text>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text> <a href="@link.link" class="menuitems">@link.heading</a><br />
+                        break;                    
+                 }
+                 
+                 old_link_group = @link.link_group;
+            
+             }
+    }
+}
+
+
+}
+else
+{
+    		<center><br/><br/><br/><h2><font color="red" size="+2">You do not have access to view this page.  <br />For access to this page, please contact <a href="mailto:cote-techsupport@illinois.edu">cote-techsupport@illinois.edu</a></font></h2></center>
+}
+
+            </div>
+        </div>
+	</body>
+
+</html>
+

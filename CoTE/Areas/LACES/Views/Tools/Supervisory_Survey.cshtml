@@ -1,0 +1,189 @@
+﻿@using CoTE.Models
+@using System.Configuration
+@using System.Data.SqlClient
+@{
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+    string breadcrumb = "<nav class=\"site-breadcrumbs\"><ul>";
+    breadcrumb += " <li><a href=\"#\">Home</a> /</li>";
+    breadcrumb += " <li><a href=\"/dotnet/portals/programportal.aspx\">Program Staff Portal</a> /</li>";
+    breadcrumb += " <li><a href=\"/dotnet/laces/laces.aspx\">LACES</a> </li>";
+    breadcrumb += "</ul></nav>";
+
+    string supervisor_field = "";
+    string program = "";
+    string term = "";
+    string program_group = "";
+    string message = (string)ViewBag.message ?? "";
+
+    supervisor_field = "<select name = 'supervisor_id' tabindex='1'><option value='' selected='selected'>-- Select a Supervisor --</option>";
+    program = "<select name= 'uiuc_program_id' tabindex='1'><option value='' selected='selected'>-- Select a Program --</option>";
+    term = "<select name='term_id' tabindex='1'><option value='' selected='selected'>-- Select a Term --</option>";
+    program_group = "<select name= 'UIUC_ProgramGroup' tabindex='1'><option value='' selected='selected'>-- Select a Program Group--</option>";
+       
+            
+    String ConnString = ConfigurationManager.ConnectionStrings["UserDb"].ConnectionString;
+
+    using (SqlConnection conn = new SqlConnection(ConnString))
+    {
+        conn.Open();
+        using (SqlCommand cmd = new SqlCommand())
+        {
+            cmd.Connection = conn;
+            cmd.CommandType = System.Data.CommandType.Text;
+
+
+
+            cmd.CommandText = "SELECT DISTINCT supervisor_id, supervisor " +
+               " FROM CTE.DBO.v_CE_SPRVSR_SURVEY " +
+               "WHERE (((modified_date IS NOT NULL) AND ((supervisor_id) IS NOT NULL)))" +
+               "ORDER BY supervisor;";
+
+            cmd.CommandText = cmd.CommandText + "SELECT DISTINCT uiuc_program_id, uiuc_ProgramName " +
+            " FROM CTE.DBO.v_CE_SPRVSR_SURVEY " +
+            "WHERE (((modified_date IS NOT NULL) AND ((supervisor_id) IS NOT NULL)))" +
+            "ORDER BY uiuc_ProgramName;";
+
+           cmd.CommandText = cmd.CommandText + "SELECT DISTINCT term, cte.dbo.fn_decodebannerterm(term) " +
+           " FROM CTE.DBO.v_CE_SPRVSR_SURVEY " +
+           "WHERE (((modified_date IS NOT NULL) AND ((supervisor_id) IS NOT NULL)))" +
+           "ORDER BY term;";
+
+
+           cmd.CommandText = cmd.CommandText + "SELECT DISTINCT UIUC_ProgramGroup as PGroup, UIUC_ProgramGroup " +
+           " FROM CTE.DBO.v_CE_SPRVSR_SURVEY " +
+           "WHERE (((modified_date IS NOT NULL) AND ((supervisor_id) IS NOT NULL)))" +
+           "ORDER BY UIUC_ProgramGroup;";
+                                    
+           cmd.CommandText = cmd.CommandText + "SELECT placement_type as Placement, placement_type" +
+           " FROM CTE.DBO.v_CE_SPRVSR_SURVEY" +
+           " WHERE (((modified_date IS NOT NULL) AND ((supervisor_id) IS NOT NULL)))" +
+           "ORDER BY term;";
+
+            using (SqlDataReader reader = cmd.ExecuteReader())
+            {
+
+                //get first parameter
+                
+                while (reader.Read())
+                {
+
+                       supervisor_field = supervisor_field + "<option value=" + reader[0].ToString() + ">" +reader[1].ToString()+ "</option>";
+                }
+
+                //second parameter
+                reader.NextResult();        
+                                         
+                 while (reader.Read())   
+                 {          
+                       program = program + "<option value=" + reader[0].ToString() + ">" + reader[1].ToString() + "</option>";
+                  
+                 }   
+                
+                //get third paramenter
+                reader.NextResult(); 
+                              
+                while (reader.Read())
+               {    
+                       term = term + "<option value =" + reader[0].ToString() + ">" + reader[1].ToString() + "</option>";
+                
+                }
+
+                //get fourth paramenter
+                reader.NextResult();
+
+                while (reader.Read())
+                {
+                    program_group = program_group + "<option value =" + reader[0].ToString() + ">" + reader[1].ToString() + "</option>";
+
+                }                
+
+//                reader.Close();
+
+//                       supervisor_field = supervisor_field + "<option value=" + reader[0].ToString() + ">" +reader[0].ToString()+ "</option>";
+//                       program = program + "<option value=" + reader[0].ToString() + ">" + reader[0].ToString() + "</option>";
+//                       term = term + "<option value =" + reader[0].ToString() + ">" + reader[0].ToString() + "</option>";
+//                
+                
+                
+                }   
+                }
+            }
+        }
+                       
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Supervisor Survey</title>
+</head>
+<body>
+
+<div class="row page-content portal-content">
+    <div class="small-12 column">   
+
+<a href="/dotnet/account.aspx/logout"><FONT COLOR="RED"><B>LOGOUT</B></FONT> <i class="fa fa-sign-out" aria-hidden="true"></i></a>
+
+@MvcHtmlString.Create(@breadcrumb)
+ 
+    <h2>Supervisor Survey</h2>
+    @using(Html.BeginForm("Supervisory_Survey", "Tools", FormMethod.Post))
+    {
+      
+    <table>
+        <tr>
+            <td>Report Type</td>
+            <td>
+               Individual @Html.RadioButton("Report_Type", "Individual")
+               Aggregate @Html.RadioButton("Report_Type", "Aggregate")
+            </td>
+        </tr>
+        <tr>
+            <td>Program Group</td>
+            <td>
+                @MvcHtmlString.Create(program_group)
+            </td>
+        </tr>
+        <tr>
+            <td>Program</td>
+            <td>
+                @MvcHtmlString.Create(program)
+            </td>
+        </tr>
+        <tr>
+            <td>Term</td>
+            <td>
+                @MvcHtmlString.Create(term)
+            </td>
+        </tr>
+
+       <tr>
+            <td>Placement Type</td>
+           <td>
+               Student Teaching @Html.RadioButton("Placement_Type", "ST")
+               Eary Field Experience @Html.RadioButton("Placement_Type", "EFE")
+           </td>
+        </tr>
+       <tr>
+            <td colspan="2">
+                <br /><input type="submit" name="Submit" value="Submit"/>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2"><b><br />
+            @if (message != "")
+            {
+                @MvcHtmlString.Create(message)
+            }
+            </b></td>
+        </tr>
+ 
+    </table>
+    }
+
+          </div>
+        </div>
+</body>
+</html>
+

@@ -1,0 +1,107 @@
+@using System.Configuration
+@using System.Data.SqlClient
+@{
+    string district = "";
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+    string left_menu = "/dotnet/areas/webpages/content/js/cc_left_menu.js";
+    string breadcrumb = "<li><a href=\"/dotnet/webpages/webpage.aspx\">Home</a> /</li> <li> <a href=\"/dotnet/webpages/webpage.aspx/webpage?page_level=4.1\"> Current Candidates</a> </li>  <li> /<a href=\"#\"> Districts with current Placement Contracts</a></li>";
+    string search_term = "";
+}
+
+<!-- InstanceEndEditable -->
+    <!-- InstanceBeginEditable name="body-content" -->
+    <div class="row align-center page-content">
+        <div class="img-container">
+            <img src="/dotnet/areas/webpages/content/images/inside.jpg" class="img-header"/>
+        </div>
+        <div class="small-12 large-10 column site-top-border">
+            <nav class="site-breadcrumbs">
+                <ul>
+                    @MvcHtmlString.Create(@breadcrumb)
+                </ul>
+            </nav>
+            <section class="row align-center page-section">
+                <aside class="small-11 large-4 column page-aside">
+<script language="JavaScript1.2">
+ var strWhereAmI = 1
+</script>
+<script type="text/javascript" language="JavaScript1.2" src="@left_menu"></script>
+                </aside>
+                <div class="small-11 large-8 column page-text">
+                    <h1> Districts with current Placement Contracts
+                    </h1>
+
+<form name="districts" action="facilitylist" method="POST">
+		Enter any part of the city, school, or district. (Example:  To find Central High School in Champaign use either <b>Champaign</b> or <b>Central</b> or <b>CUSD 4</b>)
+		<br/><br/><input name="search" type="text" size="10" /><input type="submit" value="Search"/><br/><br/>
+</form>
+
+ @{
+
+     String ConnString = ConfigurationManager.ConnectionStrings["UserDb"].ConnectionString;
+
+     using (SqlConnection conn = new SqlConnection(ConnString))
+     {
+         conn.Open();
+         using (SqlCommand cmd = new SqlCommand())
+         {
+             cmd.Connection = conn;
+             //cmd.CommandType = System.Data.CommandType.Text;
+             //cmd.CommandText = "SELECT distinct district, facility, url, custom_contract_url FROM V_CE_FACILITIES_WEB WHERE facility like '%" + ViewBag.SearchTerm + "%' OR district like '%" + ViewBag.SearchTerm + "%' 	OR (school_code = '0000' and dist_ind IN (Select dist_ind from ce_facilities where facility like '%" + ViewBag.SearchTerm + "%' OR city like '%" + ViewBag.SearchTerm + "%' OR facility like '%" + ViewBag.SearchTerm + "%')) ORDER BY 1";
+
+             search_term = ViewBag.SearchTerm;
+
+             if (search_term.IsEmpty())
+             {
+                 search_term = "";
+             }
+             cmd.CommandType = System.Data.CommandType.StoredProcedure;
+             cmd.CommandText = "CTE.dbo.WEB_FACILITES_SEARCH";
+             cmd.Parameters.Add(new SqlParameter("@search_term", search_term));
+
+             using (SqlDataReader reader = cmd.ExecuteReader())
+             {
+
+                 while (reader.Read())
+                 {
+
+                     string custom_contract = "";
+                     if (reader[3].ToString() != "")
+                     {
+                         custom_contract = "<br/><font color='red'><b>This school has a custom contract, please click <a href='" + reader[3].ToString() + "'>here</a> to view the contract.</font>";
+                     }
+
+                     if (district == "" || district != reader[0].ToString())
+                     {
+                           <tr><td><h4 class="facility">@reader[0].ToString()</h4></td></tr>
+                       }  
+                       
+                        <tr>
+                            <td>
+                                @if(reader[2].ToString() != "")
+                                {
+                                    <ul class="subSection"><a href="@reader[2].ToString()">@reader[1].ToString().</a>@Html.Raw(custom_contract.ToString())</ul>
+                                }
+                                else
+                                {
+                                    <ul class="subSection">@reader[1].ToString()@Html.Raw(@custom_contract.ToString())</ul>
+                                }
+   
+                            </td>
+                        </tr>
+                        
+                        district = reader[0].ToString();
+                    }
+                }
+            }
+        }
+}
+	
+                    <div class="arrow-down-white"></div>
+                </div>
+            </section>
+        </div>
+    </div>
+	
+<body>
+<!-- InstanceEndEditable -->

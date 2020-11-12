@@ -1,0 +1,145 @@
+﻿@{
+    Layout = null;
+ }
+<html>
+
+<head>
+
+  <meta name="keywords" content="College of Education Intranet">
+
+  <meta name="description" content="College of Education Intranet Logon">
+
+  <meta name="reply-to" content="webmaster@education.illinois.edu">
+
+  <title>UIUC College of Education:  Intranet</title>
+
+ <link rel="stylesheet" href="https://www-s2.education.illinois.edu/intranet/library/intranet.css" rel="blah" type="text/css" ></link>
+
+<script src="/intranet/library/intranet.js"></script>
+
+
+
+</head>
+
+<body bgcolor="#ffffff" link="#3333cc" vlink="#cc3300"    OnLoad="initializeIntranetPage();document.logonform.username.focus();" >
+
+<div class="header" id="header">
+
+<div id="application"><a href="javascript:confirmexit('/intranet/default.asp','Exiting this page without saving changes will result in the loss of any changes that you have made.\n\n Are you sure you want to exit this page?\n');">COE Intranet</a></div>
+
+<div id="intranet"><a href="javascript:confirmexit('/intranet/','Exiting this page without saving changes will result in the loss of any changes that you have made.\n\n Are you sure you want to exit this page?\n');">Go to Intranet Home</a></div>
+
+<div id="logout"><a href="javascript:confirmexit('/intranet/logout.asp','Exiting this page without saving changes will result in the loss of any changes that you have made.\n\n Are you sure you want to exit this page?\n');">Log Off Intranet</a></div>
+
+</div>
+
+<div class="subheader"></div>
+
+<div class="content" id="main_content"> 
+
+
+
+<div id="arrow" class="layout" style="text-align: center;">
+
+<h2>Log on to College of Education Intranet</h2>
+
+
+
+
+
+
+
+ <form method="post" action="/dotnet/coelogin.aspx/login">
+
+        <table border="0" cellspacing="0" cellpadding="3" width="80%" align="center">
+
+
+
+        	<tr><td><br/> 	
+
+        	<font size=+2>L</font><font size=+1>og on to College of Education Intranet</font><br><br></td></tr>
+
+          <tr>
+
+            <td>
+
+			<font size=-1 face=arial,helvetica>User Name:&nbsp;</td>
+
+            <td><INPUT TYPE=text NAME="username"  onfocus="this.value='';" SIZE="35" valign=top onkeypress="if (event.which == 13 || event.keyCode == 13) {this.form.password.focus(); return false;}" value=""></td> 
+
+            <td></td>
+
+          </tr>
+
+
+
+          <tr>
+
+            <td>
+
+       <font size=-1 face=arial,helvetica>Password:&nbsp;</td>
+
+            <td><INPUT TYPE=password NAME="password"  SIZE="35" valign=top onkeypress="if (event.which == 13 || event.keyCode == 13) {this.form.submit(); return false;}"> </td>
+
+            <td> </td>
+
+          </tr>
+
+         <tr>
+            <td colspan="3">
+                <b><font color="red" size=-1 face=arial,helvetica>
+                            @if (@ViewBag.ErrorMessage != null)
+                            {
+                                @Html.Raw(HttpUtility.HtmlDecode(@ViewBag.ErrorMessage));
+                            }
+                </font></b>
+	        </td>
+          </tr>
+          <tr>
+
+
+
+            <td></td>
+
+            <td><input type="submit" value="Logon" name="action"> <input type="reset"
+
+              value="Reset"></td>
+
+            <td><input type="hidden" name="logon" value="true"></td>
+
+          </tr>
+
+</table>
+
+</form>
+
+
+
+      
+
+ 
+
+ 
+
+</div>
+
+
+
+</div>
+
+			
+
+ 
+
+
+
+
+
+</div>
+
+<div class="footer" id="footer">
+
+</div></body>
+
+</html>
+

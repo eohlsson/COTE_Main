@@ -1,0 +1,91 @@
+﻿@* THIS IS THE REAL ONE *@
+@using System.Data;
+@using System.Data.SqlClient;
+@using System.Configuration;
+
+@{
+
+    Layout = "~/Areas/WebPages/Views/Shared/Website_Header.cshtml";
+    string left_menu = "/dotnet/areas/webpages/content/js/cc_left_menu.js";
+    string breadcrumb = "<nav class=\"site-breadcrumbs\"><ul>";
+    breadcrumb += " <li><a href=\"#\">Home</a> /</li>";
+    breadcrumb += " <li><a href=\"/dotnet/portals/programportal.aspx\">Program Staff Portal</a> /</li>";
+    breadcrumb += " <li><a href=\"/dotnet/laces/laces.aspx\">LACES</a> /</li>";
+    breadcrumb += "</ul></nav>";
+   
+    string message = "";
+    string sent_to = "<b>Email(s) sent to:</b><br/><br/>";
+    int sent_to_count = 0;
+    
+    String ConnString = ConfigurationManager.ConnectionStrings["UserDb"].ConnectionString;
+
+    using (SqlConnection conn = new SqlConnection(ConnString))
+    {
+        conn.Open();
+        using (SqlCommand cmd = new SqlCommand())
+        {
+
+            // Load Form data
+            cmd.Connection = conn;
+            cmd.CommandType = CommandType.Text;
+            cmd.CommandText = "Select log_sent_to from mail_merge_log where batch_id =  '" + ViewBag.batch_id + "'";
+
+            var reader = cmd.ExecuteReader();
+
+            // fill the parameter collection
+            using (reader)
+            {
+
+                while (reader.Read())
+                {
+                    sent_to = sent_to + reader[0] + "<br/>";
+                    sent_to_count++;
+                    message = sent_to_count.ToString() + " emails sent.";
+                }
+            }
+
+        }
+    }
+    
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Email Merge</title>
+</head>
+<body>
+ <div class="row page-content portal-content">
+    <div class="small-12 column">   
+
+<a href="/dotnet/account.aspx/logout"><FONT COLOR="RED"><B>LOGOUT</B></FONT> <i class="fa fa-sign-out" aria-hidden="true"></i></a>
+
+@MvcHtmlString.Create(@breadcrumb)
+    <div>
+        <br /><br />
+        @if (ViewBag.testing)
+        {
+            @MvcHtmlString.Create("<b><font color='red'>Testing Mode:  NO EMAILS SENT</font></b><br/>")
+        }            
+
+        @if (ViewBag.error_message != "")
+        {
+            @MvcHtmlString.Create("<b><font color='red'>ERROR:" + ViewBag.error_message + "</font></b><br/>")
+        }            
+
+        Merge has been completed.<br /><br />
+
+        @MvcHtmlString.Create(@message)<br /><br />
+
+        @MvcHtmlString.Create(@sent_to)<br /><br />
+
+        Click <a href="/dotnet/formprocessor/index.aspx/index?form_id=1393&index_id=1527">here</a> to return to the Email Merge menu
+    
+            </div>
+          </div>
+        </div>
+    </div>
+</body>
+</html>

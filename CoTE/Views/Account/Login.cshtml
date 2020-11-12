@@ -1,0 +1,126 @@
+@{
+    ViewBag.Title = "Login";
+    Layout = null;
+}
+<head>
+    <link href="/dotnet/areas/webpages/content/css/main.css" rel="stylesheet" type="text/css">
+</head>
+<div class="section-border">
+    <div class="row medium-unstack">
+
+        <center>
+
+            <form method="post" action="/dotnet/account.aspx/login?portal=@ViewBag.portal">
+
+                <div class="column cs-input-group">
+                    @if (ViewBag.portal == "coop")
+                    {
+                        <font size=+2>L</font><font size=+1>og on to Cooperating Personnel Portal</font><br><br>
+                    }
+                    @if (ViewBag.portal == "sce")
+                    {
+                        <font size=+2>L</font><font size=+1>og on to School and Community Experiences Portal</font><br><br>
+                    }
+                    @if (ViewBag.portal == "student")
+                    {
+                        <font size=+2>L</font><font size=+1>og on to Student Portal</font><br><br>
+                    }
+                    @if (ViewBag.portal == "supervisor")
+                    {
+                        <font size=+2>L</font><font size=+1>og on to Supervisor Portal</font><br><br>
+                    }
+                    @if (ViewBag.portal == "program")
+                    {
+                        <font size=+2>L</font><font size=+1>og on to Program Staff Portal</font><br><br>
+                    }
+                </div>
+    </div>
+    <div class="row medium-unstack">
+        <div class="column cs-input-group">
+            <font size=-1 face=arial,helvetica>
+                @if (ViewBag.portal == "coop")
+                {
+                    @Html.Raw(HttpUtility.HtmlDecode("Email Address: &nbsp;"));
+                }
+                else if (ViewBag.portal == "sce")
+                {
+                    @Html.Raw(HttpUtility.HtmlDecode("Network ID (for students and TAs) <br/>or Email Address (for Site Supervisors): &nbsp;"));
+                }
+                else
+                {
+                    @Html.Raw(HttpUtility.HtmlDecode("Network ID: &nbsp;"));
+                }
+            </font>
+            <INPUT TYPE=text NAME="username" id="username" onfocus="this.value='';" SIZE="35px" valign=top onkeypress="if (event.which == 13 || event.keyCode == 13) {this.form.password.focus(); return false;}" value="">
+        </div>
+    </div>
+    <div class="row medium-unstack">
+        <div class="column cs-input-group">
+            <font size=-1 face=arial,helvetica>Password:</font>
+            <INPUT TYPE="password" NAME="password" SIZE="35px" valign=top onkeypress="if (event.which == 13 || event.keyCode == 13) {this.form.submit(); return false;}">
+        </div>
+    </div>
+    <div class="row medium-unstack">
+        <div class="column cs-input-group">
+            <b>
+                <font color="red" size=-1 face=arial,helvetica>
+                    @if (@ViewBag.ErrorMessage != null)
+                    {
+                        @Html.Raw(HttpUtility.HtmlDecode(@ViewBag.ErrorMessage));
+                    }
+                </font>
+            </b>
+        </div>
+    </div>
+    <div class="row medium-unstack">
+        <div class="column cs-input-group">
+            <center>
+                <input type="submit" value="Logon" name="action">
+                <input type="hidden" name="logon" value="true">
+            </center>
+        </div>
+    </div>
+    <div class="row medium-unstack">
+        <div class="column cs-input-group">
+            @if (ViewBag.portal == "coop")
+            {
+                <left>
+                    <font color="blue">
+                        If you have <b>NOT</b> already setup your account, click <a href="/dotnet/account.aspx/retrieve">here</a>.<br /><br />
+                        If you have already setup your account, but can't remember your password, click <a href='/dotnet/account.aspx/ResetPassword'>here</a> to <b>reset your password.</b><br /><br />
+                        For detailed instructions for logging in and resetting your account, click <a href="http://www.cote.illinois.edu/documents/Coop_Portal_Login_Instructions.pdf">here</a>
+                    </font>
+                </left>
+            }
+            else if (ViewBag.portal == "sce")
+            {
+                <left>
+                    <font color='red'><b>Site Supervisors:</b><br /><br /></font>
+                    <font color='blue'>
+                        If you have <b>NOT</b> already setup your account, click <a href='/dotnet/account.aspx/retrieve'>here</a>.<br /><br />
+                        If you have already setup your account, but can't remember your password, click <a href='/dotnet/account.aspx/ResetPassword'>here</a> to <b>reset your password.</b><br /><br />
+                        For detailed instructions for logging in and resetting your account, click <a href='http://www.cote.illinois.edu/documents/Coop_Portal_Login_Instructions.pdf'>here</a>
+                    </font>
+                </left>
+            }
+            else
+            {
+                @Html.Raw("<br/><left><font color='blue'>For information regarding Network IDs, click <a href='http://www.cites.illinois.edu/netid/index.html'>here</a></br></br>For information regarding your Active Directory Password, click <a href='https://passwords.cites.illinois.edu/'>here</a></br></br></font></left>");
+            }
+        </div>
+    </div>
+    <div class="row medium-unstack">
+        <div class="column cs-input-group">
+            <br />For additional help, please email
+            <script type='text/javascript'>var a = new Array('lto:', '@@illin', 'upport', 'techs', 'cote-', 'ois.edu', 'mai'); document.write("<a href=" + a[6] + a[0] + "'" + a[4] + a[3] + a[2] + a[1] + a[5] + "'>" + a[4] + a[3] + a[2] + a[1] + a[5] + "</a>");</script> or call <b>(217) 333-2804</b>.
+        </div>
+        </center>
+    </div>
+
+    </form>
+</div>
+<script type="text/javascript">
+    window.onload = function () {
+        document.getElementById("username").focus();
+    };
+</script>

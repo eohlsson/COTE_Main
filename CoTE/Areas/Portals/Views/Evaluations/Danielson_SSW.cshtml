@@ -1,0 +1,267 @@
+﻿@model CoTE.Areas.Portals.Models.Danielson
+
+@{
+
+    String[] ratings = { "", "1", "2", "3", "4" };
+    String[] midterm_summary = { "", "Do not continue in placement", "Continue only with remediation", "Continue with reservation", "Continue without reservation" };
+    String[] final_summary = { "", "Unsatisfactory performance", "Satisfactory performance" };
+    String rubric1_link = "";
+    String rubric2_link = "";
+    String rubric3_link = "";
+    String rubric4_link = "";
+
+    }
+
+<table class="danielson" border=1 border-color="white" cellpadding="15px">
+
+<tr>
+
+	<td colspan=2 class="domain" valign=top bgcolor="F8F1A0">
+
+  <b><font size="+1">DOMAIN 1: Planning and Preparation (<a href="https://cte-s.education.illinois.edu/documents/danielson%20-%20domain%201%20rubric%20-%20SSW.pdf" target="_blank">Rubric</a>)</font></b>
+
+  <br/><br/><b>
+
+      @Html.DropDownListFor(m => m.domain1_a, new SelectList(ratings), new { tabindex = 5 })
+
+  1a &nbsp;Demonstrates knowledge of social work theories, principles, and methods of practice</b>
+  <b>
+<br /><br />
+      @Html.DropDownListFor(m => m.domain1_b, new SelectList(ratings), new { tabindex = 6 })
+
+  1b &nbsp;Identifies research supported educational, behavioral, and mental health interventions and services to address school needs</b>
+
+  <b>
+
+<br /><br />
+      @Html.DropDownListFor(m => m.domain1_c, new SelectList(ratings), new { tabindex = 7 })
+
+  1c &nbsp;Establishes and maintains collaborative professional relationships</b>
+
+  <b>
+
+<br /><br />
+      @Html.DropDownListFor(m => m.domain1_d, new SelectList(ratings), new { tabindex = 8 })
+
+  1d &nbsp;Knows current federal, state and local laws as well as district policies and procedures that guide school social work practice </b>
+
+  <b>
+
+<br /><br />
+      @Html.DropDownListFor(m => m.domain1_e, new SelectList(ratings), new { tabindex = 9 })
+
+  1e &nbsp;Establishing and maintaining clear procedures for referral for social work services</b>
+
+<br /><br />
+       <b>Comments</b><br />
+       @Html.TextAreaFor(m => m.domain1_comments, 3, 60, new { @title = "Comment" })
+
+	</td>
+
+	<td colspan=2 class="domain" valign=top bgcolor="78C1F6">
+
+  <B><font size="+1">DOMAIN 2: The School Environment (<a href="https://cte-s.education.illinois.edu/documents/danielson%20-%20domain%202%20rubric%20-%20SSW.pdf" target="_blank">Rubric</a>)</font></B>
+
+  <br/><br/><b>
+
+      @Html.DropDownListFor(m => m.domain2_a, new SelectList(ratings), new { tabindex = 12 })
+
+  2a &nbsp;Creating an environment of respect and rapport</b>
+
+  <b>
+
+<br /><br />
+    @Html.DropDownListFor(m => m.domain2_b, new SelectList(ratings), new { tabindex = 13 })
+
+  2b &nbsp;Contributes to a safe and healthy school environment</b>
+
+  <b>
+
+<br /><br />
+    @Html.DropDownListFor(m => m.domain2_c, new SelectList(ratings), new { tabindex = 14 })
+
+  2c &nbsp;Advocates for student needs and challenges structural barriers, social inequalities, and educational disparities impacting student success</b>
+
+  <b>
+
+<br /><br />
+    @Html.DropDownListFor(m => m.domain2_d, new SelectList(ratings), new { tabindex = 14 })
+
+  2d &nbsp;Managing student behavior</b>
+
+  <b>
+
+<br /><br />
+    @Html.DropDownListFor(m => m.domain2_e, new SelectList(ratings), new { tabindex = 14 })
+
+  2e &nbsp;Organizing physical space in a way that proactively prepares for the effective delivery of social work services</b>
+
+  <b>
+             <br /><br /><b>Comments</b><br />
+       @Html.TextAreaFor(m => m.domain2_comments, 3, 60, new { @title = "Comment" })
+
+	</td>
+
+</tr>
+
+
+<tr>
+
+	<td colspan=2 class="domain" valign=top bgcolor="B9D5C6">
+
+  <B><font size="+1">DOMAIN  4: Professional Responsibilities (<a href="https://cte-s.education.illinois.edu/documents/danielson%20-%20domain%204%20rubric%20-%20SSW.pdf" target="_blank">Rubric</a>)</font></B>
+
+  <br/><br/><b>
+
+    @Html.DropDownListFor(m => m.domain4_a, new SelectList(ratings), new { tabindex = 18 })
+
+
+  4a &nbsp;Exhibits self-awareness, self-monitoring and reflection on practice </b>
+
+  <b>
+
+<br /><br />
+    @Html.DropDownListFor(m => m.domain4_b, new SelectList(ratings), new { tabindex = 19 })
+
+
+  4b &nbsp;Maintains timely and accurate records and documentation in compliance with FERPA and state requirements</b>
+
+  <b>
+
+<br /><br />
+    @Html.DropDownListFor(m => m.domain4_c, new SelectList(ratings), new { tabindex = 20 })
+
+
+  4c &nbsp;Adheres to the NASW Code of Ethics and confidentiality </b>
+
+  <b>
+
+<br /><br />
+    @Html.DropDownListFor(m => m.domain4_d, new SelectList(ratings), new { tabindex = 21 })
+
+  4d &nbsp;Participating in the Professional Community  </b>
+
+  <b>
+
+<br /><br />
+    @Html.DropDownListFor(m => m.domain4_e, new SelectList(ratings), new { tabindex = 21 })
+
+  4e &nbsp;Growing and developing professionally</b>
+
+          <b>
+
+
+<br /><br />
+    @Html.DropDownListFor(m => m.domain4_f, new SelectList(ratings), new { tabindex = 21 })
+
+  4f &nbsp;Showing professionalism</b>
+
+                  <b>
+
+<br /><br />
+    @Html.DropDownListFor(m => m.domain4_g, new SelectList(ratings), new { tabindex = 21 })
+
+  4g &nbsp;Demonstrates skill in effective time management, flexibility and responsiveness</b>
+  <b>
+
+       <br /><br /><b>Comments</b><br />
+       @Html.TextAreaFor(m => m.domain4_comments, 3, 60, new { @title = "Comment" })
+
+	</td>
+
+	<td colspan=2 class="domain" valign=top bgcolor="F4C4EA">
+
+  <B><font size="+1">DOMAIN 3: Service Delivery (<a href="https://cte-s.education.illinois.edu/documents/danielson%20-%20domain%203%20rubric%20-%20SSW.pdf" target="_blank">Rubric</a>)</font></B>
+
+  <br/><br/><b>
+
+    @Html.DropDownListFor(m => m.domain3_a, new SelectList(ratings), new { tabindex = 25 })
+
+
+  3a &nbsp;Demonstrates effective clinical skills</b>
+
+  <b>
+
+<br /><br />
+    @Html.DropDownListFor(m => m.domain3_b, new SelectList(ratings), new { tabindex = 26 })
+
+
+  3b &nbsp;Conducts multi-tiered school needs assessment</b>
+
+  <b>
+
+<br /><br />
+    @Html.DropDownListFor(m => m.domain3_c, new SelectList(ratings), new { tabindex = 27 })
+
+
+  3c &nbsp;Implements multi-tiered, empirically-supported interventions that improve academic and behavioral performance</b>
+
+  <b>
+
+<br /><br />
+    @Html.DropDownListFor(m => m.domain3_d, new SelectList(ratings), new { tabindex = 28 })
+
+
+  3d &nbsp;Provides school-based mental health services</b>
+
+  <b>
+
+<br /><br />
+    @Html.DropDownListFor(m => m.domain3_e, new SelectList(ratings), new { tabindex = 28 })
+
+  3e &nbsp;Provides programs and services in a culturally sensitive manner</b>
+
+  <b>
+
+<br /><br />
+    @Html.DropDownListFor(m => m.domain3_f, new SelectList(ratings), new { tabindex = 28 })
+
+  3f &nbsp;Evaluation of interventions and services at all tier levels</b>
+
+          <b>
+
+
+<br /><br />
+    @Html.DropDownListFor(m => m.domain3_g, new SelectList(ratings), new { tabindex = 28 })
+
+  3g &nbsp;Mobilizes school and community resources to maximize academic and behavior success</b>
+
+          <b>
+
+
+<br /><br />
+    @Html.DropDownListFor(m => m.domain3_h, new SelectList(ratings), new { tabindex = 28 })
+
+  3h &nbsp;Assesses and encourages family engagement</b>
+        
+          <b>
+
+       <br /><br /><b>Comments</b><br />
+       @Html.TextAreaFor(m => m.domain3_comments, 3, 60, new { @title = "Comment" })
+
+	</td>
+
+</tr>
+<tr>
+    <td colspan="4" align="center">
+
+        @if (Model.position != null && Model.position == "C")
+        {
+            if (Model.eval_type != null && Model.eval_type == "M")
+            {
+                    <b>Midterm Summary:</b>@Html.DropDownListFor(m => m.summary, new SelectList(midterm_summary))
+            }
+            else
+            {
+                    <b>Final Summary:</b>@Html.DropDownListFor(m => m.summary, new SelectList(final_summary))
+            }        
+        }
+            
+        <br /><br />
+        <b>Signature:</b>  @Html.CheckBoxFor(m => m.signature) 
+        <br /><br /><b><i>Note:</i> You may save changes to this form if you plan to return to edit by clicking the Save button. Once you click the signature box you <b><font color="red">WILL NOT</font></b> be able to edit or make changes to this evaluation. <br />Please <b><font color="red">DO NOT</font></b> click on the signature box until you are absolutely sure that you don't want to edit this form again.</b>
+
+        <br/><br/><input type="submit" value="Save" />&nbsp;&nbsp;<input type="button" value="Print" onclick="Print()"/>
+    </td>
+</tr>
+</table>

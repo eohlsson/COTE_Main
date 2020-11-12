@@ -1,0 +1,869 @@
+﻿@* http://localhost:54017/index.aspx/index *@
+
+@using System.Data.Entity;
+@using System.Web.Helpers;
+@using FormProcessor.Models;
+@using System.Data;
+@using System.Data.SqlClient;
+@using System.Dynamic;
+@using System.Configuration;
+@using CoTE.Areas.FormProcessor.Helpers;
+@using System.Collections;
+
+@model IEnumerable<Form_Data>
+
+@{  
+    
+    Session["A"] = "foo";
+    var result = new List<dynamic>();
+    bool blnAdd = false;
+    bool blnUpdate = false;
+    bool blnView = false;
+    bool blnDelete = false;
+    bool? default_to_empty = false;
+    string strAction = "";
+    string strRecordID = "";
+    string title = "";
+    string filter_url = Request.Url.ToString();
+    string record_name = "";
+    string layout = "";
+    string breadcrumb = "";
+    bool? anonymous = false;
+    int field_count = 0;
+
+    string username = ViewBag.Username;
+
+    if (!filter_url.Contains("filter=yes"))
+    {
+        filter_url += "&filter=yes";
+    }
+
+    IEnumerable<Form_Data> formdata = ViewData.Model;
+
+    // Setup filter cookie for reading
+    string cookie_name = "index_filter_" + ViewBag.form_id;
+    var cookie = Request.Cookies[cookie_name];
+        // If the response cookie is null check for the request cookie
+        //if (cookie["**sql**"] == null)
+        //{
+        //    cookie = Request.Cookies[cookie_name];
+        //}
+    
+<!DOCTYPE html> 
+<html> 
+
+    @foreach (Form_Data h in formdata)
+    {
+
+        var value_lists = new List<Form_Valuelists> { };
+        value_lists = h.ValueListDataSet;
+
+        foreach (var index in h.IndexDataSet.Where(index => index.index_id.ToString() == ViewBag.index_id))
+        {
+                
+    <head> 
+<!-- Hide menu since we are logged in -->
+<style>
+    .main-navigation {
+        display: none;
+    }
+</style>
+<script src="@Url.Content("~/Scripts/jquery-1.7.1.min.js")" type="text/javascript"></script>          
+
+   <script>
+
+       $(document).ready(function () {
+           jQuery('abc').click(function () {
+
+               event.preventDefault();
+               var url = $(this).attr("href");
+               var form = $('<form action="' + url + '" method="post">' +
+                 '<input type="text" name="api_url" value="' + url + '" />' +
+                 '</form>');
+               $('body').append(form);
+               form.submit();
+               alert(url);
+
+           });
+       });
+
+    </script>
+        
+        <script type="text/javascript">
+
+
+            function OnChange(question_name, question_id, question_list) {
+
+                //alert("Question: " + question_id + " which limits " + question_list + " has been changed");
+                //alert(question_name);
+                question_name = question_name.replace(/[.]/g, '_');
+                //alert(document.getElementById(question_name).value);
+                //alert(document.getElementById(question_name).innerHTML);
+
+                var questions = question_list.toString().split(";");
+
+                for (var i = 0; i < questions.length; i++) {
+                    $.ajax({
+                        type: "GET",
+                        contentType: "application/json; charset=utf-8",
+                        url: '@Url.Action("FilterQuestion", "Index")',
+                    data: { "question_id": question_id, "question_value": document.getElementById(question_name).value, "question_list": questions[i], "completeData": question_list },
+                    dataType: "json",
+                    beforeSend: function () { },
+                    success: function (new_values) {
+
+                        var values = "";
+                        var changed_field = "";
+
+                        $.each(new_values, function (i, new_values) {
+                            if (i != 0) {
+                                //alert(i);
+                                values += '<option value="' + new_values.Value + '">' +
+                                     new_values.Text + '</option>';
+                                //alert('<option value="' + new_values.Value + '">' + new_values.Text + '</option>')
+                            }
+                            else {
+                                changed_field = new_values.Text;
+                            }
+                        })
+
+                        //document.getElementById(changed_field).innerHTML = values;
+                        changed_field = "#" + changed_field.replace(/[.]/g, '_');
+                        $(changed_field).empty().append(values);
+
+                    }
+                })
+
+            }
+        }
+
+        function question_filter(question_id, question_name) {
+
+            //alert("IN");
+            var search_question = "search_" + question_name;
+            //alert(search_question);
+            //alert(document.getElementById(search_question).value);
+            var search_value = document.getElementById(search_question).value;
+
+            //alert("question: " + question_name + ", question_id: " + question_id + ", search value:" + search_value);
+
+            $.ajax({
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                url: '@Url.Action("FilterSearchQuestion", "Index")',
+                data: { "question_id": question_id, "search_value": search_value },
+                dataType: "json",
+                beforeSend: function () { },
+                success: function (new_values) {
+
+                    var values = "";
+
+                    $.each(new_values, function (i, new_values) {
+                        //alert(i);
+                        values += '<option value="' + new_values.Value + '">' +
+                                new_values.Text + '</option>';
+                        //alert('<option value="' + new_values.Value + '">' + new_values.Text + '</option>')
+                    })
+
+                    question_name = "#" + question_name.replace(/[.]/g, '_');
+                    $(question_name).empty().append(values);
+
+                }
+            })
+
+        }
+
+        function delete_record(form_id, record_id, username) {
+
+            var r = confirm("Are you sure you want to delete this record?");
+            if (r == true) {
+                window.location.href = "/dotnet/FormProcessor/form.aspx/index?form_id=" + form_id + "&action=delete&record_id=" + record_id + "&amp;" + username;
+            }
+
+        }
+
+       </script>
+
+        @foreach (var form in h.FormDataSet.ToList()) // Form
+        {
+            // Get Form Variables
+            record_name = form.record_name.ToString();
+
+            //Use breadcrumb from index if it exists otherwise use form breadcrumb
+            breadcrumb = (string)index.breadcrumb ?? "";
+            if (breadcrumb == "")
+            {
+                breadcrumb = (string)form.breadcrumb ?? "";
+            }
+
+            layout = (string)form.layout ?? "";
+            anonymous = form.anonymous_access;
+
+            if (layout != "")
+            {
+                Layout = form.layout;
+            }
+            else
+            {
+                @MvcHtmlString.Create(form.header_xslt)
+            }
+
+            //*********************** TESTING ***********************
+            Layout = "~/Areas/WebPages/Views/Shared/Website_Header_Index.cshtml";
+            
+            <title>@form.form_title</title>
+        }
+
+                
+    </head>
+    <body> 
+     <div class="row page-content portal-content">
+        <div class="small-12 column">
+            @if (anonymous == false)
+            {      
+                <a class="abc" href="/dotnet/account.aspx/logout"><FONT COLOR="RED"><B>LOGOUT</B></FONT> <i class="fa fa-sign-out" aria-hidden="true"></i></a>
+            }
+
+            @if (breadcrumb != "")
+            {
+                <nav class="site-breadcrumbs">
+                        @MvcHtmlString.Create(@breadcrumb)
+                </nav>
+            }
+            <h1 class="portal-content" id="form_title">@index.index_menu_link_name</h1>
+            <div class="directions" id="directions" name="directions">@MvcHtmlString.Create(@index.index_directions)</div>
+
+            <form method="post" class="main_form" name="fp_form" id="Index" action="@filter_url" enctype="multipart/form-data">
+            
+            @foreach (var form_section in h.SectionsDataSet) // Section
+            {
+
+                if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "Section: " + form_section.section_id + " Start"); }
+
+                <h2 class="section_title">@form_section.section_title</h2>
+                <section>
+                    <div class="section-border">
+
+                @foreach (var question in h.QuestionsDataSet.Where(question => question.section_id.ToString() == form_section.section_id.ToString())) // Question
+                {
+
+                    if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "Question: " + question.question_id + " Start"); }
+
+                    string field_value = "";
+                    if (cookie != null && cookie[question.data_location] != null && ViewBag.showall == null)
+                    {
+                        field_value = cookie[question.data_location].ToString();
+                    }
+
+                    if (field_count % 3 == 0 || field_count == 0)
+                    {
+                        if (field_count > 0)
+                        {
+                            @MvcHtmlString.Create("</div>");
+                        }
+                                                
+                        @MvcHtmlString.Create("<div class=\"row medium-unstack\">");
+                    }
+                       	<div class="column">
+                            <label for="@question.data_location" class="cs-input-label">@question.question_name</label>@Functions.GenerateFPField(this, field_value, question.data_location, question, question.input_type, value_lists, ViewBag.record_id, ViewBag.form_id)
+                        </div>
+                    
+                    field_count++;
+                    if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "Question: " + question.question_id + " End "); }
+
+                }
+                    @MvcHtmlString.Create("</div>")
+
+                    <div class="row align-right filter-buttons">
+                            @if (ViewBag.filter_sql != "")
+                            {
+                               <input type="hidden" id="filter_sql" name="filter_sql" value="@ViewBag.filter_sql"/>
+                            }
+                            <input class="button cs-input-button" accesskey="s" name="showall" type="submit" value="Filter"></input>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input class="button cs-input-button" name="submit" type="submit" value="Remove Filter"></input>
+                    </div>
+                </div>
+                </section>
+                
+            }
+
+            @if (ViewBag.insert_permissions.ToString() == "True")
+            {
+               <b><a href='/dotnet/FormProcessor/form.aspx/index?form_id=@ViewBag.form_id&action=add&record_id=@ViewBag.session_id&username=@ViewBag.Username'>Click here to add @if (record_name.Substring(0, 1).IndexOfAny(new char[] { 'a', 'A', 'e', 'E', 'i', 'I', 'o', 'O', 'u', 'U' }) == -1)
+                                                                                                                                                                                 { <text>a</text> }
+                                                                                                                                                                                 else
+                                                                                                                                                                                 { <text>an</text> } @record_name</a></b>
+            }
+
+           <div id="grid"> 
+
+           @if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "Start Loading Index"); }
+
+           @{
+           string where_clause = index.record_index_where;
+
+           // Check for ViewBag filter
+           //if (ViewBag.filter_sql != "")
+
+           // Check session for filter
+           string filter_sql = "";
+
+           if (cookie != null && cookie["**sql**"] != null)
+           {
+               filter_sql = cookie["**sql**"];
+           }
+
+           if (filter_sql != "")
+           {
+               if (where_clause != null && where_clause.Length > 0)
+               {
+                   where_clause += " and " + filter_sql;
+               }
+               else
+               {
+                   where_clause = filter_sql;
+               }
+           }
+
+           if (where_clause != null && (where_clause.Contains("[username]") || where_clause.Contains("[param1]") || where_clause.Contains("[param2]")))
+           {
+               where_clause = where_clause.Replace("[username]", ViewBag.Username);
+               where_clause = where_clause.Replace("[param1]", ViewBag.param1);
+               where_clause = where_clause.Replace("[param2]", ViewBag.param2);
+           }
+
+           // Replace % so that searches don't get messed up when they are put in the cookie
+           if (where_clause != null)
+           {
+               where_clause = where_clause.Replace("%", "|");
+               where_clause = where_clause.Replace("+", "`");
+               where_clause = where_clause.Replace("\r", " ");
+               where_clause = where_clause.Replace("\n", " ");
+               where_clause = where_clause.Replace("\t", " ");
+           }
+
+           title = index.index_menu_link_name;
+
+           // If there is no filter and default_to_emptyset then set it to be empty
+           if (ViewBag.filter_sql == "" && index.default_to_emptyset != null && ViewBag.page == null)
+           {
+               default_to_empty = index.default_to_emptyset;
+           }
+
+           // Set Viewbag prior to call to ResultsController.cs
+           //cookie_name = "where_clause_cookie";
+           cookie_name = "index_filter_" + index.index_id.ToString();
+           HttpCookie myCookie = new HttpCookie(cookie_name);
+           string action_column_mapping = "";
+           string action_column_HTML = "";
+           string column_widths = "";
+
+           action_column_mapping = index.action_column_mapping;
+           if (action_column_mapping != null)
+           {
+               action_column_mapping = action_column_mapping.Replace("=", "||");
+               action_column_mapping = action_column_mapping.Replace("&", "@@");
+               action_column_mapping = action_column_mapping.Replace(";", "~~");
+           }
+
+           action_column_HTML = index.action_column_HTML;
+           if (action_column_HTML != null)
+           {
+               action_column_HTML = action_column_HTML.Replace("=", "||");
+               action_column_HTML = action_column_HTML.Replace("&", "@@");
+               action_column_HTML = action_column_HTML.Replace(";", "~~");
+           }
+
+           column_widths = index.column_widths;
+
+           // Store filter in session variable
+           if (Response.Cookies[cookie_name] != null)
+           {
+               myCookie.Expires = DateTime.Now.AddDays(-1d);
+               Request.Cookies.Remove(cookie_name);
+               Response.Cookies.Add(myCookie);
+           }
+           myCookie.Expires = DateTime.Now.AddDays(1d);
+           Response.Cookies.Add(myCookie);
+           if (where_clause != "")
+           {
+               myCookie["**sql**"] = where_clause;
+           }
+           if (action_column_mapping != "")
+           {
+               myCookie["**action_column_mapping**"] = action_column_mapping;
+           }
+           if (action_column_HTML != "")
+           {
+               myCookie["**action_column_HTML**"] = action_column_HTML;
+           }
+           if (column_widths != "")
+           {
+               myCookie["**column_widths**"] = column_widths;
+           }
+
+           Boolean outdated_browser = false;
+           string browser_name = Request.Browser.Browser;
+           string browser_platform = Request.Browser.Platform;
+           string browser_minor_version = Request.Browser.MinorVersion.ToString();
+           string browser_major_version = Request.Browser.MajorVersion.ToString();
+
+           switch (browser_name)
+           {
+               case "Safari":
+                   outdated_browser = true;
+                   break;
+               case "Chrome":
+                   if (Convert.ToInt32(browser_major_version) < 57)
+                   {
+                       outdated_browser = true;
+                   }
+                   if (HttpContext.Current.Request.UserAgent.Contains("Edge"))
+                   {
+                       outdated_browser = true;
+                   }
+                   break;
+               case "Firefox":
+                   if (Convert.ToInt32(browser_major_version) < 52)
+                   {
+                       outdated_browser = true;
+                   }
+                   break;
+               case "InternetExplorer":
+                   outdated_browser = true;
+                   break;
+               case "Edge":
+                   outdated_browser = true;
+                   break;                   
+           }
+// If using an older browser default to the old style                                 
+           }
+                         
+               @if (outdated_browser)
+               {
+
+                           if (default_to_empty == false)
+                           {
+
+
+                               String ConnString = ConfigurationManager.ConnectionStrings["UserDb"].ConnectionString;
+                               using (SqlConnection conn = new SqlConnection(ConnString))
+                               {
+                                   conn.Open();
+                                   using (SqlCommand cmd = new SqlCommand())
+                                   {
+
+                                       string sort = (string)Request["sort"] ?? ""; ;
+
+                                       if (sort != "" && sort != "Action")
+                                       {
+                                           sort = "[" + Request["sort"] + "] " + Request["sortdir"];
+                                       }
+                                       else
+                                       {
+                                           sort = index.record_index_order_by;
+                                       }
+
+                                       if (where_clause != null)
+                                       {
+                                           where_clause = where_clause.Replace("|", "%");
+                                           where_clause = where_clause.Replace("`", "+");
+                                       }
+                                       
+                                       // Load Grid
+                                       cmd.Connection = conn;
+                                       cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                                       cmd.CommandText = "FRM_PROC.dbo.FRM_GetIndex_rs_No_Count";
+                                       cmd.Parameters.Add("user_name", ViewBag.Username);
+                                       cmd.Parameters.Add("formId", index.form_id);
+                                       cmd.Parameters.Add("indexId", index.index_id);
+                                       cmd.Parameters.Add("Where_Clause", where_clause);
+                                       cmd.Parameters.Add("Order_By", sort);
+                                       cmd.Parameters.Add("page", 1);
+
+                                       if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "Start: Loading data: " + cmd.CommandText + " @user_name=" + ViewBag.Username + ", @formId=" + index.form_id + ", @indexId=" + index.index_id + ", @Where_Clause=" + index.record_index_where + ", @Order_By" + index.record_index_order_by + ", @page=1"); }
+
+                                       // fill the parameter collection
+                                       using (SqlDataReader reader = cmd.ExecuteReader())
+                                       {
+                                           DataTable dt = new DataTable();
+                                           dt.Load(reader);
+                                           foreach (DataRow row in dt.Rows)
+                                           {
+                                               var obj = (IDictionary<string, object>)new ExpandoObject();
+                                               foreach (DataColumn column in dt.Columns)
+                                               {
+                                                   // Store values for Add, View, Update, and Delete to determine the Actions column
+                                                   switch (column.ColumnName)
+                                                   {
+                                                       case "Add":
+                                                           if (row[column.ColumnName].ToString() == "True")
+                                                           {
+                                                               blnAdd = true;
+                                                           }
+                                                           break;
+                                                       case "Update":
+                                                           if (row[column.ColumnName].ToString() == "True")
+                                                           {
+                                                               blnUpdate = true;
+                                                           }
+                                                           break;
+                                                       case "Delete":
+                                                           if (row[column.ColumnName].ToString() == "True")
+                                                           {
+                                                               blnDelete = true;
+                                                           }
+                                                           break;
+                                                       case "View":
+                                                           if (row[column.ColumnName].ToString() == "True")
+                                                           {
+                                                               blnView = true;
+                                                           }
+                                                           break;
+                                                       case "record_id":
+                                                           break;
+                                                       case "RecordID":
+                                                           strRecordID = row[column.ColumnName].ToString();
+                                                           break;
+                                                       default:
+                                                           obj.Add(column.ColumnName, MvcHtmlString.Create(row[column.ColumnName].ToString()));
+                                                           break;
+                                                   }
+
+                                               }
+
+                                               Hashtable Link_Names = new Hashtable();
+                                               Hashtable Link_Address = new Hashtable();
+
+                                               // Check to see if there are column mappings and set them up if there are
+                                               if (index.action_column_mapping != null)
+                                               {
+                                                   foreach (string mapping_group in index.action_column_mapping.Split(new char[] { '|' }))
+                                                   {
+                                                       string[] mapping = mapping_group.Split(new char[] { '^' });
+                                                       string link = mapping[0];
+                                                       string link_name = mapping[1];
+                                                       string link_address = mapping[2];
+
+                                                       // Only replace first and last []
+                                                       link = link.Substring(1, link.Length - 2);
+                                                       link_name = link_name.Substring(1, link_name.Length - 2);
+                                                       link_address = link_address.Substring(1, link_address.Length - 2);
+
+                                                       // Replace [record_id] with record_id
+                                                       // Replace [user_name] with username
+                                                       link_address = link_address.Replace("[record_id]", strRecordID);
+                                                       link_address = link_address.Replace("[username]", ViewBag.Username);
+
+                                                       Link_Names.Add(link, link_name);
+                                                       Link_Address.Add(link, link_address);
+
+                                                   }
+                                               }
+
+                                               // Create actions columns based on Add, View, Update, and Delete
+                                               // Apply columns mapping if there are any
+                                               strAction = "";
+                                               if (blnUpdate == true)
+                                               {
+                                                   if (Link_Names.ContainsKey("Edit"))
+                                                   {
+                                                       if (Link_Address["Edit"] != "")
+                                                       {
+                                                           strAction += "&nbsp;&nbsp;&nbsp;<a class='grid-action' href='" + Link_Address["Edit"].ToString() + "'>";
+                                                       }
+                                                       else
+                                                       {
+                                                           strAction += "&nbsp;&nbsp;&nbsp;<a class='grid-action' href='/dotnet/FormProcessor/form.aspx/index?form_id=" + index.form_id + "&action=edit&record_id=" + strRecordID + "&amp;" + ViewBag.Username + "'>";
+                                                       }
+
+                                                       if (Link_Names["Edit"] != "")
+                                                       {
+                                                           strAction += Link_Names["Edit"].ToString() + "</a>&nbsp;&nbsp;&nbsp;";
+                                                       }
+                                                       else
+                                                       {
+                                                           strAction += "Edit</a>&nbsp;&nbsp;&nbsp;";
+                                                       }
+                                                   }
+                                                   else
+                                                   {
+                                                       strAction += "&nbsp;&nbsp;&nbsp;<a class='grid-action' href='/dotnet/FormProcessor/form.aspx/index?form_id=" + index.form_id + "&action=edit&record_id=" + strRecordID + "&amp;" + ViewBag.Username + "'>Edit</a>&nbsp;&nbsp;&nbsp;";
+                                                   }
+                                               }
+
+                                               if (blnView == true)
+                                               {
+                                                   if (Link_Names.ContainsKey("View"))
+                                                   {
+                                                       if (Link_Address["View"] != "")
+                                                       {
+                                                           strAction += "&nbsp;&nbsp;&nbsp;<a class='grid-action' href='" + Link_Address["View"].ToString() + "'>";
+                                                       }
+                                                       else
+                                                       {
+                                                           strAction += "&nbsp;&nbsp;&nbsp;<a class='grid-action' href='/dotnet/FormProcessor/form.aspx/index?form_id=" + index.form_id + "&action=edit&record_id=" + strRecordID + "&amp;" + ViewBag.Username + "'>";
+                                                       }
+
+                                                       if (Link_Names["View"] != "")
+                                                       {
+                                                           strAction += Link_Names["View"].ToString() + "</a>&nbsp;&nbsp;&nbsp;";
+                                                       }
+                                                       else
+                                                       {
+                                                           strAction += "View</a>&nbsp;&nbsp;&nbsp;";
+                                                       }
+                                                   }
+                                                   else
+                                                   {
+                                                       strAction += "&nbsp;&nbsp;&nbsp;<a class='grid-action' href='/dotnet/FormProcessor/form.aspx/index?form_id=" + index.form_id + "&action=view&record_id=" + strRecordID + "&amp;" + ViewBag.Username + "'>View</a>&nbsp;&nbsp;&nbsp;";
+                                                   }
+                                               }
+
+                                               if (blnDelete == true)
+                                               {
+                                                   if (Link_Names.ContainsKey("Delete"))
+                                                   {
+                                                       if (Link_Address["Delete"] != "")
+                                                       {
+                                                           strAction += "&nbsp;&nbsp;&nbsp;<a class='grid-action' href='" + Link_Address["Delete"].ToString() + "'>";
+                                                       }
+                                                       else
+                                                       {
+                                                           strAction += "&nbsp;&nbsp;&nbsp;<a class='grid-action' href='#' onclick='delete_record(" + index.form_id + "," + strRecordID + ",\"" + ViewBag.Username + "\");'";
+                                                       }
+
+                                                       if (Link_Names["Delete"] != "")
+                                                       {
+                                                           strAction += Link_Names["Delete"].ToString() + "</a>&nbsp;&nbsp;&nbsp;";
+                                                       }
+                                                       else
+                                                       {
+                                                           strAction += "Delete</a>&nbsp;&nbsp;&nbsp;";
+                                                       }
+                                                   }
+                                                   else
+                                                   {
+                                                       strAction += "&nbsp;&nbsp;&nbsp;<a class='grid-action' href='#' onclick='delete_record(" + index.form_id + "," + strRecordID + ",\"" + ViewBag.Username + "\");'>Delete</a>&nbsp;&nbsp;&nbsp;";
+                                                   }
+
+                                               }
+
+                                               // If it exists and there is no action_column_mapping, replace with action_column_HTML 
+                                               if (index.action_column_HTML != null && index.action_column_mapping == null)
+                                               {
+                                                   // Replace [] parameters with values
+                                                   strAction = index.action_column_HTML.ToString().Replace("[record_id]", strRecordID);
+                                                   strAction = strAction.Replace("[username]", ViewBag.Username);
+                                               }
+
+                                               obj.Add("Action", @MvcHtmlString.Create(strAction));
+
+                                               result.Add(obj);
+
+                                               // Reset permissions
+                                               blnAdd = false;
+                                               blnUpdate = false;
+                                               blnView = false;
+                                               blnDelete = false;
+
+                                           }
+
+
+                                       }
+
+                                       if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "End: Loading data: " + cmd.CommandText + " @user_name=" + ViewBag.Username + ", @formId=" + index.form_id + ", @indexId=" + index.index_id + ", @Where_Clause=" + index.record_index_where + ", @Order_By" + index.record_index_order_by + ", @page=1"); }
+
+                                   }
+
+                               }
+
+                               if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "Start Loading Grid"); }
+
+                                   int rows_per_page = 20;
+
+                                   // Determine the number of rows to show on the index based on index.rows_per_page (20 is the default)
+                                   if (index.rows_per_page != null)
+                                   {
+                                       rows_per_page = (int)index.rows_per_page;
+                                   }
+
+                                   var grid = new WebGrid(result, rowsPerPage: rows_per_page);
+
+                                   int firstRecord = (grid.PageIndex * grid.RowsPerPage) + 1;
+                                   int lastRecord = (grid.PageIndex * grid.RowsPerPage) + grid.Rows.Count();
+                                   if (firstRecord < 0)
+                                   {
+                                       firstRecord = 0;
+                                       lastRecord = 0;
+                                   }
+
+                                   // If there are no records display "No Records Found"
+                                   if (firstRecord == 0 && lastRecord == 0)
+                                   {
+                        @MvcHtmlString.Create("<table class='grid'><tr><td><h3>No Records Found</h3></td></tr></table>");
+                                   }
+                                   else
+                                   {                    
+@MvcHtmlString.Create(@grid.GetHtml(
+    mode: WebGridPagerModes.All,
+    tableStyle: "grid",
+    headerStyle: "grid-header",
+    footerStyle: "grid-footer",
+    alternatingRowStyle: "grid-alternating-row",
+    selectedRowStyle: "grid-selected-row",
+    rowStyle: "grid-row-style",
+    firstText: "First", lastText: "Last"
+).ToString().Replace("<tfoot>\r\n        <tr  class=\"grid-footer\">\r\n            <td col", "<tfoot><tr class='grid-footer'><td align='right' col").ToString().Replace("<tfoot><tr class='grid-footer'>", "<tfoot><tr class='grid-footer'><td align='left' class='footstuff'>Records " + firstRecord + " to " + lastRecord + " of " + grid.TotalRowCount + "          ")
+.Replace("<thead>", "<thead><tr class=\"grid-footer\"><td><b>Records " + firstRecord + " to " + lastRecord + " of " + grid.TotalRowCount + "          " + "</b></td><td colspan=\"" + @grid.ColumnNames.Count() + "\" class=\"grid-pagination\">" + @grid.Pager() + "</td></tr>")
+)
+                                   }
+
+                               }
+                               else
+                               {
+                    <b><br />No results shown. Apply filter to see Records.</b>
+                    <br /><br />
+                               }
+               }
+               // end old style
+               else
+               // New style ui-grid
+               {
+                   if (default_to_empty == false)
+                   {
+       <input name="username" type="hidden" value="@ViewBag.Username" />
+    <link href="~/Content/Site.css" rel="stylesheet" type="text/css" />
+    <!-- UIGrid Style References -->
+    <link href="~/Content/ui-grid.min.css" rel="stylesheet" />
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <div class="row page-content portal-content">
+
+            <div class="row">
+                <div class="col-md-12" ng-app="UIGrid_App" ng-controller="ResultsCtrl">
+                    <div ui-grid="gridOptions"
+                         ui-grid-pagination
+                         ui-grid-resize-columns
+                         ui-grid-move-columns
+                         ui-grid-exporter
+                         ui-grid-one-bind-html
+                         ui-grid-pinning
+                    class="ui-grid">
+    <div class="no-rows" ng-show="!gridOptions.data.length">
+      <div class="msg">
+        <span>{{lblMessage}}</span>
+      </div>
+    </div>
+                    </div>
+                    <div class="loadmore">
+                        <div ng-show="loaderMore" ng-class="result">
+                            <img src="~/Content/ng-loader.gif" />
+                            {{lblMessage}}
+                        </div>
+                    </div>
+
+                    <br /><br />
+                    <div role="contentinfo" class="ui-grid-pager-panel ng-scope">
+                        <div role="navigation" class="ui-grid-pager-container">
+                            <div role="menubar" class="ui-grid-pager-control">
+                                <!-- Start Page -->
+                                <button type="button" role="menuitem" class="ui-grid-pager-first" ui-grid-one-bind-title="aria.pageToFirst"
+                                        ui-grid-one-bind-aria-label="aria.pageToFirst"
+                                        ng-click="gridApi.pagination.seek(1)"
+                                        ng-disabled="cantPageBackward()" title="Page to first" aria-label="Page to first"
+                                        disabled="disabled">
+                                    <div class="first-triangle">
+                                        <div class="first-bar"></div>
+                                    </div>
+                                </button>
+
+                                <!-- Prev Page -->
+                                <button type="button" role="menuitem" class="ui-grid-pager-previous"
+                                        ui-grid-one-bind-title="aria.pageBack" ui-grid-one-bind-aria-label="aria.pageBack"
+                                        ng-click="gridApi.pagination.previousPage()"
+                                        ng-disabled="cantPageBackward()" title="Page back" aria-label="Page back" disabled="disabled">
+                                    <div class="first-triangle prev-triangle"></div>
+                                </button>
+
+                                <input type="number" ui-grid-one-bind-title="aria.pageSelected" ui-grid-one-bind-aria-label="aria.pageSelected"
+                                       class="ui-grid-pager-control-input ng-pristine ng-untouched ng-valid ng-not-empty ng-valid-min ng-valid-max ng-valid-required"
+                                       ng-model="gridApi.pagination.getPage()"
+                                       min="1" max="{{pagination.getTotalPages()}}" required="" title="Selected page"
+                                       aria-label="Selected page" disabled>
+
+                                <span class="ui-grid-pager-max-pages-number ng-binding"
+                                      ng-show="pagination.getTotalPages() > 0">
+                                    <abbr ui-grid-one-bind-title="paginationOf" title="of"> /</abbr>{{pagination.getTotalPages()}}
+                                </span>
+
+                                <!-- Next Page -->
+                                <button type="button" role="menuitem" class="ui-grid-pager-next" ui-grid-one-bind-title="aria.pageForward"
+                                        ui-grid-one-bind-aria-label="aria.pageForward"
+                                        ng-click="gridApi.pagination.nextPage()"
+                                        ng-disabled="cantPageForward()"
+                                        title="Page forward" aria-label="Page forward">
+                                    <div class="last-triangle next-triangle"></div>
+                                </button>
+
+                                <!-- Last Page -->
+                                <button type="button" role="menuitem" class="ui-grid-pager-last"
+                                        ui-grid-one-bind-title="aria.pageToLast" ui-grid-one-bind-aria-label="aria.pageToLast"
+                                        ng-click="gridApi.pagination.seek(gridApi.pagination.getTotalPages())" ng-disabled="cantPageToLast()" title="Page to last" aria-label="Page to last">
+                                    <div class="last-triangle"><div class="last-bar"></div></div>
+                                </button>
+                            </div><!-- ngIf: grid.options.paginationPageSizes.length > 1 -->
+
+                            <div class="ui-grid-pager-row-count-picker ng-scope" @*ng-if="pagination.ddlpageSize.length > 1"*@>
+                                <select ng-model="pagination.ddlpageSize"
+                                        ng-options="o as o for o in pagination.paginationPageSizes" ng-change="pagination.pageSizeChange()"
+                                        class="ng-pristine ng-untouched ng-valid ng-not-empty"></select>
+                                <span class="ui-grid-pager-row-count-label ng-binding">&nbsp;items per page</span>
+                            </div>
+                            <!-- end ngIf: grid.options.paginationPageSizes.length > 1 -->
+                            <!-- ngIf: grid.options.paginationPageSizes.length <= 1 -->
+                        </div>
+                        <div class="ui-grid-pager-count-container">
+                            <div class="ui-grid-pager-count">
+                                <span ng-show="pagination.totalItems > 0" class="ng-binding" style="">
+                                    {{pagination.ddlpageSize*(gridApi.pagination.getPage()-1)+1}}<abbr ui-grid-one-bind-title="paginationThrough" title="through"> - </abbr>{{pagination.ddlpageSize*gridApi.pagination.getPage()}} of {{pagination.totalItems}} items
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p>{{SelectedRow}}</p>
+                </div>
+            </div>
+    </div>
+                   }
+                   else
+                   {
+                <b><br />No results shown. Apply filter to see Records.</b>
+                <br /><br />
+                   }
+                   // End New Code ui-grid
+               }
+
+        </div> 
+
+        @if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "End Loading Grid"); }
+
+        @if (ViewBag.debug) { Helpers.WriteToLog(ViewBag.Username, Request.ServerVariables["REMOTE_ADDR"], "End Loading Index"); }
+            
+                </form>
+            </div>
+        </div>
+
+@section AngularScript{
+    <script src="~/ScriptsNg/Controllers/ResultsCtrl.js"></script>
+    <script src="~/ScriptsNg/Service/CRUDService.js"></script>
+}
+    </body> 
+        }
+    }        
+</html>
+        
+    }
+
+
+

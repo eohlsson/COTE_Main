@@ -1,0 +1,219 @@
+﻿@model IEnumerable<CoTE.Areas.Portals.Models.EOC_PDU_Data>
+
+@{
+    bool authorized = false;
+}
+
+<html> 
+<title>Evidence of Completion Letter</title>
+<head>
+<style type="text/css" media="print">
+@@page {
+   margin: 2cm;
+   size: portrait;
+</style>
+</head>
+<body>
+
+<!--- Check if authorized --->
+@foreach (CoTE.Areas.Portals.Models.EOC_PDU_Data h in ViewData.Model)
+{
+    foreach (var authorization in h.AuthorizedDataSet)
+    {
+        if (authorization.user_name.Length > 0)
+        {
+            authorized = true;
+        }
+    }
+}
+
+@if (authorized == true)
+{
+				<table width="750">
+					<tr>
+						<td align="center">
+                                <b>ILLINOIS STATE BOARD OF EDUCATION</b>
+                                <br />Educator Effectiveness Division
+                                <br />100 North First Street, S-306
+                                <br />Springfield, Illinois 62777-0001
+                                <br /><br />
+                                <b>EVIDENCE OF COMPLETION FOR PROFESSIONAL DEVELOPMENT</b>
+                                <hr />
+						</td>
+					</tr>
+					<tr>
+						<td>
+                            This is to certify that the undersigned has completed the professional development activity described herein and that the provider is
+                            approved by the State Superintendent of Education at the time of completion.  This form serves as evidence to verify the participation in
+                            this professional development activity and must be maintained for a period of six (6) years by the licensee and produced if requested
+                            as part of an audit.<br /><br />
+						</td>
+					</tr>
+					<tr>
+						<td>
+                            <table border="1">
+                                    <tr>
+                                        <td>
+                                            <b>IMPORTANT: THE LICENSEE MUST ENTER THIS ACTIVITY INTO THE EDUCATOR LICENSURE INFORMATION SYSTEM
+                                                (ELIS) BY AUGUST 31 OF THE LICENSE RENEWAL YEAR.  LICENSEES RETAIN THIS FORM FOR SIX (6) YEARS FOR AUDITING PURPOSES.  
+                                                DO NOT SUBMIT THE FORM TO ISBE UNLESS REQUESTED BY ISBE.</b>
+                                        </td>
+                                    </tr>
+                            </table>
+						</td>
+					</tr>
+					<tr>
+						<td>
+@foreach (CoTE.Areas.Portals.Models.EOC_PDU_Data h in ViewData.Model)
+{
+    foreach (var profile in h.EOCCoopDataSet)
+    { 
+	<table width="100%" style="border-collapse: collapse">
+		<tr>
+			<td colspan="2">
+                <div style="border: solid 0 #000000; border-top-width:1px; border-bottom-width:1px">
+                    NAME OF PARTICIPANT (Last, First, Middle Initial)                        
+       				<br />@profile.full_name
+                </div>
+            </td>
+        </tr>
+		<tr>
+			<td colspan="2">
+                <div style="border: solid 0 #000000; border-bottom-width:1px">
+                    TITLE OF PROFESSIONAL DEVELOPMENT
+                    <br />Mentoring candidates in practicum and student teaching experiences
+                </div>
+            </td>
+        </tr>
+		<tr>
+			<td colspan="2">
+                <div style="border: solid 0 #000000; border-bottom-width:1px">
+                    DATE(S) OF ACTIVITY
+       				<br />@profile.dates
+                </div>
+            </td>
+        </tr>
+		<tr>
+			<td colspan="2">
+                    LOCATION (Name of Facility, City, State)
+       				<br />@profile.location
+            </td>
+        </tr>
+		<tr>
+			<td colspan="1" style="padding-right:0px; border: solid 0 #000000; border-right-width:1px; border-top-width:1px; border-bottom-width:1px">
+                    NAME OF APPROVED PROVIDER
+       				<br />University of Illinois at Urbana-Champaign
+			</td>
+			<td colspan="1" style=" padding-left:2px; border: solid 0 #000000; border-top-width:1px; border-bottom-width:1px">
+                    REGION, COUNTY, DISTRICT, TYPE CODE
+                    <br />090105450510000
+			</td>
+        </tr>
+		<tr>
+			<td colspan="2">
+                <div style="border: solid 0 #000000; border-bottom-width:1px">
+                    NAME OF PRESENTER
+                    <br />&nbsp;
+                </div>
+            </td>
+        </tr>
+		<tr>
+			<td colspan="2">
+                    NUMBER OF PROFESSIONAL DEVELOPMENT HOURS
+			</td>
+        </tr>
+        <tr>
+    			<td colspan="2">
+                <div style="border: solid 0 #000000; border-bottom-width:1px">
+        				@profile.pdus                   
+                </div>
+            </td>
+        </tr>
+</table>
+    <br /><br /><br /><br />
+    <table width="100%" border="0">
+        <tr>
+            <td width="5%" >
+                &nbsp;
+            </td>
+            <td width="42%" align="center" style="border: solid 0 #000000; border-bottom-width:1px">
+                <img src="https://cte-s.education.illinois.edu/coopportal/eoc/exec%20director%20sig.jpg" width="120" height="50"/>
+            </td>
+            <td width="6%">
+                &nbsp;
+            </td>
+            <td width="42%" align="center" style="border: solid 0 #000000; border-bottom-width:1px">
+                @profile.eoc_date
+            </td>
+            <td width="5%">
+                &nbsp;
+            </td>
+        </tr>
+        <tr>
+            <td width="5%" >
+                &nbsp;
+            </td>
+            <td width="42%" style="text-align:center; vertical-align:text-top" >
+                Signature of Approved Provider's Representative
+            </td>
+            <td width="6%">
+                &nbsp;
+            </td>
+            <td width="42%" style="text-align:center; vertical-align:text-top" >
+                Date
+            </td>
+            <td width="5%">
+                &nbsp;
+            </td>
+        </tr>
+        <tr>
+            <td width="5%" >
+                &nbsp;
+            </td>
+            <td width="42%" align="center" style="border: solid 0 #000000; border-bottom-width:1px">
+                <br /><br /><br />
+            </td>
+            <td width="6%">
+                &nbsp;
+            </td>
+            <td width="42%" align="center" style="border: solid 0 #000000; border-bottom-width:1px">
+                &nbsp;
+            </td>
+            <td width="5%">
+                &nbsp;
+            </td>
+        </tr>
+        <tr>
+            <td width="5%" >
+                &nbsp;
+            </td>
+            <td width="42%" style="text-align:center; vertical-align:text-top" >
+                Signature of Participant
+            </td>
+            <td width="6%">
+                &nbsp;
+            </td>
+            <td width="42%" style="text-align:center; vertical-align:text-top" >
+                Date
+            </td>
+            <td width="5%">
+                &nbsp;
+            </td>
+        </tr>
+</table>
+}
+}
+                <br /><br /><br /><br /><br /><hr width="100%" />
+                ISBE 77-21B (10/16)
+            </td>
+        </tr>
+</table>
+}
+else
+{
+    		<center><br/><br/><br/><h2><font color="red" size="+2">You do not have access to view this page.  <br />For access to this page, please contact <a href="mailto:cote-techsupport@illinois.edu">cote-techsupport@illinois.edu</a></font></h2></center>
+}
+    
+	</body>
+
+</html>
